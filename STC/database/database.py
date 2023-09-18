@@ -17,6 +17,7 @@ from sqlalchemy import event
 from sqlalchemy import exc
 from sqlalchemy import select
 from sqlalchemy import update
+from sqlalchemy import inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import InvalidRequestError
@@ -94,7 +95,9 @@ class DbConnection:
     @classmethod
     def createDatabaseIfNotExist(cls, engine):
         """ Создает БД согласно классам ORM модели """
-        if not database_exists(engine.url) or not engine.has_table('product'):
+        inspection = inspect(engine)
+        product_table_not_exist = 'product' not in inspection.get_table_names()
+        if not database_exists(engine.url) or not product_table_not_exist:
             SplashScreen().newMessage(message='База данных не найдена.\n'
                                               'Создание новой базы данных',
                                       log=True,
