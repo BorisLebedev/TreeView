@@ -97,7 +97,7 @@ class DbConnection:
         """ Создает БД согласно классам ORM модели """
         inspection = inspect(engine)
         product_table_not_exist = 'product' not in inspection.get_table_names()
-        if not database_exists(engine.url) or not product_table_not_exist:
+        if not database_exists(engine.url) or product_table_not_exist:
             SplashScreen().newMessage(message='База данных не найдена.\n'
                                               'Создание новой базы данных',
                                       log=True,
