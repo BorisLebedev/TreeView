@@ -32,8 +32,7 @@ class NewDocumentMainFrame(FrameBasic):
     changeDocument = pyqtSignal()
 
     def __init__(self) -> None:
-        super().__init__(frame_name='Основные данные',
-                         frame_type='NewDocumentBasic')
+        super().__init__(frame_name='Основные данные')
         self._department_codes = {}
         self._organization_codes = {}
         self._method_codes = {}
@@ -437,8 +436,7 @@ class NewDocumentMainFrame(FrameBasic):
 class NewDocumentSpecProducts(FrameWithTable):
 
     def __init__(self, frame_name) -> None:
-        super().__init__(frame_name=frame_name,
-                         frame_type='NewDocumentBasic')
+        super().__init__(frame_name=frame_name)
         self.addNewRow()
 
     def initTableSettings(self) -> None:
@@ -619,8 +617,7 @@ class NewDocumentSpecProductsNoDeno(NewDocumentSpecProducts):
 class NewDocumentDocumentTypes(FrameWithTable):
 
     def __init__(self) -> None:
-        super().__init__(frame_name='Документы',
-                         frame_type='NewDocumentBasic')
+        super().__init__(frame_name='Документы')
         self.addNewRow()
 
     def initTableSettings(self) -> None:
@@ -669,8 +666,7 @@ class NewDocumentDocumentTypes(FrameWithTable):
 class FrameComplexDocument(FrameWithTable):
 
     def __init__(self) -> None:
-        super().__init__(frame_name='Изготавливается\nсовместно',
-                         frame_type='NewDocumentBasic')
+        super().__init__(frame_name='Изготавливается\nсовместно')
         self.table.itemChanged.connect(self.checkProduct)
         self.icon_ok = CONFIG.style.done_mini
         self.icon_cross = CONFIG.style.close

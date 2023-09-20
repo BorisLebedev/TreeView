@@ -92,8 +92,7 @@ class FrameAdmin(FrameWithTable):
     new = '+'
 
     def __init__(self, frame_name, load_default: bool=True) -> None:
-        super(FrameAdmin, self).__init__(frame_name=frame_name,
-                                         frame_type='NewDocumentBasic')
+        super(FrameAdmin, self).__init__(frame_name=frame_name)
         if load_default:
             self.initDefaultData()
         self.table.setSortingEnabled(False)

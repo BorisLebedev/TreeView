@@ -17,9 +17,8 @@ from STC.gui.windows.ancestors.frame import FrameBasic
 
 class FrameSettings(FrameBasic):
 
-    def __init__(self, frame_name: str, frame_type: str, tree_model: HierarchicalView) -> None:
-        super().__init__(frame_name=frame_name,
-                         frame_type=frame_type)
+    def __init__(self, frame_name: str, tree_model: HierarchicalView) -> None:
+        super().__init__(frame_name=frame_name)
         self.tree_model = tree_model
         self.setFrame()
         self.setTab()
@@ -41,9 +40,7 @@ class FrameSettings(FrameBasic):
 class FrameKDSettings(FrameSettings):
 
     def __init__(self, tree_model: HierarchicalView) -> None:
-        super().__init__(frame_name='КД',
-                         frame_type='NewDocumentBasic',
-                         tree_model=tree_model)
+        super().__init__(frame_name='КД',tree_model=tree_model)
 
     def setFrame(self) -> None:
         self.main_settings = FrameMainSettingsKD(tree_model=self.tree_model)
@@ -54,9 +51,7 @@ class FrameKDSettings(FrameSettings):
 class FrameTDSettings(FrameSettings):
 
     def __init__(self, tree_model: HierarchicalView) -> None:
-        super().__init__(frame_name='ТД',
-                         frame_type='NewDocumentBasic',
-                         tree_model=tree_model)
+        super().__init__(frame_name='ТД',tree_model=tree_model)
 
     def setFrame(self) -> None:
         self.main_settings = FrameMainSettingsTD(tree_model=self.tree_model)
@@ -67,9 +62,7 @@ class FrameTDSettings(FrameSettings):
 class FrameProductSettings(FrameSettings):
 
     def __init__(self, tree_model: HierarchicalView) -> None:
-        super().__init__(frame_name='Изделие',
-                         frame_type='NewDocumentBasic',
-                         tree_model=tree_model)
+        super().__init__(frame_name='Изделие',tree_model=tree_model)
 
     def setFrame(self) -> None:
         self.main_settings = FrameMainSettingsProduct(tree_model=self.tree_model)
@@ -80,8 +73,7 @@ class FrameProductSettings(FrameSettings):
 class FrameCheckboxSettings(FrameBasic):
 
     def __init__(self, frame_name: str, tree_model: HierarchicalView) -> None:
-        super().__init__(frame_name=frame_name,
-                         frame_type='NewDocumentBasic')
+        super().__init__(frame_name=frame_name)
         self.tree_model = tree_model
         self.setSettings()
         self.widgetCheckbox()

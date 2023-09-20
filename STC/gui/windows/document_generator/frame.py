@@ -68,8 +68,7 @@ class FrameMkMain(FrameBasic):
     changeKind = pyqtSignal()
 
     def __init__(self) -> None:
-        super().__init__(frame_name='Основные данные',
-                         frame_type='NewDocumentBasic')
+        super().__init__(frame_name='Основные данные')
         self.stage_letters = sorted(CONFIG.data['document_settings']['litera'].replace(' ', '').split(','))
         self.stages = CONFIG.data['document_settings']['stages'].replace("", "").split(',')
         self.initWidgetLabel()
@@ -257,8 +256,7 @@ class FrameMkOperations(FrameWithTable):
         self._document_main = None
         self.del_operation = None
         self.new_operation = None
-        super().__init__(frame_name='Операции',
-                         frame_type='NewDocumentBasic')
+        super().__init__(frame_name='Операции')
 
     def initTableSettings(self) -> None:
         self.header_settings = ({'col': 0, 'width': 30, 'name': '+'},
@@ -468,8 +466,7 @@ class FrameMkOperationMain(FrameBasic):
         self.document = document
         self.operation = operation
         self.operation_name = f'{operation.num} {operation.name}'
-        super().__init__(frame_name=self.operation_name,
-                         frame_type='NewDocumentBasic')
+        super().__init__(frame_name=self.operation_name)
         self.icon_close = CONFIG.style.arrow_up
         self.icon_open = CONFIG.style.arrow_down
         self.initWidgetLabel()

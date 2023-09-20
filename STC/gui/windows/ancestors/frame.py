@@ -3,14 +3,13 @@ from PyQt5.QtCore import QPoint
 from PyQt5.QtWidgets import QFrame
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QTableWidget
-from PyQt5.QtWidgets import QVBoxLayout
 from STC.gui.windows.ancestors.context_menu import ContextMenuForBasicTable
 
 
 # Базовая рамка с настройками в зависимости от типа запрашиваемой рамки
 class FrameBasic(QFrame):
 
-    def __init__(self, frame_name: str | None = None, frame_type: str = 'NewDocumentBasic') -> None:
+    def __init__(self, frame_name: str | None = None) -> None:
         super().__init__()
         self.name = frame_name
         self.type = frame_type
@@ -18,21 +17,19 @@ class FrameBasic(QFrame):
         self.setLayout(self.main_layout)
 
     def setFrameSettings(self) -> None:
+        """ Устанавливает общие настройки в зависимости от типа рамки """
+
         self.setGeometry(100, 100, 100, 100)
-        if self.type == 'NewDocumentBasic':
-            self.setFrameStyle(QFrame.Panel | QFrame.HLine)
-            self.setLineWidth(2)
-            self.main_layout = QGridLayout()
-        elif self.type == 'Contents':
-            self.main_layout = QVBoxLayout()
+        self.setFrameStyle(QFrame.Panel | QFrame.HLine)
+        self.setLineWidth(2)
+        self.main_layout = QGridLayout()
 
 
 # Базовая рамка с таблицей внутри
 class FrameWithTable(FrameBasic):
 
-    def __init__(self, frame_name: str | None = None, frame_type: str = 'NewDocumentBasic') -> None:
-        super().__init__(frame_name=frame_name,
-                         frame_type=frame_type)
+    def __init__(self, frame_name: str | None = None,) -> None:
+        super().__init__(frame_name=frame_name)
         self.start_rows = 0
         self.start_cols = 0
         self.header_settings = None
