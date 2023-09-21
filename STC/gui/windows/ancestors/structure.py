@@ -1,10 +1,8 @@
+""" Родительский класс окна с боковым меню """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from STC.gui.windows.document_add_new.frame import NewDocumentMainFrame
-    from STC.gui.windows.document_generator.structure import FrameMkMain
 
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QFrame
@@ -13,9 +11,15 @@ from PyQt5.QtWidgets import QVBoxLayout
 from STC.gui.windows.ancestors.frame import FrameBasic
 from STC.config.config import CONFIG
 
+if TYPE_CHECKING:
+    from STC.gui.windows.document_add_new.frame import NewDocumentMainFrame
+    from STC.gui.windows.document_generator.structure import FrameMkMain
 
-# Базовая структура окна (расположение рамок)
+
 class StructureSideMenu:
+    """ Окно с боковым меню """
+
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, main_layout: QGridLayout):
         self.main_layout = main_layout
@@ -26,6 +30,13 @@ class StructureSideMenu:
         self.addFrames()
 
     def initFrames(self) -> None:
+        """
+            self.menu_frame - рамка с кнопками переключения
+            между рамками в self.data_frame
+            self.btns_frame - рамка для общих кнопок управления
+            не относящиеся к рамкам в self.data_frame
+        """
+
         self.menu_layout = QGridLayout()
         self.menu_frame = QFrame()
         self.menu_frame.setLayout(self.menu_layout)
@@ -45,6 +56,10 @@ class StructureSideMenu:
         self.main_layout.setColumnStretch(1, 1)
 
     def initNewDocumentFrames(self) -> None:
+        """ Рамки, которые добавляются в self.data_frame и
+            между которыми нужно переключаться с помощью
+            кнопок в рамке self.menu_frame """
+
         self.basic1 = FrameBasic('basic1')
         self.basic2 = FrameBasic('basic2')
         self.basic3 = FrameBasic('basic3')
@@ -53,15 +68,23 @@ class StructureSideMenu:
                        self.basic3]
 
     def addFrames(self) -> None:
+        """ Проходит по списку рамок для self.data_frame
+            и вызывает метод добавления их в окно """
+
         self.menu_frame.layout().setRowStretch(1000, 1)
         for frame in self.frames:
             self.updateContentsFrame(frame)
 
     def hideAllFrames(self) -> None:
+        """ Скрывает все рамки, добавленные в self.data_frame """
+
         for frame in self.frames:
             frame.hide()
 
     def updateContentsFrame(self, frame: NewDocumentMainFrame | FrameMkMain) -> None:
+        """ Добавляет определенную рамку в рамку self.data_frame,
+            создавая кнопку в боковом меню и помещая ее в рамку self.menu_frame"""
+
         button = QPushButton()
         button.setText(frame.name)
         button.setObjectName(frame.name)
@@ -73,11 +96,17 @@ class StructureSideMenu:
         frame.hide()
 
     def frameSwitcher(self, frame_name: str):
+        """ Аналог нажатия на кнопку меню для определенной рамки,
+            но без дополнительных сигналов, которые посылаются
+            при нажатии на кнопку """
+
         self.hideAllFrames()
         self.showFrame(frame_name)
         self.activateMenuBtn(frame_name)
 
     def showFrame(self, frame_name: str | None = None, frame=None):
+        """ Скрывает все рамки из self.data_frame, кроме одной """
+
         for frame_item in self.frames:
             if frame_name:
                 if frame_item.name == frame_name:
@@ -87,6 +116,9 @@ class StructureSideMenu:
                     frame_item.show()
 
     def activateMenuBtn(self, frame_name: str):
+        """ Изменяет стиль отрисовки кнопки если она относиться к
+            определенной рамке """
+
         for btn in self.menu_buttons:
             if btn.text() == frame_name:
                 btn.setStyleSheet(CONFIG.style.btn_stylesheet_active_table)
