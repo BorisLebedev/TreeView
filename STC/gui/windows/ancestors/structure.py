@@ -1,4 +1,4 @@
-""" Родительский класс окна с боковым меню """
+""" Модуль классов описывающих типовые структуры окон приложения """
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class StructureSideMenu:
-    """ Окно с боковым меню """
+    """ Класс для описания структуры окна с боковым меню """
 
     # pylint: disable=too-many-instance-attributes
 

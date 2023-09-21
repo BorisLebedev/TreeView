@@ -31,6 +31,7 @@ class StyleFactory:
                 return StyleStandart(app=app)
 
 
+# pylint: disable=too-many-instance-attributes
 class StyleClass:
     """ Родительский класс """
     color = 'black'
@@ -58,7 +59,6 @@ class StyleClass:
         _id = QFontDatabase.addApplicationFont("Montserrat/Montserrat-Medium.ttf")
         self.app.setFont(QFont(self.font, self.font_size))
 
-    # pylint: disable=too-many-instance-attributes
     def icons(self) -> None:
         """ Параметры иконок """
         match self.__class__.color:

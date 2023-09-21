@@ -118,6 +118,7 @@ class SplashScreen(QSplashScreen):
         self.progress_bar_sub.setGeometry(50, self.height() - 30, self.width() - 100, 20)
         self.changeSubProgressBar(stage=0, stages=1)
 
+    #pylint: disable=too-many-arguments
     def newMessage(self, message: str,
                    stage: int | None = None,
                    stages: int | None = None,
