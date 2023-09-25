@@ -1,3 +1,5 @@
+""" Структуры окон натройки параметров документов и изделий """
+
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QPushButton
 from STC.gui.splash_screen import SplashScreen
@@ -22,12 +24,13 @@ from STC.gui.windows.config.frame import FrameAdminEqt
 from STC.gui.windows.config.frame import FrameAdminEqtDef
 from STC.gui.windows.config.frame import FrameAdminTTPErr
 from STC.gui.windows.config.frame import FrameAdminPrimaryProduct
-from STC.gui.windows.config.frame import FrameAdminProductPKI
-from STC.gui.windows.config.frame import FrameAdminProductSTC
 
 
-# Структура окна создания маршрутной карты
 class StructureCreateMKConfig(StructureSideMenu):
+    """ Структура окна создания маршрутной карты """
+
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=attribute-defined-outside-init
 
     def __init__(self, main_layout: QGridLayout, default_frame: str = 'Операции'):
         super().__init__(main_layout)
@@ -37,6 +40,9 @@ class StructureCreateMKConfig(StructureSideMenu):
         SplashScreen().closeWithWindow()
 
     def initNewDocumentFrames(self) -> None:
+        """ Инициализация рамок и сигналов рамок,
+            привязка списка рамок к атрибуту """
+
         self.initNewFrames()
         self.initFrameSignals()
         self.frames = [
@@ -61,63 +67,67 @@ class StructureCreateMKConfig(StructureSideMenu):
                        ]
 
     def initNewFrames(self) -> None:
-        SplashScreen().newMessage(message=f'Загрузка данных...Операции',
+        """ Инициализация рамок окна """
+
+        SplashScreen().newMessage(message='Загрузка данных...Операции',
                                   stage=1,
                                   stages=16)
         self.operation = FrameAdminOperations('Операции')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Данные операций')
+        SplashScreen().newMessage(message='Загрузка данных...Данные операций')
         self.operation_def = FrameAdminOperationsDef('Данные операций')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Участок')
+        SplashScreen().newMessage(message='Загрузка данных...Участок')
         self.area = FrameAdminArea('Участок')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Рабочее место')
+        SplashScreen().newMessage(message='Загрузка данных...Рабочее место')
         self.workplace = FrameAdminWorkplace('Рабочее место')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Профессия')
+        SplashScreen().newMessage(message='Загрузка данных...Профессия')
         self.profession = FrameAdminProfession('Профессия')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Виды документов')
+        SplashScreen().newMessage(message='Загрузка данных...Виды документов')
         self.doc = FrameAdminDoc('Виды документов')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...ИОТ')
+        SplashScreen().newMessage(message='Загрузка данных...ИОТ')
         self.iot = FrameAdminIOT('ИОТ')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Материалы')
+        SplashScreen().newMessage(message='Загрузка данных...Материалы')
         self.mat = FrameAdminMat('Материалы')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Оснастка')
+        SplashScreen().newMessage(message='Загрузка данных...Оснастка')
         self.rig = FrameAdminRig('Оснастка')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Оборудование')
+        SplashScreen().newMessage(message='Загрузка данных...Оборудование')
         self.eqt = FrameAdminEqt('Оборудование')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Свойства')
+        SplashScreen().newMessage(message='Загрузка данных...Свойства')
         self.setting = FrameAdminSettings('Операция -> Свойства')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Свойства -> Переход')
+        SplashScreen().newMessage(message='Загрузка данных...Свойства -> Переход')
         self.setting_def = FrameAdminSettingsDef('Свойства -> Переход')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Переходы')
+        SplashScreen().newMessage(message='Загрузка данных...Переходы')
         self.sentence = FrameAdminSentence('Переходы')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Переход -> Вид документа')
+        SplashScreen().newMessage(message='Загрузка данных...Переход -> Вид документа')
         self.doc_def = FrameAdminDocDef('Переход -> Вид документа')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Переход -> ИОТ')
+        SplashScreen().newMessage(message='Загрузка данных...Переход -> ИОТ')
         self.iot_def = FrameAdminIOTDef('Переход -> ИОТ')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Переход -> Материалы')
+        SplashScreen().newMessage(message='Загрузка данных...Переход -> Материалы')
         self.mat_def = FrameAdminMatDef('Переход -> Материалы')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Переход -> Оснастка')
+        SplashScreen().newMessage(message='Загрузка данных...Переход -> Оснастка')
         self.rig_def = FrameAdminRigDef('Переход -> Оснастка')
 
-        SplashScreen().newMessage(message=f'Загрузка данных...Переход -> Оборудование')
+        SplashScreen().newMessage(message='Загрузка данных...Переход -> Оборудование')
         self.eqt_def = FrameAdminEqtDef('Переход -> Оборудование')
 
     def initFrameSignals(self) -> None:
+        """ Инициализация сигналов рамок и их взаимодействия"""
+
         self.operation.newItem.connect(self.newOperationAdded)
         self.area.newItem.connect(self.operation_def.updTable)
         self.workplace.newItem.connect(self.operation_def.updTable)
@@ -131,20 +141,28 @@ class StructureCreateMKConfig(StructureSideMenu):
         self.sentence.newSentence.connect(self.newSentenceAdded)
 
     def initUpdButton(self) -> None:
+        """ Кнопка обновления данных рамок окна """
+
         self.btn_upd = QPushButton('Обновить')
         self.btn_upd.clicked.connect(self.updTables)
         self.btns_layout.addWidget(self.btn_upd)
 
     def updTables(self):
+        """ Обновление данных рамок окна """
+
         for table in self.frames:
             if table.isVisible():
                 table.updTable()
 
     def newOperationAdded(self) -> None:
+        """ Реакция окна на добавление операции """
+
         self.operation_def.updTable()
         self.setting.updTable()
 
     def newSentenceAdded(self) -> None:
+        """ Реакция окна на добавление перехода """
+
         self.setting_def.updTable()
         self.iot.updTable()
         self.mat.updTable()
@@ -152,15 +170,16 @@ class StructureCreateMKConfig(StructureSideMenu):
         self.eqt.updTable()
 
     def alignTextInMenu(self):
+        """ Выравнивание кнопок бокового меню """
+
         for btn in self.menu_buttons:
             btn.setStyleSheet("Text-align:left")
-        # for widget in self.menu_frame.children():
-        #     if isinstance(widget, QPushButton):
-        #         widget.setStyleSheet("Text-align:left")
 
 
-# Структура окна администрирования изделий
 class StructureCreateProductConfig(StructureSideMenu):
+    """ Структура окна администрирования изделий """
+
+    # pylint: disable=attribute-defined-outside-init
 
     def __init__(self, main_layout: QGridLayout, default_frame: str = 'Ошибки с КТТП'):
         super().__init__(main_layout)
@@ -170,30 +189,35 @@ class StructureCreateProductConfig(StructureSideMenu):
         SplashScreen().closeWithWindow()
 
     def initNewDocumentFrames(self) -> None:
+        """ Инициализация рамок и привязка списка рамок к атрибуту """
+
         self.initNewFrames()
         self.frames = [
             self.ttp_err,
-            self.primary_product,
-            # self.prt_pki,
-            # self.prt_stc,
-        ]
+            self.primary_product]
 
     def initNewFrames(self) -> None:
+        """ Инициализация рамок окна """
+
         self.ttp_err = FrameAdminTTPErr('Ошибки с КТТП')
         self.primary_product = FrameAdminPrimaryProduct('Не указана\nпервичная\nприменяемость')
-        # self.prt_pki = FrameAdminProductPKI('Изделия (ПКИ)')
-        # self.prt_stc = FrameAdminProductSTC('Изделия (СТЦ)')
 
     def initUpdButton(self) -> None:
+        """ Кнопка обновления данных рамок окна """
+
         self.btn_upd = QPushButton('Обновить')
         self.btn_upd.clicked.connect(self.updTables)
         self.btns_layout.addWidget(self.btn_upd)
 
     def updTables(self):
+        """ Обновление данных рамок окна """
+
         for table in self.frames:
             if table.isVisible():
                 table.updTable()
 
     def alignTextInMenu(self):
+        """ Выравнивание кнопок бокового меню """
+
         for btn in self.menu_buttons:
             btn.setStyleSheet("Text-align:left")
