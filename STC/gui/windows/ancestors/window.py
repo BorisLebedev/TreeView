@@ -78,13 +78,13 @@ class CustomBar(QWidget):
         """ Обработка действия мыши """
 
         if self.pressing:
-            self.end = self.mapToGlobal(event.pos())
-            self.movement = self.end - self.start
-            self.parent.setGeometry(self.mapToGlobal(self.movement).x(),
-                                    self.mapToGlobal(self.movement).y(),
+            end = self.mapToGlobal(event.pos())
+            movement = self.end - self.start
+            self.parent.setGeometry(self.mapToGlobal(movement).x(),
+                                    self.mapToGlobal(movement).y(),
                                     self.parent.width(),
                                     self.parent.height())
-            self.start = self.end
+            self.start = end
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         """ Обработка действия мыши """
@@ -118,7 +118,6 @@ class CustomBar(QWidget):
         self.btn_min.setStyleSheet(CONFIG.style.bar_btn_style_str)
         self.btn_max.setStyleSheet(CONFIG.style.bar_btn_style_str)
         self.title.setStyleSheet(CONFIG.style.bar_title_style_str)
-
 
 
 class WindowBasic(QWidget):
