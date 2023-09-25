@@ -3595,7 +3595,8 @@ class DbMaterialDef(Base):
     def uniqueData(cls) -> list[DbMaterialDef]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
@@ -3717,7 +3718,8 @@ class DbMaterialDoc(Base):
     def uniqueData(cls) -> list[DbMaterialDoc]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
@@ -3956,7 +3958,8 @@ class DbRigDef(Base):
     def uniqueData(cls) -> list[DbRigDef]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4073,7 +4076,8 @@ class DbRigDoc(Base):
     def uniqueData(cls) -> list[DbRigDoc]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4292,7 +4296,8 @@ class DbEquipmentDef(Base):
     def uniqueData(cls) -> list[DbEquipmentDef]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4416,7 +4421,8 @@ class DbEquipmentDoc(Base):
     def uniqueData(cls) -> list[DbEquipmentDoc]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4655,7 +4661,8 @@ class DbIOTDef(Base):
     def uniqueData(cls) -> list[DbIOTDef]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls):
@@ -4776,7 +4783,8 @@ class DbIOTDoc(Base):
     def uniqueData(cls) -> list[DbIOTDoc]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4879,7 +4887,8 @@ class DbDocDef(Base):
     def uniqueData(cls) -> list[DbDocDef]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
@@ -5002,7 +5011,8 @@ class DbDocDoc(Base):
     def uniqueData(cls) -> list[DbDocDoc]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
@@ -5208,7 +5218,8 @@ class DbOperationDef(Base):
     def uniqueData(cls) -> list[DbOperationDef]:
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
+        # return BaseMethods.uniqueData(cls)
+        return cls.items.values()
 
     @classmethod
     def updCheck(cls) -> None:
