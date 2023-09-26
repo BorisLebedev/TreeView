@@ -1,6 +1,6 @@
+"""  """
+
 from PyQt5.QtCore import Qt
-from PyQt5.Qt import QStandardItemModel
-from PyQt5.Qt import QStandardItem
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QPoint
 from PyQt5.QtWidgets import QTableWidgetItem
@@ -57,19 +57,27 @@ from STC.gui.splash_screen import SplashScreen
 from STC.functions.func import deno_to_components
 
 
-def updRecordDialog():
+def upd_record_dialog():
+    """ Сообщение об обновлении данных """
+
     show_dialog('Данные обновлены')
 
 
-def newRecordDialog():
+def new_record_dialog():
+    """ Сообщение о внесении данных """
+
     show_dialog('Новые данные внесены')
 
 
-def delRecordDialog():
+def del_record_dialog():
+    """ Сообщение об обновлении данных """
+
     show_dialog('Данные удалены')
 
 
-def keyError(f):
+def key_error(f):
+    """  """
+
     def wrapper(*args, **kw):
         try:
             return f(*args, **kw)
@@ -78,37 +86,45 @@ def keyError(f):
     return wrapper
 
 
-class ComboBoxAdmin(QComboBox):
-
-    def __init__(self, items: list[str]) -> None:
-        super(ComboBoxAdmin, self).__init__()
-        self.wheelEvent = lambda event: None
-        self.addItems(items)
-        self.setCurrentText(items[0])
+# class ComboBoxAdmin(QComboBox):
+#     """  """
+#
+#     def __init__(self, items: list[str]) -> None:
+#         super().__init__()
+#         self.wheelEvent = lambda event: None
+#         self.addItems(items)
+#         self.setCurrentText(items[0])
 
 
 class FrameAdmin(FrameWithTable):
+    """ Родительский класс для рамок с таблицей окна
+        ввода данных по умолчанию для маршрутных карт """
+
     newItem = pyqtSignal()
     new = '+'
 
     def __init__(self, frame_name, load_default: bool=True) -> None:
-        super(FrameAdmin, self).__init__(frame_name=frame_name)
+        super().__init__(frame_name=frame_name)
         if load_default:
             self.initDefaultData()
         self.table.setSortingEnabled(False)
 
     def initDefaultData(self) -> None:
-        pass
+        """ Инициализация данных по умолчанию """
 
     def itemChanged(self, item):
-        pass
+        """ Реакция на изменения данных таблицы """
 
     def showContextMenu(self, point: QPoint) -> None:
+        """ Вызов контекстного меню """
+
         self.context_menu = ContextMenuForFrameAdminDef(self)
-        qp = self.sender().mapToGlobal(point)
-        self.context_menu.exec_(qp)
+        qpoint = self.sender().mapToGlobal(point)
+        self.context_menu.exec_(qpoint)
 
     def copyRow(self):
+        """ Копирование ниже активной строки таблицы """
+
         row = self.addRow()
         self.table.blockSignals(True)
         for column in range(self.table.columnCount()):
@@ -118,6 +134,8 @@ class FrameAdmin(FrameWithTable):
         self.table.resizeRowToContents(row)
 
     def updTable(self):
+        """ Удаление данных и загрузка данных по умолчанию """
+
         current_row = self.table.currentRow()
         self.table.blockSignals(True)
         for row in range(self.table.rowCount(), -1, -1):
@@ -127,9 +145,11 @@ class FrameAdmin(FrameWithTable):
         self.table.selectRow(current_row)
 
     def cellChanged(self) -> None:
-        pass
+        """ Реакция на изменение данных в ячейке таблицы """
 
     def addRow(self):
+        """ Вставляет пустую строку ниже активной строки """
+
         row = self.table.currentRow()
         if row == -1:
             self.table.setRowCount(self.table.rowCount() + 1)
@@ -139,17 +159,21 @@ class FrameAdmin(FrameWithTable):
         return row
 
     def deleteRow(self) -> None:
+        """ Удаление строки таблицы """
+
         show_dialog(text='Удаление данных не поддерживается')
 
 
-# Операции
 class FrameAdminOperations(FrameAdmin):
+    """ Рамка с таблицей операций """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 50, 'name': 'id'},
                                 {'col': 1, 'width': 99, 'name': 'Операция'},
                                 )
@@ -157,11 +181,15 @@ class FrameAdminOperations(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbOperation.uniqueData()
         data = sorted(data, key=lambda x: x.name)
         self.table.blockSignals(True)
@@ -173,22 +201,25 @@ class FrameAdminOperations(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() == 1:
             row = item.row()
             id_operation = self.table.item(row, 0).text()
             if id_operation == self.__class__.new:
                 db_operation = DbOperation.addNewOperation(name=item.text())
                 self.table.item(row, 0).setText(str(db_operation.id_operation))
-                newRecordDialog()
+                new_record_dialog()
             else:
                 DbOperation.updOperation(id_operation=int(self.table.item(item.row(), 0).text()),
                                          new_name=item.text())
-                updRecordDialog()
+                upd_record_dialog()
             self.newItem.emit()
 
 
-# Переходы
 class FrameAdminSentence(FrameAdmin):
+    """ Рамка с таблицей переходов """
+
     newSentence = pyqtSignal()
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
@@ -197,6 +228,8 @@ class FrameAdminSentence(FrameAdmin):
         self.initDelegateSettings()
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 99, 'name': 'Переход'},
                                 )
@@ -204,16 +237,22 @@ class FrameAdminSentence(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def initDelegateSettings(self) -> None:
+        """ Назначение делегата для определенных столбцов таблицы """
+
         self.delegate_sentence = DelegatePlainText()
         self.delegate_sentence.itemChanged.connect(self.itemChanged)
         self.table.setItemDelegateForColumn(1, self.delegate_sentence)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbSentence.uniqueData()
         data = sorted(data, key=lambda x: x.text)
         self.table.blockSignals(True)
@@ -227,6 +266,8 @@ class FrameAdminSentence(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() == 1:
             row = item.row()
             id_sentence = self.table.item(row, 0).text()
@@ -237,23 +278,25 @@ class FrameAdminSentence(FrameAdmin):
                     db_sentence = DbSentence.addNewSentence(text=item.text())
                     self.table.item(row, 0).setText(str(db_sentence.id_sentence))
                     self.newSentence.emit()
-                    newRecordDialog()
+                    new_record_dialog()
             else:
                 DbSentence.updSentence(id_sentence=int(id_sentence),
                                        text=item.text())
-                updRecordDialog()
+                upd_record_dialog()
             self.newItem.emit()
             self.table.resizeRowToContents(row)
 
 
-# Участок
 class FrameAdminArea(FrameAdmin):
+    """ Рамка с таблицей участков """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 50, 'name': 'id'},
                                 {'col': 1, 'width': 800, 'name': 'Наименование'},
                                 {'col': 2, 'width': 150, 'name': 'Сокращение'},
@@ -262,12 +305,16 @@ class FrameAdminArea(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
         self.table.setItem(row, 2, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbArea.uniqueData()
         data = sorted(data, key=lambda x: x.id_area)
         self.table.blockSignals(True)
@@ -281,6 +328,8 @@ class FrameAdminArea(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() != 0:
             row = item.row()
             id_area = self.table.item(row, 0).text()
@@ -291,23 +340,25 @@ class FrameAdminArea(FrameAdmin):
                     db_area = DbArea.addNewArea(name=name,
                                                 name_short=name_short)
                     self.table.item(row, 0).setText(str(db_area.id_area))
-                    newRecordDialog()
+                    new_record_dialog()
                 else:
                     DbArea.updArea(id_area=int(id_area),
                                    name=name,
                                    name_short=name_short)
-                    updRecordDialog()
+                    upd_record_dialog()
                 self.newItem.emit()
 
 
-# Рабочее место
 class FrameAdminWorkplace(FrameAdmin):
+    """ Рамка с таблицей рабочих мест """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 300, 'name': 'Наименование'},
                                 )
@@ -315,11 +366,15 @@ class FrameAdminWorkplace(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbWorkplace.uniqueData()
         data = sorted(data, key=lambda x: x.id_workplace)
         self.table.blockSignals(True)
@@ -332,28 +387,32 @@ class FrameAdminWorkplace(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() == 1:
             row = item.row()
             id_workplace = self.table.item(row, 0).text()
             if id_workplace == self.__class__.new:
                 db_workplace = DbWorkplace.addNewWorkplace(name=item.text())
                 self.table.item(row, 0).setText(str(db_workplace.id_workplace))
-                newRecordDialog()
+                new_record_dialog()
             else:
                 DbWorkplace.updWorkplace(id_workplace=int(id_workplace),
                                          name=item.text())
-                updRecordDialog()
+                upd_record_dialog()
             self.newItem.emit()
 
 
-# Профессия
 class FrameAdminProfession(FrameAdmin):
+    """ Рамка с таблицей профессий """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 300, 'name': 'Профессия'},
                                 {'col': 2, 'width': 300, 'name': 'Код'},
@@ -362,12 +421,16 @@ class FrameAdminProfession(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
         self.table.setItem(row, 2, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbProfession.uniqueData()
         data = sorted(data, key=lambda x: x.name)
         self.table.blockSignals(True)
@@ -381,6 +444,8 @@ class FrameAdminProfession(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() != 0:
             row = item.row()
             id_profession = self.table.item(row, 0).text()
@@ -391,23 +456,25 @@ class FrameAdminProfession(FrameAdmin):
                     db_profession = DbProfession.addNewProfession(name=name,
                                                                   code=code)
                     self.table.item(row, 0).setText(str(db_profession.id_profession))
-                    newRecordDialog()
+                    new_record_dialog()
                 else:
                     DbProfession.updProfession(id_profession=int(id_profession),
                                                name=name,
                                                code=code)
-                    updRecordDialog()
+                    upd_record_dialog()
                 self.newItem.emit()
 
 
-# ИОТ
 class FrameAdminIOT(FrameAdmin):
+    """ Рамка с таблицей инструкций по охране труда (ИОТ) """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 300, 'name': 'Сокращение (тип)'},
                                 {'col': 2, 'width': 300, 'name': 'Сокращение (наим.)'},
@@ -419,6 +486,8 @@ class FrameAdminIOT(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
@@ -428,6 +497,8 @@ class FrameAdminIOT(FrameAdmin):
         self.table.setItem(row, 5, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbIOT.uniqueData()
         data = sorted(data, key=lambda x: x.name_short)
         data = sorted(data, key=lambda x: x.type_short)
@@ -445,6 +516,8 @@ class FrameAdminIOT(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() != 0:
             row = item.row()
             id_iot = self.table.item(row, 0).text()
@@ -461,7 +534,7 @@ class FrameAdminIOT(FrameAdmin):
                                              name=name,
                                              name_short=name_short)
                     self.table.item(row, 0).setText(str(db_iot.id_iot))
-                    newRecordDialog()
+                    new_record_dialog()
                 else:
                     DbIOT.updIOT(id_iot=int(id_iot),
                                  type=type_long,
@@ -469,19 +542,21 @@ class FrameAdminIOT(FrameAdmin):
                                  deno=deno,
                                  name=name,
                                  name_short=name_short)
-                    updRecordDialog()
+                    upd_record_dialog()
                 ComboBoxIotByName.updItemDictCls()
                 self.newItem.emit()
 
 
-# Виды документов
 class FrameAdminDoc(FrameAdmin):
+    """ Рамка с таблицей видов документов """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 300, 'name': 'Класс'},
                                 {'col': 2, 'width': 300, 'name': 'Подкласс'},
@@ -494,6 +569,8 @@ class FrameAdminDoc(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
@@ -504,6 +581,8 @@ class FrameAdminDoc(FrameAdmin):
         self.table.setItem(row, 6, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbDocumentType.uniqueData()
         data = sorted(data, key=lambda x: x.type_name)
         data = sorted(data, key=lambda x: x.subclass_name)
@@ -523,6 +602,8 @@ class FrameAdminDoc(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() != 0:
             row = item.row()
             id_type = self.table.item(row, 0).text()
@@ -541,7 +622,7 @@ class FrameAdminDoc(FrameAdmin):
                                                                 sign=sign,
                                                                 description=description)
                     self.table.item(row, 0).setText(str(db_type.id_type))
-                    newRecordDialog()
+                    new_record_dialog()
                 else:
                     DbDocumentType.updDocumentType(id_type=int(id_type),
                                                    class_name=class_name,
@@ -550,19 +631,21 @@ class FrameAdminDoc(FrameAdmin):
                                                    subtype_name=subtype_name,
                                                    sign=sign,
                                                    description=description)
-                    updRecordDialog()
+                    upd_record_dialog()
                 # ComboBoxIotByName.updItemDictCls()
                 self.newItem.emit()
 
 
-# Материалы
 class FrameAdminMat(FrameAdmin):
+    """ Рамка с таблицей материалов """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 300, 'name': 'Вид'},
                                 {'col': 2, 'width': 300, 'name': 'Тип'},
@@ -574,6 +657,8 @@ class FrameAdminMat(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
@@ -583,6 +668,8 @@ class FrameAdminMat(FrameAdmin):
         self.table.setItem(row, 5, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbMaterial.uniqueData()
         data = sorted(data, key=lambda x: x.mat_type)
         data = sorted(data, key=lambda x: x.kind)
@@ -600,6 +687,8 @@ class FrameAdminMat(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() != 0:
             row = item.row()
             id_material = self.table.item(row, 0).text()
@@ -616,7 +705,7 @@ class FrameAdminMat(FrameAdmin):
                                                        document=document,
                                                        kind=kind)
                     self.table.item(row, 0).setText(str(db_material.id_material))
-                    newRecordDialog()
+                    new_record_dialog()
                 else:
                     DbMaterial.updMat(id_material=int(id_material),
                                       name=name,
@@ -624,19 +713,21 @@ class FrameAdminMat(FrameAdmin):
                                       name_short=name_short,
                                       document=document,
                                       kind=kind)
-                    updRecordDialog()
+                    upd_record_dialog()
                 ComboBoxMatByName.updItemDictCls()
                 self.newItem.emit()
 
 
-# Оснастка
 class FrameAdminRig(FrameAdmin):
+    """ Рамка с таблицей оснастки """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 300, 'name': 'Вид'},
                                 {'col': 2, 'width': 300, 'name': 'Тип'},
@@ -648,6 +739,8 @@ class FrameAdminRig(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
@@ -657,6 +750,8 @@ class FrameAdminRig(FrameAdmin):
         self.table.setItem(row, 5, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbRig.uniqueData()
         data = sorted(data, key=lambda x: x.rig_type)
         self.table.blockSignals(True)
@@ -674,6 +769,8 @@ class FrameAdminRig(FrameAdmin):
         self.table.setColumnHidden(1, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() != 0:
             row = item.row()
             id_rig = self.table.item(row, 0).text()
@@ -690,7 +787,7 @@ class FrameAdminRig(FrameAdmin):
                                              name_short=name_short,
                                              document=document)
                     self.table.item(row, 0).setText(str(db_rig.id_rig))
-                    newRecordDialog()
+                    new_record_dialog()
                 else:
                     DbRig.updRig(id_rig=int(id_rig),
                                  kind=kind,
@@ -698,19 +795,21 @@ class FrameAdminRig(FrameAdmin):
                                  name=name,
                                  name_short=name_short,
                                  document=document)
-                    updRecordDialog()
+                    upd_record_dialog()
                 ComboBoxRigByName.updItemDictCls()
                 self.newItem.emit()
 
 
-# Оборудование
 class FrameAdminEqt(FrameAdmin):
+    """ Рамка с таблицей оборудования """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 300, 'name': 'Тип'},
                                 {'col': 2, 'width': 300, 'name': 'Наименование'},
@@ -720,6 +819,8 @@ class FrameAdminEqt(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
@@ -727,6 +828,8 @@ class FrameAdminEqt(FrameAdmin):
         self.table.setItem(row, 3, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbEquipment.uniqueData()
         data = sorted(data, key=lambda x: x.type)
         self.table.blockSignals(True)
@@ -741,6 +844,8 @@ class FrameAdminEqt(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() != 0:
             row = item.row()
             id_equipment = self.table.item(row, 0).text()
@@ -753,19 +858,20 @@ class FrameAdminEqt(FrameAdmin):
                                                                name_short=name_short,
                                                                type_name=type)
                     self.table.item(row, 0).setText(str(db_equipment.id_equipment))
-                    newRecordDialog()
+                    new_record_dialog()
                 else:
                     DbEquipment.updEquipment(id_equipment=int(id_equipment),
                                              name=name,
                                              name_short=name_short,
                                              type_name=type)
-                    updRecordDialog()
+                    upd_record_dialog()
                 ComboBoxEquipmentByName.updItemDictCls()
                 self.newItem.emit()
 
 
-# Базовый класс рамки Переход -> Свойство
 class FrameAdminDef(FrameAdmin):
+    """ Родительский класс для рамок с таблицами
+        отношений двух сущностей типа переход -> свойство """
 
     def __init__(self, frame_name: str = 'Frame name', header: str = 'Наименование') -> None:
         self.header = header
@@ -773,6 +879,8 @@ class FrameAdminDef(FrameAdmin):
         self.initDelegateSettings()
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 600, 'name': 'Переход'},
                                 {'col': 2, 'width': 300, 'name': self.header},
@@ -781,6 +889,8 @@ class FrameAdminDef(FrameAdmin):
         self.start_cols = len(self.header_settings)
 
     def initDelegateSettings(self) -> None:
+        """ Назначение делегата для определенных столбцов таблицы """
+
         self.combobox_delegate_sentence = DelegateComboBoxSentences()
         self.combobox_delegate_sentence.itemChanged.connect(self.cbChanged)
         self.table.setItemDelegateForColumn(1, self.combobox_delegate_sentence)
@@ -790,29 +900,43 @@ class FrameAdminDef(FrameAdmin):
         self.table.setItemDelegateForColumn(2, self.combobox_delegate)
 
     def initDelegate(self) -> DelegateComboBox:
+        """ Возвращает делегат в виде комбобокса """
+
         return DelegateComboBox()
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
         self.table.setItem(row, 2, QTableWidgetItem(''))
 
     def initNewRow(self, row, db_item) -> None:
-        pass
+        """ Создание новой строки
+            (родительский метод addRow + доп. функции для определенного класса) """
 
     def getDefaultData(self):
+        """ Получение и обработка данных из БД для
+            метода инициализации начальных данных """
+
         self.data = []
 
-    def getDefaultItems(self):
-        self.items = []
+    # def getDefaultItems(self):
+    #     """  """
+    #
+    #     self.items = []
 
     def getDefaultSentences(self):
+        """ Список уникальных переходов для таблиц вида  """
+
         self.sentence = sorted([item.text for item in DbSentence.uniqueData()])
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         self.getDefaultData()
-        self.getDefaultItems()
+        # self.getDefaultItems()
         self.getDefaultSentences()
         for row, db_item in enumerate(self.data):
             self.initNewRow(row=row, db_item=db_item)
@@ -822,9 +946,13 @@ class FrameAdminDef(FrameAdmin):
         self.table.setColumnHidden(0, True)
 
     def initFlags(self, row):
+        """  """
+
         self.table.item(row, 0).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     def cbChanged(self):
+        """  """
+
         row = self.table.currentRow()
         id_item = self.table.item(row, 0).text()
         sentence = self.table.item(row, 1).text()
@@ -833,9 +961,13 @@ class FrameAdminDef(FrameAdmin):
             self.addData(row=row, id_item=id_item, item=item, sentence=sentence)
 
     def addData(self, row: int, id_item: str, item: str, sentence: str):
+        """  """
+
         pass
 
     def getText(self, source: dict, item: str, item_name: str) -> str:
+        """  """
+
         if item in source.keys():
             return source[item]
         else:
@@ -843,6 +975,8 @@ class FrameAdminDef(FrameAdmin):
             return ""
 
     def deleteRow(self) -> None:
+        """  """
+
         id_item = self.table.item(self.table.currentRow(), 0).text()
         if id_item != self.__class__.new:
             self.delItem(id_item=int(id_item))
@@ -850,237 +984,325 @@ class FrameAdminDef(FrameAdmin):
         self.newItem.emit()
 
     def delItem(self, id_item):
+        """  """
+
         show_dialog(text='Удаление данных из данной таблицы не поддерживается')
 
 
-# Переход -> ИОТ
 class FrameAdminIOTDef(FrameAdminDef):
+    """ Рамка с таблицей связей ИОТ и переходов """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name, header='ИОТ')
 
     def initDelegate(self) -> DelegateComboBoxIOT:
+        """  """
+
         return DelegateComboBoxIOT()
 
     def initNewRow(self, row, db_item) -> None:
+        """ Создание новой строки
+            (родительский метод addRow + доп. функции для определенного класса) """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(str(db_item.id_iot_def)))
         self.table.setItem(row, 2, QTableWidgetItem(db_item.iot.deno))
         self.table.setItem(row, 1, QTableWidgetItem(db_item.sentence.text))
         self.table.resizeRowToContents(row)
 
-    @keyError
+    @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
+        """  """
+
         id_iot = DbIOT.data[item].id_iot
         id_sentence = DbSentence.data[sentence].id_sentence
         if id_item == self.__class__.new:
             db_iot_def = DbIOTDef.addNewIOTDef(id_sentence=int(id_sentence),
                                                id_iot=int(id_iot))
             self.table.item(row, 0).setText(str(db_iot_def.id_iot_def))
-            newRecordDialog()
+            new_record_dialog()
         else:
             DbIOTDef.updIOTDef(id_iot_def=int(id_item),
                                id_sentence=int(id_sentence),
                                id_iot=int(id_iot))
-            updRecordDialog()
+            upd_record_dialog()
 
     def getDefaultData(self):
+        """ Получение и обработка данных из БД для
+            метода инициализации начальных данных """
+
         self.data = DbIOTDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
         # self.data = sorted(self.data, key=lambda x: x.id_sentence)
 
-    def getDefaultItems(self):
-        self.items = sorted([item.deno for item in DbIOT.uniqueData()])
+    # def getDefaultItems(self):
+    #     """  """
+    #
+    #     self.items = sorted([item.deno for item in DbIOT.uniqueData()])
 
     def delItem(self, id_item):
+        """  """
+
         DbIOTDef.delIOTDef(id_iot_def=id_item)
-        delRecordDialog()
+        del_record_dialog()
 
 
-# Переход -> Материалы
 class FrameAdminMatDef(FrameAdminDef):
+    """ Рамка с таблицей связей материалов и переходов """
+
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
+        """  """
+
         super().__init__(frame_name=frame_name, header='Материал')
 
     def initDelegate(self) -> DelegateComboBoxMat:
+        """  """
+
         return DelegateComboBoxMat()
 
     def initNewRow(self, row, db_item) -> None:
+        """ Создание новой строки
+            (родительский метод addRow + доп. функции для определенного класса) """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(str(db_item.id_material_def)))
         self.table.setItem(row, 2, QTableWidgetItem(db_item.material.name))
         self.table.setItem(row, 1, QTableWidgetItem(db_item.sentence.text))
         self.table.resizeRowToContents(row)
 
-    @keyError
+    @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
+        """  """
+
         id_material = DbMaterial.data[item].id_material
         id_sentence = DbSentence.data[sentence].id_sentence
         if id_item == self.__class__.new:
             db_mat_def = DbMaterialDef.addNewMatDef(id_sentence=int(id_sentence),
                                                     id_material=int(id_material))
             self.table.item(row, 0).setText(str(db_mat_def.id_material_def))
-            newRecordDialog()
+            new_record_dialog()
         else:
             DbMaterialDef.updMatDef(id_material_def=int(id_item),
                                     id_sentence=int(id_sentence),
                                     id_material=int(id_material))
-            updRecordDialog()
+            upd_record_dialog()
 
     def getDefaultData(self):
+        """ Получение и обработка данных из БД для
+            метода инициализации начальных данных """
+
         self.data = DbMaterialDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
         # self.data = sorted(self.data, key=lambda x: x.id_sentence)
 
-    def getDefaultItems(self):
-        self.items = sorted([item.name for item in DbMaterial.uniqueData()])
+    # def getDefaultItems(self):
+    #     """  """
+    #
+    #     self.items = sorted([item.name for item in DbMaterial.uniqueData()])
 
     def delItem(self, id_item):
+        """  """
+
         DbMaterialDef.delMatDef(id_material_def=id_item)
-        delRecordDialog()
+        del_record_dialog()
 
 
-# Переход -> Оснастка
 class FrameAdminRigDef(FrameAdminDef):
+    """ Рамка с таблицей связей оснастки и переходов """
+
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
+        """  """
+
         super().__init__(frame_name=frame_name, header='Оснастка')
 
     def initDelegate(self) -> DelegateComboBoxRig:
+        """  """
+
         return DelegateComboBoxRig()
 
     def initNewRow(self, row, db_item) -> None:
+        """ Создание новой строки
+            (родительский метод addRow + доп. функции для определенного класса) """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(str(db_item.id_rig_def)))
         self.table.setItem(row, 2, QTableWidgetItem(db_item.rig.name))
         self.table.setItem(row, 1, QTableWidgetItem(db_item.sentence.text))
         self.table.resizeRowToContents(row)
 
-    @keyError
+    @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
+        """  """
+
         id_rig = DbRig.data[item].id_rig
         id_sentence = DbSentence.data[sentence].id_sentence
         if id_item == self.__class__.new:
             db_rig_def = DbRigDef.addNewRigDef(id_sentence=int(id_sentence),
                                                id_rig=int(id_rig))
             self.table.item(row, 0).setText(str(db_rig_def.id_rig_def))
-            newRecordDialog()
+            new_record_dialog()
         else:
             DbRigDef.updRigDef(id_rig_def=int(id_item),
                                id_sentence=int(id_sentence),
                                id_rig=int(id_rig))
-            updRecordDialog()
+            upd_record_dialog()
 
     def getDefaultData(self):
+        """ Получение и обработка данных из БД для
+            метода инициализации начальных данных """
+
         self.data = DbRigDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
         # self.data = sorted(self.data, key=lambda x: x.id_sentence)
 
-    def getDefaultItems(self):
-        self.items = sorted([item.name for item in DbRig.uniqueData()])
+    # def getDefaultItems(self):
+    #     """  """
+    #
+    #     self.items = sorted([item.name for item in DbRig.uniqueData()])
 
     def delItem(self, id_item):
+        """  """
+
         DbRigDef.delRigDef(id_rig_def=id_item)
-        delRecordDialog()
+        del_record_dialog()
 
 
-# Переход -> Оборудование
 class FrameAdminEqtDef(FrameAdminDef):
+    """ Рамка с таблицей связей оборудования и переходов """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
+        """  """
+
         super().__init__(frame_name=frame_name, header='Оборудование')
 
     def initDelegate(self) -> DelegateComboBoxEqt:
+        """  """
+
         return DelegateComboBoxEqt()
 
     def initNewRow(self, row, db_item) -> None:
+        """ Создание новой строки
+            (родительский метод addRow + доп. функции для определенного класса) """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(str(db_item.id_equipment_def)))
         self.table.setItem(row, 2, QTableWidgetItem(db_item.equipment.name))
         self.table.setItem(row, 1, QTableWidgetItem(db_item.sentence.text))
         self.table.resizeRowToContents(row)
 
-    @keyError
+    @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
+        """  """
+
         id_equipment = DbEquipment.data[item].id_equipment
         id_sentence = DbSentence.data[sentence].id_sentence
         if id_item == self.__class__.new:
             db_equipment_def = DbEquipmentDef.addNewEqtDef(id_sentence=int(id_sentence),
                                                            id_equipment=int(id_equipment))
             self.table.item(row, 0).setText(str(db_equipment_def.id_equipment_def))
-            newRecordDialog()
+            new_record_dialog()
         else:
             DbEquipmentDef.updEqtDef(id_equipment_def=int(id_item),
                                      id_sentence=int(id_sentence),
                                      id_equipment=int(id_equipment))
-            updRecordDialog()
+            upd_record_dialog()
 
     def getDefaultData(self):
+        """ Получение и обработка данных из БД для
+            метода инициализации начальных данных """
+
         self.data = DbEquipmentDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
         # self.data = sorted(self.data, key=lambda x: x.id_sentence)
 
-    def getDefaultItems(self):
-        self.items = sorted([item.name for item in DbEquipment.uniqueData()])
+    # def getDefaultItems(self):
+    #     """  """
+    #
+    #     self.items = sorted([item.name for item in DbEquipment.uniqueData()])
 
     def delItem(self, id_item):
+        """  """
+
         DbEquipmentDef.delEqtDef(id_equipment_def=id_item)
-        delRecordDialog()
+        del_record_dialog()
 
 
-# Переход -> Вид документа
 class FrameAdminDocDef(FrameAdminDef):
+    """ Рамка с таблицей связей видами документов и переходами """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
+        """  """
+
         super().__init__(frame_name=frame_name, header='Вид документа')
 
     def initDelegate(self) -> DelegateComboBoxDoc:
+        """  """
+
         return DelegateComboBoxDoc()
 
     def initNewRow(self, row, db_item) -> None:
+        """ Создание новой строки
+            (родительский метод addRow + доп. функции для определенного класса) """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(str(db_item.id_doc_def)))
         self.table.setItem(row, 2, QTableWidgetItem(db_item.document_type.subtype_name))
         self.table.setItem(row, 1, QTableWidgetItem(db_item.sentence.text))
         self.table.resizeRowToContents(row)
 
-    @keyError
+    @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
+        """  """
+
         id_type = DbDocumentType.data[('КД', item)].id_type
         id_sentence = DbSentence.data[sentence].id_sentence
         if id_item == self.__class__.new:
             db_doc_def = DbDocDef.addNewDocDef(id_sentence=int(id_sentence),
                                                id_type=int(id_type))
             self.table.item(row, 0).setText(str(db_doc_def.id_doc_def))
-            newRecordDialog()
+            new_record_dialog()
         else:
             DbDocDef.updDocDef(id_doc_def=int(id_item),
                                id_sentence=int(id_sentence),
                                id_type=int(id_type))
-            updRecordDialog()
+            upd_record_dialog()
 
     def getDefaultData(self):
+        """ Получение и обработка данных из БД для
+            метода инициализации начальных данных """
+
         self.data = DbDocDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
         # self.data = sorted(self.data, key=lambda x: x.id_sentence)
 
-    def getDefaultItems(self):
-        self.items = sorted([item.subtype_name for item in DbDocumentType.uniqueData()])
+    # def getDefaultItems(self):
+    #     """  """
+    #
+    #     self.items = sorted([item.subtype_name for item in DbDocumentType.uniqueData()])
 
     def delItem(self, id_item):
+        """  """
+
         DbDocDef.delDocDef(id_doc_def=id_item)
-        delRecordDialog()
+        del_record_dialog()
 
 
-# Свойства -> Переход
 class FrameAdminSettingsDef(FrameAdminDef):
+    """ Рамка с таблицей какие переходы соответствуют
+        определенному свойству операции """
+
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
+        """  """
+
         super().__init__(frame_name=frame_name)
         self.initDelegateSettings()
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 50, 'name': 'id'},
                                 # {'col': 1, 'width': 200, 'name': 'Операция'},
                                 {'col': 1, 'width': 60, 'name': 'Порядок'},
@@ -1091,6 +1313,8 @@ class FrameAdminSettingsDef(FrameAdminDef):
         self.start_cols = len(self.header_settings)
 
     def initDelegateSettings(self) -> None:
+        """ Назначение делегата для определенных столбцов таблицы """
+
         self.combobox_delegate_order = DelegateComboBoxOrder()
         self.combobox_delegate_order.itemChanged.connect(self.cbChanged)
         self.table.setItemDelegateForColumn(1, self.combobox_delegate_order)
@@ -1104,6 +1328,8 @@ class FrameAdminSettingsDef(FrameAdminDef):
         self.table.setItemDelegateForColumn(3, self.combobox_delegate_sentences)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
         self.table.setItem(row, 1, QTableWidgetItem(''))
@@ -1111,6 +1337,9 @@ class FrameAdminSettingsDef(FrameAdminDef):
         self.table.setItem(row, 3, QTableWidgetItem(''))
 
     def initNewRow(self, row, db_item) -> None:
+        """ Создание новой строки
+            (родительский метод addRow + доп. функции для определенного класса) """
+
         row = self.addRow()
         setting_with_operation = f'{db_item.setting.operation.name} - {db_item.setting.text}'
         self.table.setItem(row, 0, QTableWidgetItem(str(db_item.id_setting_def)))
@@ -1120,15 +1349,22 @@ class FrameAdminSettingsDef(FrameAdminDef):
         self.table.resizeRowToContents(row)
 
     def getDefaultData(self):
+        """ Получение и обработка данных из БД для
+            метода инициализации начальных данных """
+
         self.data = DbSettingDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence_order)
         self.data = sorted(self.data, key=lambda x: f'{x.setting.operation.name}\n{x.setting.text}')
 
-    def getDefaultItems(self):
-        self.setting = sorted([item.text for item in DbSetting.uniqueData()])
+    # def getDefaultItems(self):
+    #     """  """
+    #
+    #     self.setting = sorted([item.text for item in DbSetting.uniqueData()])
 
-    @keyError
+    @key_error
     def cbChanged(self) -> None:
+        """  """
+
         row = self.table.currentRow()
         id_setting_def = self.table.item(row, 0).text()
         sentence_order = self.table.item(row, 1).text()
@@ -1144,25 +1380,30 @@ class FrameAdminSettingsDef(FrameAdminDef):
                                                                id_sentence=int(id_sentence),
                                                                sentence_order=int(sentence_order) - 1)
                 self.table.item(row, 0).setText(str(db_setting_def.id_setting_def))
-                newRecordDialog()
+                new_record_dialog()
             else:
                 DbSettingDef.updSettingDef(id_setting_def=int(id_setting_def),
                                            id_setting=int(id_setting),
                                            id_sentence=int(id_sentence),
                                            sentence_order=int(sentence_order) - 1)
-                updRecordDialog()
+                upd_record_dialog()
             self.newItem.emit()
 
     def initFlags(self, row):
+        """  """
+
         self.table.item(row, 0).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     def delItem(self, id_item):
+        """  """
+
         DbSettingDef.delSettingDef(id_setting_def=id_item)
-        delRecordDialog()
+        del_record_dialog()
 
 
-# Операция -> Свойства
 class FrameAdminSettings(FrameAdminDef):
+    """ Рамка с таблицей, отображающей свойства,
+        соответствущие различным операциям """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
@@ -1170,6 +1411,8 @@ class FrameAdminSettings(FrameAdminDef):
         self.initDelegateSettings()
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 20, 'name': 'id'},
                                 {'col': 1, 'width': 150, 'name': 'Операция'},
                                 {'col': 2, 'width': 150, 'name': 'Свойство'},
@@ -1178,11 +1421,15 @@ class FrameAdminSettings(FrameAdminDef):
         self.start_cols = len(self.header_settings)
 
     def initDelegateSettings(self) -> None:
+        """ Назначение делегата для определенных столбцов таблицы """
+
         self.combobox_delegate = DelegateComboBoxOperations()
         self.combobox_delegate.itemChanged.connect(self.cbChanged)
         self.table.setItemDelegateForColumn(1, self.combobox_delegate)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.blockSignals(True)
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
@@ -1191,6 +1438,9 @@ class FrameAdminSettings(FrameAdminDef):
         self.table.blockSignals(False)
 
     def initNewRow(self, row, db_item) -> None:
+        """ Создание новой строки
+            (родительский метод addRow + доп. функции для определенного класса) """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(str(db_item.id_setting)))
         self.table.setItem(row, 1, QTableWidgetItem(str(db_item.operation.name)))
@@ -1198,18 +1448,25 @@ class FrameAdminSettings(FrameAdminDef):
         self.table.resizeRowToContents(row)
 
     def getDefaultData(self):
+        """ Получение и обработка данных из БД для
+            метода инициализации начальных данных """
+
         self.data = DbSetting.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.text)
         self.data = sorted(self.data, key=lambda x: x.operation.name)
 
-    def getDefaultItems(self):
-        self.operations = sorted([item.name for item in DbOperation.uniqueData()])
+    # def getDefaultItems(self):
+    #     """  """
+    #
+    #     self.operations = sorted([item.name for item in DbOperation.uniqueData()])
 
     def getDefaultSentences(self):
-        pass
+        """  """
 
-    @keyError
+    @key_error
     def cbChanged(self) -> None:
+        """  """
+
         row = self.table.currentRow()
         id_setting = self.table.item(row, 0).text()
         operation = self.table.item(row, 1).text()
@@ -1220,15 +1477,17 @@ class FrameAdminSettings(FrameAdminDef):
                 db_settings = DbSetting.addNewSetting(id_operation=id_operation,
                                                       text=text)
                 self.table.item(row, 0).setText(str(db_settings.id_setting))
-                newRecordDialog()
+                new_record_dialog()
             else:
                 DbSetting.updSetting(id_setting=int(id_setting),
                                      id_operation=id_operation,
                                      text=text)
-                updRecordDialog()
+                upd_record_dialog()
             self.newItem.emit()
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         row = item.row()
         id_setting = self.table.item(row, 0).text()
         operation = self.table.item(row, 1).text()
@@ -1239,22 +1498,25 @@ class FrameAdminSettings(FrameAdminDef):
                 db_settings = DbSetting.addNewSetting(id_operation=id_operation,
                                                       text=text)
                 self.table.item(row, 0).setText(str(db_settings.id_setting))
-                newRecordDialog()
+                new_record_dialog()
             else:
                 DbSetting.updSetting(id_setting=int(id_setting),
                                      id_operation=id_operation,
                                      text=text)
-                updRecordDialog()
+                upd_record_dialog()
             self.newItem.emit()
 
 
-# Данные операций
 class FrameAdminOperationsDef(FrameAdminDef):
+    """ Рамка с таблицей возможных мест проведения и
+        исполнителей различных операций """
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         super().__init__(frame_name=frame_name)
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 50, 'name': 'id'},
                                 {'col': 1, 'width': 200, 'name': 'Операция'},
                                 {'col': 2, 'width': 200, 'name': 'Участок'},
@@ -1266,6 +1528,8 @@ class FrameAdminOperationsDef(FrameAdminDef):
         self.start_cols = len(self.header_settings)
 
     def initDelegateSettings(self) -> None:
+        """ Назначение делегата для определенных столбцов таблицы """
+
         self.combobox_delegate_oper = DelegateComboBoxOperations()
         self.combobox_delegate_area = DelegateComboBoxArea()
         self.combobox_delegate_work = DelegateComboBoxWorkplace()
@@ -1285,12 +1549,18 @@ class FrameAdminOperationsDef(FrameAdminDef):
         self.table.setItemDelegateForColumn(5, self.combobox_delegate_kind)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
-        for col, items in enumerate([self.oper, self.area, self.work, self.prof, self.kind]):
+        # for col, items in enumerate([self.oper, self.area, self.work, self.prof, self.kind]):
+        for col in range(4):
             self.table.setItem(row, col + 1, QTableWidgetItem(''))
 
     def initNewRow(self, row, db_item) -> None:
+        """ Создание новой строки
+            (родительский метод addRow + доп. функции для определенного класса) """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(str(db_item.id_operation_def)))
         self.table.setItem(row, 1, QTableWidgetItem(db_item.operation.name))
@@ -1301,21 +1571,27 @@ class FrameAdminOperationsDef(FrameAdminDef):
         self.table.resizeRowToContents(row)
 
     def getDefaultData(self):
+        """ Получение и обработка данных из БД для
+            метода инициализации начальных данных """
+
         self.data = DbOperationDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.profession.name)
         self.data = sorted(self.data, key=lambda x: x.workplace.name)
         self.data = sorted(self.data, key=lambda x: x.area.name)
         self.data = sorted(self.data, key=lambda x: x.operation.name)
 
-    def getDefaultItems(self):
-        self.oper = sorted([item.name for item in DbOperation.uniqueData()])
-        self.area = sorted([item.name for item in DbArea.uniqueData()])
-        self.work = sorted([item.name for item in DbWorkplace.uniqueData()])
-        self.prof = sorted([item.name for item in DbProfession.uniqueData()])
-        self.kind = sorted([item.name_short for item in DbProductKind.uniqueData()])
+    # def getDefaultItems(self):
+    #     """ Получение текущих уникальных значений для переменных данных таблицы """
+    #     self.oper = sorted([item.name for item in DbOperation.uniqueData()])
+    #     self.area = sorted([item.name for item in DbArea.uniqueData()])
+    #     self.work = sorted([item.name for item in DbWorkplace.uniqueData()])
+    #     self.prof = sorted([item.name for item in DbProfession.uniqueData()])
+    #     self.kind = sorted([item.name_short for item in DbProductKind.uniqueData()])
 
-    @keyError
+    @key_error
     def cbChanged(self):
+        """ Реакция на изменение комбобокса в таблице """
+
         row = self.table.currentRow()
         id_operation_def = self.table.item(row, 0).text()
         operation = self.table.item(row, 1).text()
@@ -1336,7 +1612,7 @@ class FrameAdminOperationsDef(FrameAdminDef):
                                                                      id_profession=int(id_profession),
                                                                      id_kind=int(id_kind))
                 self.table.item(row, 0).setText(str(db_operation_def.id_operation_def))
-                newRecordDialog()
+                new_record_dialog()
             else:
                 DbOperationDef.updOperationDef(id_operation_def=int(id_operation_def),
                                                id_operation=int(id_operation),
@@ -1344,9 +1620,11 @@ class FrameAdminOperationsDef(FrameAdminDef):
                                                id_workplace=int(id_workplace),
                                                id_profession=int(id_profession),
                                                id_kind=int(id_kind))
-                updRecordDialog()
+                upd_record_dialog()
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         self.getDefaultData()
         self.getDefaultItems()
         for row, db_item in enumerate(self.data):
@@ -1357,15 +1635,20 @@ class FrameAdminOperationsDef(FrameAdminDef):
         self.table.setColumnHidden(0, True)
 
     def initFlags(self, row):
+        """  """
+
         self.table.item(row, 0).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     def delItem(self, id_item):
+        """  """
+
         DbOperationDef.delOperationDef(id_operation_def=id_item)
-        delRecordDialog()
+        del_record_dialog()
 
 
-# Изделия которым присвоено несколько ТТП
 class FrameAdminTTPErr(FrameAdmin):
+    """ Рамка с таблицей изделий которым присвоено
+        более 1 типового технологического процесса """
 
     def __init__(self, frame_name):
         super(FrameAdminTTPErr, self).__init__(frame_name=frame_name,
@@ -1374,6 +1657,8 @@ class FrameAdminTTPErr(FrameAdmin):
         self.initDelegateSettings()
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 400, 'name': 'Наименование'},
                                 {'col': 1, 'width': 200, 'name': 'Децимальный\nномер'},
                                 {'col': 2, 'width': 200, 'name': 'КТТП'},
@@ -1383,11 +1668,15 @@ class FrameAdminTTPErr(FrameAdmin):
         # self.table.setSortingEnabled(True)
 
     def initDelegateSettings(self) -> None:
+        """ Назначение делегата для определенных столбцов таблицы """
+
         self.delegate_sentence = DelegateComboBoxTTP()
         # self.delegate_sentence.itemChanged.connect(self.itemChanged)
         self.table.setItemDelegateForColumn(2, self.delegate_sentence)
 
     def addRow(self):
+        """ Вставляет пустую строку ниже активной строки """
+
         row = self.table.currentRow()
         if row == -1:
             self.table.setRowCount(self.table.rowCount() + 1)
@@ -1397,12 +1686,16 @@ class FrameAdminTTPErr(FrameAdmin):
         return row
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(''))
         self.table.setItem(row, 1, QTableWidgetItem(''))
         self.table.setItem(row, 2, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbDocument.getErrorTTP()
         data = sorted(data.items(), key=lambda x: x[0].name)
         self.product_builder = ProductBuilder()
@@ -1430,6 +1723,8 @@ class FrameAdminTTPErr(FrameAdmin):
         # self.table.setColumnHidden(0, True)
 
     def updTable(self):
+        """ Удаление данных и загрузка данных по умолчанию """
+
         current_row = self.table.currentRow()
         self.table.blockSignals(True)
         for row in range(self.table.rowCount(), -1, -1):
@@ -1440,6 +1735,8 @@ class FrameAdminTTPErr(FrameAdmin):
         self.table.horizontalHeader().setStretchLastSection(True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() == 2:
             row = item.row()
             db_document_real = self.delegate_sentence.db_documents_real.get(item.text(), None)
@@ -1451,8 +1748,9 @@ class FrameAdminTTPErr(FrameAdmin):
             self.newItem.emit()
 
 
-# Изделия без первичной применяемости
 class FrameAdminPrimaryProduct(FrameAdmin):
+    """ Рамка с таблицей изделий у которых
+        не указана первичная применяемость """
 
     def __init__(self, frame_name):
         super(FrameAdminPrimaryProduct, self).__init__(frame_name=frame_name,
@@ -1461,6 +1759,8 @@ class FrameAdminPrimaryProduct(FrameAdmin):
         # self.initDelegateSettings()
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 400, 'name': 'Наименование'},
                                 {'col': 1, 'width': 200, 'name': 'Децимальный\nномер'},
                                 {'col': 2, 'width': 200, 'name': 'Первичная применяемость'},
@@ -1470,6 +1770,8 @@ class FrameAdminPrimaryProduct(FrameAdmin):
 
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         data = DbProduct.getProductWithoutPrimaryApplication()
         data = sorted(data, key=lambda x: x.deno[4:])
         self.product_builder = ProductBuilder()
@@ -1490,6 +1792,8 @@ class FrameAdminPrimaryProduct(FrameAdmin):
         self.table.resizeRowsToContents()
 
     def updTable(self):
+        """ Удаление данных и загрузка данных по умолчанию """
+
         current_row = self.table.currentRow()
         self.table.blockSignals(True)
         for row in range(self.table.rowCount(), -1, -1):
@@ -1500,6 +1804,8 @@ class FrameAdminPrimaryProduct(FrameAdmin):
         self.table.horizontalHeader().setStretchLastSection(True)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() == 2:
 
             deno = item.text()
@@ -1530,8 +1836,8 @@ class FrameAdminPrimaryProduct(FrameAdmin):
             # self.newItem.emit()
 
 
-# Общий класс для покупных и изготавливаемых изделий
 class FrameAdminProduct(FrameAdmin):
+    """ Родительский класс рамок для покупных и изготавливаемых изделий """
 
     def __init__(self, frame_name):
         super(FrameAdminProduct, self).__init__(frame_name=frame_name,
@@ -1540,6 +1846,8 @@ class FrameAdminProduct(FrameAdmin):
         self.initDelegateSettings()
 
     def initTableSettings(self) -> None:
+        """ Начальные параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 400, 'name': 'Наименование'},
                                 {'col': 1, 'width': 200, 'name': 'Децимальный\nномер'},
                                 {'col': 2, 'width': 200, 'name': 'ПКИ'},
@@ -1549,11 +1857,15 @@ class FrameAdminProduct(FrameAdmin):
         # self.table.setSortingEnabled(True)
 
     def initDelegateSettings(self) -> None:
+        """ Назначение делегата для определенных столбцов таблицы """
+
         self.delegate_sentence = DelegateComboBoxPKI()
         # self.delegate_sentence.itemChanged.connect(self.itemChanged)
         self.table.setItemDelegateForColumn(2, self.delegate_sentence)
 
     def addRow(self):
+        """ Вставляет пустую строку ниже активной строки """
+
         row = self.table.currentRow()
         if row == -1:
             self.table.setRowCount(self.table.rowCount() + 1)
@@ -1563,12 +1875,16 @@ class FrameAdminProduct(FrameAdmin):
         return row
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки в таблицу """
+
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(''))
         self.table.setItem(row, 1, QTableWidgetItem(''))
         self.table.setItem(row, 2, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
+        """ Инициализация данных по умолчанию """
+
         row = 0
         data = DbProduct.data
         self.table.blockSignals(True)
@@ -1583,15 +1899,21 @@ class FrameAdminProduct(FrameAdmin):
         # self.table.setColumnHidden(0, True)
 
     def setRowData(self, db_product, row):
+        """  """
+
         self.table.item(row, 0).setText(str(db_product.name))
         if db_product.name != db_product.deno:
             self.table.item(row, 1).setText(str(db_product.deno))
         self.table.item(row, 2).setText(str(db_product.purchased))
 
     def getProductToTable(self, db_product: DbProduct) -> bool:
+        """  """
+
         return True if db_product.purchased is not None else False
 
     def updTable(self):
+        """ Удаление данных и загрузка данных по умолчанию """
+
         current_row = self.table.currentRow()
         self.table.blockSignals(True)
         for row in range(self.table.rowCount(), -1, -1):
@@ -1601,6 +1923,8 @@ class FrameAdminProduct(FrameAdmin):
         self.table.selectRow(current_row)
 
     def itemChanged(self, item):
+        """ Реакция на изменения данных таблицы """
+
         if item.text() and item.column() == 2:
             row = item.row()
             deno = self.table.item(row, 1)
@@ -1611,21 +1935,27 @@ class FrameAdminProduct(FrameAdmin):
             self.newItem.emit()
 
 
-# Таблица изготавливаемых не в СТЦ изделий с возможностью изменения типа изготовления
 class FrameAdminProductPKI(FrameAdminProduct):
+    """ Рамка с таблицей не изготавливаемых изделий с
+        возможностью изменения типа изготовления """
 
     def __init__(self, frame_name) -> None:
         super(FrameAdminProductPKI, self).__init__(frame_name=frame_name)
 
     def getProductToTable(self, db_product: DbProduct) -> bool:
+        """  """
+
         return False if db_product.purchased in [None, 0] else True
 
 
-# Таблица изготавливаемых в СТЦ изделий с возможностью изменения типа изготовления
 class FrameAdminProductSTC(FrameAdminProduct):
+    """ Рамка с таблицей изготавливаемых изделий с
+        возможностью изменения типа изготовления """
 
     def __init__(self, frame_name) -> None:
         super(FrameAdminProductSTC, self).__init__(frame_name=frame_name)
 
     def getProductToTable(self, db_product: DbProduct) -> bool:
+        """  """
+
         return True if db_product.purchased in [None, 0] else False
