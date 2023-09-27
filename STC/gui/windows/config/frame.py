@@ -1495,8 +1495,7 @@ class FrameAdminOperationsDef(FrameAdminDef):
 
         row = self.addRow()
         self.table.setItem(row, 0, QTableWidgetItem(self.__class__.new))
-        # for col, items in enumerate([self.oper, self.area, self.work, self.prof, self.kind]):
-        for col in range(4):
+        for col in range(5):
             self.table.setItem(row, col + 1, QTableWidgetItem(''))
 
     def initNewRow(self, row, db_item) -> None:
