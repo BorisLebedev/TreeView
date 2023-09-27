@@ -86,16 +86,6 @@ def key_error(f):
     return wrapper
 
 
-# class ComboBoxAdmin(QComboBox):
-#     """  """
-#
-#     def __init__(self, items: list[str]) -> None:
-#         super().__init__()
-#         self.wheelEvent = lambda event: None
-#         self.addItems(items)
-#         self.setCurrentText(items[0])
-
-
 class FrameAdmin(FrameWithTable):
     """ Родительский класс для рамок с таблицей окна
         ввода данных по умолчанию для маршрутных карт """
@@ -632,7 +622,6 @@ class FrameAdminDoc(FrameAdmin):
                                                    sign=sign,
                                                    description=description)
                     upd_record_dialog()
-                # ComboBoxIotByName.updItemDictCls()
                 self.newItem.emit()
 
 
@@ -922,11 +911,6 @@ class FrameAdminDef(FrameAdmin):
 
         self.data = []
 
-    # def getDefaultItems(self):
-    #     """  """
-    #
-    #     self.items = []
-
     def getDefaultSentences(self):
         """ Список уникальных переходов для таблиц вида  """
 
@@ -936,22 +920,19 @@ class FrameAdminDef(FrameAdmin):
         """ Инициализация данных по умолчанию """
 
         self.getDefaultData()
-        # self.getDefaultItems()
         self.getDefaultSentences()
         for row, db_item in enumerate(self.data):
             self.initNewRow(row=row, db_item=db_item)
             self.initFlags(row=row)
-        # self.table.setSortingEnabled(True)
-        # self.table.resizeColumnsToContents()
         self.table.setColumnHidden(0, True)
 
     def initFlags(self, row):
-        """  """
+        """ Установка флагов для элементов таблицы """
 
         self.table.item(row, 0).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     def cbChanged(self):
-        """  """
+        """ Реакция на изменение данных комбобокса в таблице """
 
         row = self.table.currentRow()
         id_item = self.table.item(row, 0).text()
@@ -975,7 +956,7 @@ class FrameAdminDef(FrameAdmin):
             return ""
 
     def deleteRow(self) -> None:
-        """  """
+        """ Удаление строки таблицы """
 
         id_item = self.table.item(self.table.currentRow(), 0).text()
         if id_item != self.__class__.new:
@@ -984,7 +965,7 @@ class FrameAdminDef(FrameAdmin):
         self.newItem.emit()
 
     def delItem(self, id_item):
-        """  """
+        """ Удаление данных приведенных в таблице из БД """
 
         show_dialog(text='Удаление данных из данной таблицы не поддерживается')
 
@@ -996,7 +977,7 @@ class FrameAdminIOTDef(FrameAdminDef):
         super().__init__(frame_name=frame_name, header='ИОТ')
 
     def initDelegate(self) -> DelegateComboBoxIOT:
-        """  """
+        """ Возвращает делегат в виде комбобокса """
 
         return DelegateComboBoxIOT()
 
@@ -1033,15 +1014,9 @@ class FrameAdminIOTDef(FrameAdminDef):
 
         self.data = DbIOTDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
-        # self.data = sorted(self.data, key=lambda x: x.id_sentence)
-
-    # def getDefaultItems(self):
-    #     """  """
-    #
-    #     self.items = sorted([item.deno for item in DbIOT.uniqueData()])
 
     def delItem(self, id_item):
-        """  """
+        """ Удаление данных приведенных в таблице из БД """
 
         DbIOTDef.delIOTDef(id_iot_def=id_item)
         del_record_dialog()
@@ -1057,7 +1032,7 @@ class FrameAdminMatDef(FrameAdminDef):
         super().__init__(frame_name=frame_name, header='Материал')
 
     def initDelegate(self) -> DelegateComboBoxMat:
-        """  """
+        """ Возвращает делегат в виде комбобокса """
 
         return DelegateComboBoxMat()
 
@@ -1094,15 +1069,9 @@ class FrameAdminMatDef(FrameAdminDef):
 
         self.data = DbMaterialDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
-        # self.data = sorted(self.data, key=lambda x: x.id_sentence)
-
-    # def getDefaultItems(self):
-    #     """  """
-    #
-    #     self.items = sorted([item.name for item in DbMaterial.uniqueData()])
 
     def delItem(self, id_item):
-        """  """
+        """ Удаление данных приведенных в таблице из БД """
 
         DbMaterialDef.delMatDef(id_material_def=id_item)
         del_record_dialog()
@@ -1118,7 +1087,7 @@ class FrameAdminRigDef(FrameAdminDef):
         super().__init__(frame_name=frame_name, header='Оснастка')
 
     def initDelegate(self) -> DelegateComboBoxRig:
-        """  """
+        """ Возвращает делегат в виде комбобокса """
 
         return DelegateComboBoxRig()
 
@@ -1155,15 +1124,9 @@ class FrameAdminRigDef(FrameAdminDef):
 
         self.data = DbRigDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
-        # self.data = sorted(self.data, key=lambda x: x.id_sentence)
-
-    # def getDefaultItems(self):
-    #     """  """
-    #
-    #     self.items = sorted([item.name for item in DbRig.uniqueData()])
 
     def delItem(self, id_item):
-        """  """
+        """ Удаление данных приведенных в таблице из БД """
 
         DbRigDef.delRigDef(id_rig_def=id_item)
         del_record_dialog()
@@ -1178,7 +1141,7 @@ class FrameAdminEqtDef(FrameAdminDef):
         super().__init__(frame_name=frame_name, header='Оборудование')
 
     def initDelegate(self) -> DelegateComboBoxEqt:
-        """  """
+        """ Возвращает делегат в виде комбобокса """
 
         return DelegateComboBoxEqt()
 
@@ -1215,15 +1178,9 @@ class FrameAdminEqtDef(FrameAdminDef):
 
         self.data = DbEquipmentDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
-        # self.data = sorted(self.data, key=lambda x: x.id_sentence)
-
-    # def getDefaultItems(self):
-    #     """  """
-    #
-    #     self.items = sorted([item.name for item in DbEquipment.uniqueData()])
 
     def delItem(self, id_item):
-        """  """
+        """ Удаление данных приведенных в таблице из БД """
 
         DbEquipmentDef.delEqtDef(id_equipment_def=id_item)
         del_record_dialog()
@@ -1238,7 +1195,7 @@ class FrameAdminDocDef(FrameAdminDef):
         super().__init__(frame_name=frame_name, header='Вид документа')
 
     def initDelegate(self) -> DelegateComboBoxDoc:
-        """  """
+        """ Возвращает делегат в виде комбобокса """
 
         return DelegateComboBoxDoc()
 
@@ -1275,15 +1232,9 @@ class FrameAdminDocDef(FrameAdminDef):
 
         self.data = DbDocDef.uniqueData()
         self.data = sorted(self.data, key=lambda x: x.sentence.text)
-        # self.data = sorted(self.data, key=lambda x: x.id_sentence)
-
-    # def getDefaultItems(self):
-    #     """  """
-    #
-    #     self.items = sorted([item.subtype_name for item in DbDocumentType.uniqueData()])
 
     def delItem(self, id_item):
-        """  """
+        """ Удаление данных приведенных в таблице из БД """
 
         DbDocDef.delDocDef(id_doc_def=id_item)
         del_record_dialog()
@@ -1356,14 +1307,9 @@ class FrameAdminSettingsDef(FrameAdminDef):
         self.data = sorted(self.data, key=lambda x: x.sentence_order)
         self.data = sorted(self.data, key=lambda x: f'{x.setting.operation.name}\n{x.setting.text}')
 
-    # def getDefaultItems(self):
-    #     """  """
-    #
-    #     self.setting = sorted([item.text for item in DbSetting.uniqueData()])
-
     @key_error
     def cbChanged(self) -> None:
-        """  """
+        """ Реакция на изменение данных комбобокса в таблице """
 
         row = self.table.currentRow()
         id_setting_def = self.table.item(row, 0).text()
@@ -1390,12 +1336,12 @@ class FrameAdminSettingsDef(FrameAdminDef):
             self.newItem.emit()
 
     def initFlags(self, row):
-        """  """
+        """ Установка флагов для элементов таблицы """
 
         self.table.item(row, 0).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     def delItem(self, id_item):
-        """  """
+        """ Удаление данных приведенных в таблице из БД """
 
         DbSettingDef.delSettingDef(id_setting_def=id_item)
         del_record_dialog()
@@ -1455,17 +1401,13 @@ class FrameAdminSettings(FrameAdminDef):
         self.data = sorted(self.data, key=lambda x: x.text)
         self.data = sorted(self.data, key=lambda x: x.operation.name)
 
-    # def getDefaultItems(self):
-    #     """  """
-    #
-    #     self.operations = sorted([item.name for item in DbOperation.uniqueData()])
-
     def getDefaultSentences(self):
-        """  """
+        """ Список уникальных переходов для таблиц вида.
+            (В данном случае он не требуется) """
 
     @key_error
     def cbChanged(self) -> None:
-        """  """
+        """ Реакция на изменение данных комбобокса в таблице """
 
         row = self.table.currentRow()
         id_setting = self.table.item(row, 0).text()
@@ -1580,17 +1522,9 @@ class FrameAdminOperationsDef(FrameAdminDef):
         self.data = sorted(self.data, key=lambda x: x.area.name)
         self.data = sorted(self.data, key=lambda x: x.operation.name)
 
-    # def getDefaultItems(self):
-    #     """ Получение текущих уникальных значений для переменных данных таблицы """
-    #     self.oper = sorted([item.name for item in DbOperation.uniqueData()])
-    #     self.area = sorted([item.name for item in DbArea.uniqueData()])
-    #     self.work = sorted([item.name for item in DbWorkplace.uniqueData()])
-    #     self.prof = sorted([item.name for item in DbProfession.uniqueData()])
-    #     self.kind = sorted([item.name_short for item in DbProductKind.uniqueData()])
-
     @key_error
     def cbChanged(self):
-        """ Реакция на изменение комбобокса в таблице """
+        """ Реакция на изменение данных комбобокса в таблице """
 
         row = self.table.currentRow()
         id_operation_def = self.table.item(row, 0).text()
@@ -1626,21 +1560,19 @@ class FrameAdminOperationsDef(FrameAdminDef):
         """ Инициализация данных по умолчанию """
 
         self.getDefaultData()
-        self.getDefaultItems()
         for row, db_item in enumerate(self.data):
             self.initNewRow(row=row, db_item=db_item)
             self.initFlags(row=row)
-        # self.table.setSortingEnabled(True)
         self.table.resizeColumnsToContents()
         self.table.setColumnHidden(0, True)
 
     def initFlags(self, row):
-        """  """
+        """ Установка флагов для элементов таблицы """
 
         self.table.item(row, 0).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
     def delItem(self, id_item):
-        """  """
+        """ Удаление данных приведенных в таблице из БД """
 
         DbOperationDef.delOperationDef(id_operation_def=id_item)
         del_record_dialog()
@@ -1665,13 +1597,11 @@ class FrameAdminTTPErr(FrameAdmin):
                                 )
         self.start_rows = 0
         self.start_cols = len(self.header_settings)
-        # self.table.setSortingEnabled(True)
 
     def initDelegateSettings(self) -> None:
         """ Назначение делегата для определенных столбцов таблицы """
 
         self.delegate_sentence = DelegateComboBoxTTP()
-        # self.delegate_sentence.itemChanged.connect(self.itemChanged)
         self.table.setItemDelegateForColumn(2, self.delegate_sentence)
 
     def addRow(self):
@@ -1719,8 +1649,6 @@ class FrameAdminTTPErr(FrameAdmin):
             self.table.item(num, 2).setText(ttp_doc)
         self.table.blockSignals(False)
         self.table.resizeRowsToContents()
-        # self.table.resizeColumnsToContents()
-        # self.table.setColumnHidden(0, True)
 
     def updTable(self):
         """ Удаление данных и загрузка данных по умолчанию """
@@ -1756,7 +1684,6 @@ class FrameAdminPrimaryProduct(FrameAdmin):
         super(FrameAdminPrimaryProduct, self).__init__(frame_name=frame_name,
                                                        load_default=False)
         self.table.itemChanged.connect(self.itemChanged)
-        # self.initDelegateSettings()
 
     def initTableSettings(self) -> None:
         """ Начальные параметры таблицы """
@@ -1825,17 +1752,6 @@ class FrameAdminPrimaryProduct(FrameAdmin):
                            f'{parent.name} {parent.deno}')
 
 
-
-            # row = item.row()
-            # db_document_real = self.delegate_sentence.db_documents_real.get(item.text(), None)
-            # if db_document_real is not None:
-            #     deno = self.table.item(row, 1).text()
-            #     self.product_builder.getDbProductByDenotation(deno=deno)
-            #     product = self.product_builder.product
-            #     product.updKttp(documents=[db_document_real])
-            # self.newItem.emit()
-
-
 class FrameAdminProduct(FrameAdmin):
     """ Родительский класс рамок для покупных и изготавливаемых изделий """
 
@@ -1854,13 +1770,11 @@ class FrameAdminProduct(FrameAdmin):
                                 )
         self.start_rows = 0
         self.start_cols = len(self.header_settings)
-        # self.table.setSortingEnabled(True)
 
     def initDelegateSettings(self) -> None:
         """ Назначение делегата для определенных столбцов таблицы """
 
         self.delegate_sentence = DelegateComboBoxPKI()
-        # self.delegate_sentence.itemChanged.connect(self.itemChanged)
         self.table.setItemDelegateForColumn(2, self.delegate_sentence)
 
     def addRow(self):
@@ -1896,7 +1810,6 @@ class FrameAdminProduct(FrameAdmin):
         self.table.blockSignals(False)
         self.table.resizeRowsToContents()
         self.table.resizeColumnsToContents()
-        # self.table.setColumnHidden(0, True)
 
     def setRowData(self, db_product, row):
         """  """
