@@ -1,60 +1,63 @@
-"""  """
+""" Рамки с таблицами данных по умолчанию
+    для создания маршрутных карт """
 
+# pylint: disable=too-many-lines
+
+from PyQt5.QtCore import QPoint
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtCore import QPoint
 from PyQt5.QtWidgets import QTableWidgetItem
-from PyQt5.QtWidgets import QComboBox
+
+from STC.database.database import DbArea
+from STC.database.database import DbDocDef
+from STC.database.database import DbDocument
+from STC.database.database import DbDocumentType
+from STC.database.database import DbEquipment
+from STC.database.database import DbEquipmentDef
+from STC.database.database import DbIOT
+from STC.database.database import DbIOTDef
+from STC.database.database import DbMaterial
+from STC.database.database import DbMaterialDef
+from STC.database.database import DbOperation
+from STC.database.database import DbOperationDef
+from STC.database.database import DbPrimaryApplication
+from STC.database.database import DbProduct
+from STC.database.database import DbProductKind
+from STC.database.database import DbProfession
+from STC.database.database import DbRig
+from STC.database.database import DbRigDef
+from STC.database.database import DbSentence
+from STC.database.database import DbSetting
+from STC.database.database import DbSettingDef
+from STC.database.database import DbWorkplace
+from STC.functions.func import deno_to_components
+from STC.gui.splash_screen import SplashScreen
 from STC.gui.splash_screen import show_dialog
 from STC.gui.windows.ancestors.frame import FrameWithTable
 from STC.gui.windows.config.context_menu import ContextMenuForFrameAdminDef
-from STC.database.database import DbProduct
-from STC.database.database import DbDocument
-from STC.database.database import DbOperation
-from STC.database.database import DbOperationDef
-from STC.database.database import DbSetting
-from STC.database.database import DbSettingDef
-from STC.database.database import DbSentence
-from STC.database.database import DbArea
-from STC.database.database import DbWorkplace
-from STC.database.database import DbIOT
-from STC.gui.windows.document_generator.combobox import ComboBoxIotByName
-from STC.database.database import DbIOTDef
-from STC.database.database import DbMaterial
-from STC.gui.windows.document_generator.combobox import ComboBoxMatByName
-from STC.database.database import DbMaterialDef
-from STC.database.database import DbRig
-from STC.gui.windows.document_generator.combobox import ComboBoxRigByName
-from STC.database.database import DbRigDef
-from STC.database.database import DbEquipment
-from STC.gui.windows.document_generator.combobox import ComboBoxEquipmentByName
-from STC.database.database import DbEquipmentDef
-from STC.database.database import DbDocumentType
-from STC.database.database import DbDocDef
-from STC.database.database import DbProfession
-from STC.database.database import DbProductKind
-from STC.database.database import DbPrimaryApplication
-from STC.gui.windows.config.delegate import DelegatePlainText
 from STC.gui.windows.config.delegate import DelegateComboBox
-from STC.gui.windows.config.delegate import DelegateComboBoxRig
+from STC.gui.windows.config.delegate import DelegateComboBoxArea
+from STC.gui.windows.config.delegate import DelegateComboBoxDoc
+from STC.gui.windows.config.delegate import DelegateComboBoxEqt
 from STC.gui.windows.config.delegate import DelegateComboBoxIOT
 from STC.gui.windows.config.delegate import DelegateComboBoxMat
-from STC.gui.windows.config.delegate import DelegateComboBoxEqt
-from STC.gui.windows.config.delegate import DelegateComboBoxSettings
-from STC.gui.windows.config.delegate import DelegateComboBoxSentences
-from STC.gui.windows.config.delegate import DelegateComboBoxOrder
 from STC.gui.windows.config.delegate import DelegateComboBoxOperations
-from STC.gui.windows.config.delegate import DelegateComboBoxArea
-from STC.gui.windows.config.delegate import DelegateComboBoxWorkplace
-from STC.gui.windows.config.delegate import DelegateComboBoxProfession
-from STC.gui.windows.config.delegate import DelegateComboBoxProductKind
-from STC.gui.windows.config.delegate import DelegateComboBoxDoc
-from STC.gui.windows.config.delegate import DelegateComboBoxTTP
+from STC.gui.windows.config.delegate import DelegateComboBoxOrder
 from STC.gui.windows.config.delegate import DelegateComboBoxPKI
-from STC.product.product import ProductBuilder
+from STC.gui.windows.config.delegate import DelegateComboBoxProductKind
+from STC.gui.windows.config.delegate import DelegateComboBoxProfession
+from STC.gui.windows.config.delegate import DelegateComboBoxRig
+from STC.gui.windows.config.delegate import DelegateComboBoxSentences
+from STC.gui.windows.config.delegate import DelegateComboBoxSettings
+from STC.gui.windows.config.delegate import DelegateComboBoxTTP
+from STC.gui.windows.config.delegate import DelegateComboBoxWorkplace
+from STC.gui.windows.config.delegate import DelegatePlainText
+from STC.gui.windows.document_generator.combobox import ComboBoxEquipmentByName
+from STC.gui.windows.document_generator.combobox import ComboBoxIotByName
+from STC.gui.windows.document_generator.combobox import ComboBoxMatByName
+from STC.gui.windows.document_generator.combobox import ComboBoxRigByName
 from STC.product.product import DocumentBuilder
-from STC.gui.splash_screen import SplashScreen
-from STC.functions.func import deno_to_components
+from STC.product.product import ProductBuilder
 
 
 def upd_record_dialog():
@@ -75,14 +78,15 @@ def del_record_dialog():
     show_dialog('Данные удалены')
 
 
-def key_error(f):
-    """  """
+def key_error(func):
+    """ Сообщение при вводе некорректных данных """
 
     def wrapper(*args, **kw):
         try:
-            return f(*args, **kw)
+            return func(*args, **kw)
         except KeyError:
             show_dialog('Попытка ввести данные, которых нет в списке.', 'ERROR')
+            return None
     return wrapper
 
 
@@ -262,8 +266,8 @@ class FrameAdminSentence(FrameAdmin):
             row = item.row()
             id_sentence = self.table.item(row, 0).text()
             if id_sentence == self.__class__.new:
-                if item.text() in DbSentence.data.keys():
-                    show_dialog(f'Переход с введенным текстом уже существует')
+                if item.text() in DbSentence.data:
+                    show_dialog('Переход с введенным текстом уже существует')
                 else:
                     db_sentence = DbSentence.addNewSentence(text=item.text())
                     self.table.item(row, 0).setText(str(db_sentence.id_sentence))
@@ -518,7 +522,7 @@ class FrameAdminIOT(FrameAdmin):
             type_long = self.table.item(row, 5).text()
             if type_short and name_short and deno and name and type_long:
                 if id_iot == self.__class__.new:
-                    db_iot = DbIOT.addNewIOT(type=type_long,
+                    db_iot = DbIOT.addNewIOT(type_name=type_long,
                                              type_short=type_short,
                                              deno=deno,
                                              name=name,
@@ -527,7 +531,7 @@ class FrameAdminIOT(FrameAdmin):
                     new_record_dialog()
                 else:
                     DbIOT.updIOT(id_iot=int(id_iot),
-                                 type=type_long,
+                                 type_name=type_long,
                                  type_short=type_short,
                                  deno=deno,
                                  name=name,
@@ -603,7 +607,7 @@ class FrameAdminDoc(FrameAdmin):
             subtype_name = self.table.item(row, 4).text()
             sign = self.table.item(row, 5).text()
             description = self.table.item(row, 6).text()
-            if id_type and class_name and subclass_name and type_name and subtype_name and sign:
+            if None not in (id_type, class_name, subclass_name, type_name, subtype_name, sign):
                 if id_type == self.__class__.new:
                     db_type = DbDocumentType.addNewDocumentType(class_name=class_name,
                                                                 subclass_name=subclass_name,
@@ -838,21 +842,21 @@ class FrameAdminEqt(FrameAdmin):
         if item.text() and item.column() != 0:
             row = item.row()
             id_equipment = self.table.item(row, 0).text()
-            type = self.table.item(row, 1).text()
+            type_name = self.table.item(row, 1).text()
             name = self.table.item(row, 2).text()
             name_short = self.table.item(row, 3).text()
-            if type and name and name_short:
+            if type_name and name and name_short:
                 if id_equipment == self.__class__.new:
                     db_equipment = DbEquipment.addNewEquipment(name=name,
                                                                name_short=name_short,
-                                                               type_name=type)
+                                                               type_name=type_name)
                     self.table.item(row, 0).setText(str(db_equipment.id_equipment))
                     new_record_dialog()
                 else:
                     DbEquipment.updEquipment(id_equipment=int(id_equipment),
                                              name=name,
                                              name_short=name_short,
-                                             type_name=type)
+                                             type_name=type_name)
                     upd_record_dialog()
                 ComboBoxEquipmentByName.updItemDictCls()
                 self.newItem.emit()
@@ -863,6 +867,8 @@ class FrameAdminDef(FrameAdmin):
         отношений двух сущностей типа переход -> свойство """
 
     def __init__(self, frame_name: str = 'Frame name', header: str = 'Наименование') -> None:
+        self.data = []
+        self.sentence = []
         self.header = header
         super().__init__(frame_name=frame_name)
         self.initDelegateSettings()
@@ -942,18 +948,7 @@ class FrameAdminDef(FrameAdmin):
             self.addData(row=row, id_item=id_item, item=item, sentence=sentence)
 
     def addData(self, row: int, id_item: str, item: str, sentence: str):
-        """  """
-
-        pass
-
-    def getText(self, source: dict, item: str, item_name: str) -> str:
-        """  """
-
-        if item in source.keys():
-            return source[item]
-        else:
-            show_dialog(f'Не найден: {item}')
-            return ""
+        """ Добавление новых данных в БД """
 
     def deleteRow(self) -> None:
         """ Удаление строки таблицы """
@@ -967,7 +962,7 @@ class FrameAdminDef(FrameAdmin):
     def delItem(self, id_item):
         """ Удаление данных приведенных в таблице из БД """
 
-        show_dialog(text='Удаление данных из данной таблицы не поддерживается')
+        show_dialog(text=f'Удаление данных из данной таблицы не поддерживается. id_item={id_item}')
 
 
 class FrameAdminIOTDef(FrameAdminDef):
@@ -993,7 +988,7 @@ class FrameAdminIOTDef(FrameAdminDef):
 
     @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
-        """  """
+        """ Добавление новых данных в БД """
 
         id_iot = DbIOT.data[item].id_iot
         id_sentence = DbSentence.data[sentence].id_sentence
@@ -1048,7 +1043,7 @@ class FrameAdminMatDef(FrameAdminDef):
 
     @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
-        """  """
+        """ Добавление новых данных в БД """
 
         id_material = DbMaterial.data[item].id_material
         id_sentence = DbSentence.data[sentence].id_sentence
@@ -1103,7 +1098,7 @@ class FrameAdminRigDef(FrameAdminDef):
 
     @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
-        """  """
+        """ Добавление новых данных в БД """
 
         id_rig = DbRig.data[item].id_rig
         id_sentence = DbSentence.data[sentence].id_sentence
@@ -1157,7 +1152,7 @@ class FrameAdminEqtDef(FrameAdminDef):
 
     @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
-        """  """
+        """ Добавление новых данных в БД """
 
         id_equipment = DbEquipment.data[item].id_equipment
         id_sentence = DbSentence.data[sentence].id_sentence
@@ -1211,7 +1206,7 @@ class FrameAdminDocDef(FrameAdminDef):
 
     @key_error
     def addData(self, row: int, id_item: str, item: str, sentence: str):
-        """  """
+        """ Добавление новых данных в БД """
 
         id_type = DbDocumentType.data[('КД', item)].id_type
         id_sentence = DbSentence.data[sentence].id_sentence
@@ -1322,9 +1317,10 @@ class FrameAdminSettingsDef(FrameAdminDef):
             id_setting = DbSetting.data[(operation, setting)].id_setting
             id_sentence = DbSentence.data[sentence].id_sentence
             if id_setting_def == self.__class__.new:
-                db_setting_def = DbSettingDef.addNewSettingDef(id_setting=int(id_setting),
-                                                               id_sentence=int(id_sentence),
-                                                               sentence_order=int(sentence_order) - 1)
+                db_setting_def = DbSettingDef.addNewSettingDef(
+                    id_setting=int(id_setting),
+                    id_sentence=int(id_sentence),
+                    sentence_order=int(sentence_order) - 1)
                 self.table.item(row, 0).setText(str(db_setting_def.id_setting_def))
                 new_record_dialog()
             else:
@@ -1539,11 +1535,12 @@ class FrameAdminOperationsDef(FrameAdminDef):
             id_profession = DbProfession.data[profession].id_profession
             id_kind = DbProductKind.data[kind].id_kind
             if id_operation_def == self.__class__.new:
-                db_operation_def = DbOperationDef.addNewOperationDef(id_operation=int(id_operation),
-                                                                     id_area=int(id_area),
-                                                                     id_workplace=int(id_workplace),
-                                                                     id_profession=int(id_profession),
-                                                                     id_kind=int(id_kind))
+                db_operation_def = DbOperationDef.addNewOperationDef(
+                    id_operation=int(id_operation),
+                    id_area=int(id_area),
+                    id_workplace=int(id_workplace),
+                    id_profession=int(id_profession),
+                    id_kind=int(id_kind))
                 self.table.item(row, 0).setText(str(db_operation_def.id_operation_def))
                 new_record_dialog()
             else:
@@ -1582,8 +1579,8 @@ class FrameAdminTTPErr(FrameAdmin):
         более 1 типового технологического процесса """
 
     def __init__(self, frame_name):
-        super(FrameAdminTTPErr, self).__init__(frame_name=frame_name,
-                                               load_default=False)
+        super().__init__(frame_name=frame_name,
+                         load_default=False)
         self.table.itemChanged.connect(self.itemChanged)
         self.initDelegateSettings()
 
@@ -1637,11 +1634,12 @@ class FrameAdminTTPErr(FrameAdmin):
                 self.document_builder.setDbDocument(db_document)
                 document = self.document_builder.document
                 product.documents.add(document)
-            ttp_doc = product.getDocumentByType(class_name='ТД',
-                                                subtype_name='Карта типового (группового) технологического процесса',
-                                                setting='deno',
-                                                org_code='2',
-                                                only_relevant=True)
+            ttp_doc = product.getDocumentByType(
+                class_name='ТД',
+                subtype_name='Карта типового (группового) технологического процесса',
+                setting='deno',
+                org_code='2',
+                only_relevant=True)
             self.addNewRow()
             self.table.item(num, 0).setText(product.name)
             self.table.item(num, 1).setText(product.deno)
@@ -1680,8 +1678,8 @@ class FrameAdminPrimaryProduct(FrameAdmin):
         не указана первичная применяемость """
 
     def __init__(self, frame_name):
-        super(FrameAdminPrimaryProduct, self).__init__(frame_name=frame_name,
-                                                       load_default=False)
+        super().__init__(frame_name=frame_name,
+                         load_default=False)
         self.table.itemChanged.connect(self.itemChanged)
 
     def initTableSettings(self) -> None:
@@ -1735,9 +1733,9 @@ class FrameAdminPrimaryProduct(FrameAdmin):
         if item.text() and item.column() == 2:
 
             deno = item.text()
-            code_org, code_class, num, ver = deno_to_components(deno)
+            code_org = deno_to_components(deno)[0]
             if code_org is None:
-                show_dialog(f'Неправильный формат децимального номера')
+                show_dialog('Неправильный формат децимального номера')
             else:
                 row = item.row()
                 self.product_builder.getDbProductByDenotation(deno=self.table.item(row, 1).text())
@@ -1755,8 +1753,8 @@ class FrameAdminProduct(FrameAdmin):
     """ Родительский класс рамок для покупных и изготавливаемых изделий """
 
     def __init__(self, frame_name):
-        super(FrameAdminProduct, self).__init__(frame_name=frame_name,
-                                                load_default=False)
+        super().__init__(frame_name=frame_name,
+                         load_default=False)
         self.table.itemChanged.connect(self.itemChanged)
         self.initDelegateSettings()
 
@@ -1811,7 +1809,7 @@ class FrameAdminProduct(FrameAdmin):
         self.table.resizeColumnsToContents()
 
     def setRowData(self, db_product, row):
-        """  """
+        """ Заполняет строку таблицы данными из БД """
 
         self.table.item(row, 0).setText(str(db_product.name))
         if db_product.name != db_product.deno:
@@ -1819,9 +1817,9 @@ class FrameAdminProduct(FrameAdmin):
         self.table.item(row, 2).setText(str(db_product.purchased))
 
     def getProductToTable(self, db_product: DbProduct) -> bool:
-        """  """
+        """ Соответствует ли изделие критериям для добавления в таблицу """
 
-        return True if db_product.purchased is not None else False
+        return db_product.purchased is not None
 
     def updTable(self):
         """ Удаление данных и загрузка данных по умолчанию """
@@ -1852,12 +1850,12 @@ class FrameAdminProductPKI(FrameAdminProduct):
         возможностью изменения типа изготовления """
 
     def __init__(self, frame_name) -> None:
-        super(FrameAdminProductPKI, self).__init__(frame_name=frame_name)
+        super().__init__(frame_name=frame_name)
 
     def getProductToTable(self, db_product: DbProduct) -> bool:
-        """  """
+        """ Соответствует ли изделие критериям для добавления в таблицу """
 
-        return False if db_product.purchased in [None, 0] else True
+        return not db_product.purchased in [None, 0]
 
 
 class FrameAdminProductSTC(FrameAdminProduct):
@@ -1865,9 +1863,9 @@ class FrameAdminProductSTC(FrameAdminProduct):
         возможностью изменения типа изготовления """
 
     def __init__(self, frame_name) -> None:
-        super(FrameAdminProductSTC, self).__init__(frame_name=frame_name)
+        super().__init__(frame_name=frame_name)
 
     def getProductToTable(self, db_product: DbProduct) -> bool:
-        """  """
+        """ Соответствует ли изделие критериям для добавления в таблицу """
 
-        return True if db_product.purchased in [None, 0] else False
+        return db_product.purchased in [None, 0]

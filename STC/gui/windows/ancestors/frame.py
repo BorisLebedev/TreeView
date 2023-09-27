@@ -12,6 +12,7 @@ class FrameBasic(QFrame):
 
     def __init__(self, frame_name: str | None = None) -> None:
         super().__init__()
+        self.context_menu = None
         self.name = frame_name
         self.setFrameSettings()
         self.setLayout(self.main_layout)
