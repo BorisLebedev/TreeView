@@ -3596,6 +3596,7 @@ class DbMaterialDef(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -3719,6 +3720,7 @@ class DbMaterialDoc(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -3959,6 +3961,7 @@ class DbRigDef(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -4077,6 +4080,7 @@ class DbRigDoc(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -4297,6 +4301,7 @@ class DbEquipmentDef(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -4422,6 +4427,7 @@ class DbEquipmentDoc(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -4662,6 +4668,7 @@ class DbIOTDef(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -4784,6 +4791,7 @@ class DbIOTDoc(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -4888,6 +4896,7 @@ class DbDocDef(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -5012,6 +5021,7 @@ class DbDocDoc(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
@@ -5219,6 +5229,7 @@ class DbOperationDef(Base):
         """ Возвращает список уникальных экземпляров класса из
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
+        cls.updCheck()
         return cls.items.values()
 
     @classmethod
