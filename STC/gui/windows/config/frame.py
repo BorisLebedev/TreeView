@@ -97,7 +97,7 @@ class FrameAdmin(FrameWithTable):
     newItem = pyqtSignal()
     new = '+'
 
-    def __init__(self, frame_name, load_default: bool=True) -> None:
+    def __init__(self, frame_name, load_default: bool = True) -> None:
         super().__init__(frame_name=frame_name)
         if load_default:
             self.initDefaultData()
@@ -1020,7 +1020,6 @@ class FrameAdminIOTDef(FrameAdminDef):
 class FrameAdminMatDef(FrameAdminDef):
     """ Рамка с таблицей связей материалов и переходов """
 
-
     def __init__(self, frame_name: str = 'Frame name') -> None:
         """  """
 
@@ -1074,7 +1073,6 @@ class FrameAdminMatDef(FrameAdminDef):
 
 class FrameAdminRigDef(FrameAdminDef):
     """ Рамка с таблицей связей оснастки и переходов """
-
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         """  """
@@ -1238,7 +1236,6 @@ class FrameAdminDocDef(FrameAdminDef):
 class FrameAdminSettingsDef(FrameAdminDef):
     """ Рамка с таблицей какие переходы соответствуют
         определенному свойству операции """
-
 
     def __init__(self, frame_name: str = 'Frame name') -> None:
         """  """
@@ -1692,7 +1689,6 @@ class FrameAdminPrimaryProduct(FrameAdmin):
         self.start_rows = 0
         self.start_cols = len(self.header_settings)
 
-
     def initDefaultData(self) -> None:
         """ Инициализация данных по умолчанию """
 
@@ -1745,8 +1741,8 @@ class FrameAdminPrimaryProduct(FrameAdmin):
                 DbPrimaryApplication.addDbPrimaryApplication(parent=parent,
                                                              child=child)
                 show_dialog(f'{child.name} {child.deno }\n'
-                           f'теперь первично применяется в \n'
-                           f'{parent.name} {parent.deno}')
+                            f'теперь первично применяется в \n'
+                            f'{parent.name} {parent.deno}')
 
 
 class FrameAdminProduct(FrameAdmin):
@@ -1855,7 +1851,7 @@ class FrameAdminProductPKI(FrameAdminProduct):
     def getProductToTable(self, db_product: DbProduct) -> bool:
         """ Соответствует ли изделие критериям для добавления в таблицу """
 
-        return not db_product.purchased in [None, 0]
+        return db_product.purchased not in [None, 0]
 
 
 class FrameAdminProductSTC(FrameAdminProduct):
