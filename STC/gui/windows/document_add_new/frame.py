@@ -1,4 +1,4 @@
-"""  """
+""" Модуль с рамками, которые использует окно ввода нового документа """
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
@@ -28,6 +28,9 @@ if TYPE_CHECKING:
 
 class NewDocumentMainFrame(FrameBasic):
     """ Рамка для основных реквизитов документа """
+
+    # pylint: disable = too-many-instance-attributes
+    # pylint: disable = too-many-public-methods
 
     findDocument = pyqtSignal()
     changeDocument = pyqtSignal()
@@ -321,7 +324,7 @@ class NewDocumentMainFrame(FrameBasic):
     @property
     def method_codes(self) -> dict[str, str]:
         """ Возвращает словарь наименований методов изготовления и
-            кода дециального номера, который ему соответствует """
+            кода децимального номера, который ему соответствует """
 
         if not self._method_codes:
             for method_name, code in CONFIG.data['document_method'].items():
@@ -562,7 +565,6 @@ class NewDocumentMainFrame(FrameBasic):
 class NewDocumentSpecProducts(FrameWithTable):
     """ Родительский класс для изделий входящих в спецификацию """
 
-
     def __init__(self, frame_name) -> None:
         super().__init__(frame_name=frame_name)
         self.addNewRow()
@@ -572,12 +574,15 @@ class NewDocumentSpecProducts(FrameWithTable):
 
     def showContextMenu(self, point: QPoint) -> None:
         """ Вызов контекстного меню """
+        # pylint: disable = attribute-defined-outside-init
+        # self.context_menu определено в super().init()
 
         self.context_menu = ContextMenuForSpecProductsTable(self)
         qpoint = self.sender().mapToGlobal(point)
         self.context_menu.exec_(qpoint)
 
-    def comboboxType(self) -> QComboBox:
+    @staticmethod
+    def comboboxType() -> QComboBox:
         """ Комбобокс с типами изделий по спецификации """
 
         combobox = QComboBox()
@@ -585,14 +590,16 @@ class NewDocumentSpecProducts(FrameWithTable):
         combobox.setCurrentText(CONFIG.data['product_settings']['default_type'])
         return combobox
 
-    def comboboxUnit(self) -> QComboBox:
+    @staticmethod
+    def comboboxUnit() -> QComboBox:
         """ Комбобокс с видами единиц измерения """
 
         combobox = QComboBox()
         combobox.addItems(CONFIG.data['product_settings']['units'].replace(' ', '').split(','))
         return combobox
 
-    def comboboxCode(self) -> QComboBox:
+    @staticmethod
+    def comboboxCode() -> QComboBox:
         """ Комбобокс с кодами децимальных номеров различных производителей """
 
         combobox = QComboBox()
@@ -775,6 +782,8 @@ class NewDocumentDocumentTypes(FrameWithTable):
     """ Рамка для документов входящих в спецификацию """
 
     def __init__(self) -> None:
+        self.db_types = []
+        self.cb_items = []
         super().__init__(frame_name='Документы')
         self.addNewRow()
 
@@ -786,7 +795,7 @@ class NewDocumentDocumentTypes(FrameWithTable):
         self.start_rows = 0
         self.start_cols = 2
         self.db_types = DocumentType.getAllTypes()
-        self.cb_items = sorted(list(set([db_type.sign for db_type in self.db_types])))
+        self.cb_items = sorted(list(set(db_type.sign for db_type in self.db_types)))
 
     def combobox(self) -> QComboBox:
         """ Комбобокс с кодами видов документов """
