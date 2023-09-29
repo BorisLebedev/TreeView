@@ -1,9 +1,8 @@
+""" Стартовое окно """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from STC.database.database import DbProduct
 
 import logging
 
@@ -14,9 +13,13 @@ from PyQt5.QtWidgets import QPushButton
 
 from STC.gui.windows.ancestors.window import WindowBasic
 
+if TYPE_CHECKING:
+    from STC.database.database import DbProduct
 
-# Окно выбора изделия и методов обновления данных бд по сторонним источникам
+
 class WindowProductSelector(WindowBasic):
+    """ Окно выбора изделия и методов обновления данных бд по сторонним источникам """
+
     showMainTable = pyqtSignal()
     syncWithExcel = pyqtSignal()
     syncWithExcelTdDb = pyqtSignal()
@@ -29,11 +32,13 @@ class WindowProductSelector(WindowBasic):
         super().__init__()
         self.reverse = False
         self.product_data = product_data
-        self.InitUI()
+        self.initUI()
         self.widgets()
         self.initDefaultValues()
 
-    def InitUI(self) -> None:
+    def initUI(self) -> None:
+        """ Установка параметров окна выбора изделия """
+
         logging.info('Установка параметров окна выбора изделия')
         self.title = "Параметры новой таблицы"
         self.basic_layout.itemAt(0).widget().layout.itemAt(0).widget().setText(self.title)
@@ -43,6 +48,8 @@ class WindowProductSelector(WindowBasic):
         self.setMinimumSize(300, 400)
 
     def initDefaultValues(self) -> None:
+        """ Определяет начальные значения виджетов окна """
+
         self.itemsDeno()
         self.cb_deno.setCurrentText("")
         self.itemsName()
@@ -50,11 +57,16 @@ class WindowProductSelector(WindowBasic):
         self.cb_name.setFocus()
 
     def itemsDeno(self) -> None:
+        """ Определяет реакцию на изменение текста в
+            виджете для наименованиея изделия.
+            Формирует выпадающий список децимальных номеров изделий,
+            у которых наименование содержит в себе текст
+            из виджета для наименования изделия """
+
         self.cb_deno.blockSignals(True)
         self.cb_deno.clear()
         completer_list = []
         self.cb_deno.clear()
-        logging.info(f'Поиск децимальных номеров к изделю с названием, содержащим {self.cb_name.currentText()}')
         for product in self.product_data:
             if self.cb_name.currentText() in product['name']:
                 completer_list.append(product['denotation'])
@@ -62,14 +74,18 @@ class WindowProductSelector(WindowBasic):
         if self.cb_name.currentText() == '':
             self.cb_deno.setCurrentText("")
         self.cb_deno.blockSignals(False)
-        logging.info(f'Найдено децимальных номеров {len(completer_list)}')
 
     def itemsName(self) -> None:
+        """ Определяет реакцию на изменение текста в
+            виджете для децимального номера.
+            Формирует выпадающий список наименований изделий,
+            у которых децимальный номер содержит в себе текст
+            из виджета для децимального номера """
+
         self.cb_name.blockSignals(True)
         self.cb_name.clear()
         completer_list = []
         self.cb_name.clear()
-        logging.info(f'Поиск наименований изделий с децимальным номером, содержащим {self.cb_deno.currentText()}')
         for product in self.product_data:
             if self.cb_deno.currentText() in product['denotation']:
                 completer_list.append(product['name'])
@@ -77,9 +93,10 @@ class WindowProductSelector(WindowBasic):
         if self.cb_deno.currentText() == '':
             self.cb_name.setCurrentText("")
         self.cb_name.blockSignals(False)
-        logging.info(f'Найдено наименований {len(completer_list)}')
 
     def widgets(self) -> None:
+        """ Инициализация виджетов и их расположения """
+
         logging.info('Инициализация виджетов окна выбора изделия')
 
         label_deno = QLabel()
@@ -142,5 +159,8 @@ class WindowProductSelector(WindowBasic):
         self.main_layout.addWidget(button_admin, 10, 0)
 
     def showMainTableReversed(self):
+        """ Сингал, определяющий ориентацию построения
+            иерархического древа изделия """
+
         self.reverse = True
         self.showMainTable.emit()
