@@ -1,14 +1,11 @@
+"""  """
+
 from __future__ import annotations
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from STC.product.product import Product
-    from STC.product.product import DocumentType
 
 import logging
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QPoint
-from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QPushButton
@@ -25,9 +22,13 @@ from STC.product.product import DocumentStage
 from STC.functions.func import join_deno
 from STC.gui.windows.ancestors.context_menu import ContextMenuForSpecProductsTable
 
+if TYPE_CHECKING:
+    from STC.product.product import Product
 
-# Рамка для основных реквизитов документа
+
 class NewDocumentMainFrame(FrameBasic):
+    """ Рамка для основных реквизитов документа """
+
     findDocument = pyqtSignal()
     changeDocument = pyqtSignal()
 
@@ -40,16 +41,21 @@ class NewDocumentMainFrame(FrameBasic):
         self._complex_list = []
         self._db_types = DocumentType.documentTypes()
         self.default_stage = 'Доступен для регистрации'
-        self._stages = [db_stage.stage for db_stage in DocumentStage.getAllStages()] + [self.default_stage]
+        self._stages = \
+            [db_stage.stage for db_stage in DocumentStage.getAllStages()] + [self.default_stage]
         self.d_type = None
         self._sep = ': '
-        self._def_kd_type = return_document_type(class_name='КД', subtype_name='Спецификация')
-        self._def_td_type = return_document_type(class_name='ТД', subtype_name='Маршрутная карта')
+        self._def_kd_type = return_document_type(class_name='КД',
+                                                 subtype_name='Спецификация')
+        self._def_td_type = return_document_type(class_name='ТД',
+                                                 subtype_name='Маршрутная карта')
         self.initWidgetLabel()
         self.initWidgetLineEdit()
         self.initWidgetCombobox()
         self.initWidgetButton()
-        visibility_settings_td = {'КД': False, 'ТД': True, 'PLM': False}
+        visibility_settings_td = {'КД': False,
+                                  'ТД': True,
+                                  'PLM': False}
         self.visibility = {self._l_doc_org: visibility_settings_td,
                            self._l_doc_method: visibility_settings_td,
                            self._l_doc_dep: visibility_settings_td,
@@ -66,6 +72,8 @@ class NewDocumentMainFrame(FrameBasic):
         self.initWidgetPosition()
 
     def initWidgetLabel(self) -> None:
+        """ Инициализация QLabel """
+
         self._l_doc_class = QLabel('Тип документации')
         self._l_doc_subclass = QLabel('Тип документа')
         self._l_doc_type = QLabel('Подтип документа')
@@ -91,6 +99,8 @@ class NewDocumentMainFrame(FrameBasic):
         self._l_doc_complex = QLabel('Изготавливается совместно с')  # ТД
 
     def initWidgetLineEdit(self) -> None:
+        """ Инициализация QLineEdit """
+
         self._product_name = QLineEdit()
         self._product_deno = QLineEdit()
         self._doc_name = QLineEdit()
@@ -102,6 +112,8 @@ class NewDocumentMainFrame(FrameBasic):
         self._doc_complex.setReadOnly(True)
 
     def initWidgetCombobox(self) -> None:
+        """ Инициализация QComboBox """
+
         self._doc_class = QComboBox()
         self._doc_subclass = QComboBox()
         self._doc_type = QComboBox()
@@ -116,10 +128,14 @@ class NewDocumentMainFrame(FrameBasic):
         self._doc_deno.currentTextChanged.connect(self.changeDocument)
 
     def initWidgetButton(self) -> None:
+        """ Кнопка вызова рамки с изделиями в составных документах """
+
         self._btn_doc_complex = QPushButton()
         self._btn_doc_complex.setIcon(CONFIG.style.arrow_right)
 
     def initWidgetPosition(self) -> None:
+        """ Расположение виджетов в рамке """
+
         cbs = {self._l_doc_class: self._doc_class,
                self._l_doc_subclass: self._doc_subclass,
                self._l_doc_type: self._doc_type,
@@ -135,7 +151,7 @@ class NewDocumentMainFrame(FrameBasic):
                self._l_product_papp: self._product_papp,
                self._l_doc_dev: self._doc_dev,
                self._l_doc_update: self._doc_update,
-               self._l_doc_complex: (self._doc_complex, self._btn_doc_complex)
+               self._l_doc_complex: self._doc_complex,
                }
         row = 0
         for row, label in enumerate(cbs.keys()):
@@ -149,6 +165,8 @@ class NewDocumentMainFrame(FrameBasic):
         self.main_layout.setColumnStretch(1, 1)
 
     def initWidgetComboboxDefault(self) -> None:
+        """ Данные для комбобоксов  """
+
         self._doc_org.addItems(self.organization_codes.keys())
         self._doc_method.addItems(self.method_codes.keys())
         self._doc_dep.addItems(self.department_codes.keys())
@@ -157,16 +175,28 @@ class NewDocumentMainFrame(FrameBasic):
         self._doc_pages.addItems([str(num) for num in range(100)])
 
     def initWidgetComboboxConnection(self) -> None:
-        # self._doc_class.currentIndexChanged.connect(self.generateHierarchy)
-        self._doc_class.currentIndexChanged.connect(lambda: self.modifyComboboxValues(attr='subclass'))
-        self._doc_subclass.currentIndexChanged.connect(lambda: self.modifyComboboxValues(attr='type'))
-        self._doc_type.currentIndexChanged.connect(lambda: self.modifyComboboxValues(attr='subtype'))
-        self._doc_subtype.currentIndexChanged.connect(lambda: self.modifyComboboxValues(attr='document'))
-        self._doc_org.currentIndexChanged.connect(lambda: self.modifyComboboxValues(attr='document'))
-        self._doc_method.currentIndexChanged.connect(lambda: self.modifyComboboxValues(attr='document'))
-        self._doc_dep.currentIndexChanged.connect(lambda: self.modifyComboboxValues(attr='document'))
+        """ Реакции на изменения значения комбобоксов
+            выбора типа документа """
+
+        self._doc_class.currentIndexChanged.connect(
+            lambda: self.modifyComboboxValues(attr='subclass'))
+        self._doc_subclass.currentIndexChanged.connect(
+            lambda: self.modifyComboboxValues(attr='type'))
+        self._doc_type.currentIndexChanged.connect(
+            lambda: self.modifyComboboxValues(attr='subtype'))
+        self._doc_subtype.currentIndexChanged.connect(
+            lambda: self.modifyComboboxValues(attr='document'))
+        self._doc_org.currentIndexChanged.connect(
+            lambda: self.modifyComboboxValues(attr='document'))
+        self._doc_method.currentIndexChanged.connect(
+            lambda: self.modifyComboboxValues(attr='document'))
+        self._doc_dep.currentIndexChanged.connect(
+            lambda: self.modifyComboboxValues(attr='document'))
 
     def widgetVisibility(self) -> None:
+        """ Определяет видимость виджета в форме ввода
+            в зависимости от типа документа """
+
         try:
             for widget, settings in self.visibility.items():
                 widget.setVisible(settings[self.document_class])
@@ -174,6 +204,10 @@ class NewDocumentMainFrame(FrameBasic):
             logging.debug('Не найден случай для класса документации')
 
     def setComboboxValues(self, attr: str) -> list[str]:
+        """ Изменяет варианты значений в комбобоксах
+            в зависимости от типа комбобокса и
+            выбранных значений в других комбобоксах"""
+
         _cb_values = []
         for db_type in self._db_types:
             if attr == 'class':
@@ -192,6 +226,9 @@ class NewDocumentMainFrame(FrameBasic):
         return sorted(list(set(_cb_values)))
 
     def defaultDocumentType(self, attr: str) -> None:
+        """ Устанавливает значения по умолчанию в комбобоксах
+            после изменения комбобоксов выбора типа документа """
+
         if attr == 'subclass':
             if self._doc_class.currentText() == self._def_kd_type.class_name:
                 self._doc_subclass.setCurrentText(self._def_kd_type.subclass_name)
@@ -209,6 +246,9 @@ class NewDocumentMainFrame(FrameBasic):
                 self._doc_subtype.setCurrentText(self.mergeSignAndSubtype(self._def_td_type))
 
     def modifyComboboxValues(self, attr: str) -> None:
+        """ Изменяет комбобоксы в зависимости от
+            значения изменяющегося комбобоксы """
+
         if attr == 'class':
             items = self.setComboboxValues(attr)
             self._doc_class.blockSignals(True)
@@ -240,19 +280,29 @@ class NewDocumentMainFrame(FrameBasic):
             self.documentChanged()
 
     def documentChanged(self) -> None:
-        self.d_type = return_document_type(class_name=self.document_class,
-                                           subtype_name=self.document_subtype,
-                                           method_code=self.document_method_code,
-                                           organization_code=self.document_organization_code)
+        """ Поиск типа документа по значениям,
+            указанным в комбобоксах выбора типа документа"""
+
+        self.d_type = return_document_type(
+            class_name=self.document_class,
+            subtype_name=self.document_subtype,
+            method_code=self.document_method_code,
+            organization_code=self.document_organization_code)
         self.widgetVisibility()
         self.findDocument.emit()
 
     def mergeSignAndSubtype(self, db_type: DocumentType) -> str:
+        """ Возвращает строку из сокращения и подтипа документа,
+            для использования в вариантах выбора для комбобоксов
+            выбора типа документа """
+
         sign = f'{db_type.sign}{self._sep}' if db_type.sign else ''
         return f'{sign}{db_type.subtype_name}'
 
     @property
     def department_codes(self) -> dict[str, str]:
+        """ Возвращает словарь кодов отделов и их наименований """
+
         if not self._department_codes:
             for department_name, code in CONFIG.data['document_department'].items():
                 self._department_codes[department_name] = code
@@ -260,6 +310,9 @@ class NewDocumentMainFrame(FrameBasic):
 
     @property
     def organization_codes(self) -> dict[str, str]:
+        """ Возвращает словарь типа технологического
+            процесса по организации и кода ему соответствующего """
+
         if not self._organization_codes:
             for organization_type, code in CONFIG.data['document_organization'].items():
                 self._organization_codes[organization_type] = code
@@ -267,6 +320,9 @@ class NewDocumentMainFrame(FrameBasic):
 
     @property
     def method_codes(self) -> dict[str, str]:
+        """ Возвращает словарь наименований методов изготовления и
+            кода дециального номера, который ему соответствует """
+
         if not self._method_codes:
             for method_name, code in CONFIG.data['document_method'].items():
                 self._method_codes[method_name] = code
@@ -274,140 +330,203 @@ class NewDocumentMainFrame(FrameBasic):
 
     @property
     def stage_letters(self):
+        """ Возвращает возможные значения литеры документа """
+
         if not self._stage_letters:
             return CONFIG.data['document_settings']['litera'].replace(' ', '').split(',')
         return self._stage_letters
 
     @property
     def document_class(self) -> str:
+        """ Возвращает класс типа документа """
+
         return self._doc_class.currentText()
 
     @document_class.setter
     def document_class(self, value: str) -> None:
+        """ Устанавливает класс типа документа """
+
         self._doc_class.setCurrentText(value)
         self.modifyComboboxValues(attr='subclass')
 
     @property
     def document_subclass(self) -> str:
+        """ Возвращает подкласс типа документа """
+
         return self._doc_subclass.currentText()
 
     @document_subclass.setter
     def document_subclass(self, value: str) -> None:
+        """ Устанавливает подкласс типа документа """
+
         self._doc_subclass.setCurrentText(value)
         self.modifyComboboxValues(attr='type')
 
     @property
     def document_type(self) -> str:
+        """ Возвращает тип типа документа """
+
         return self._doc_type.currentText()
 
     @property
     def document_subtype(self) -> str:
+        """ Возвращает подтип типа документа """
+
         text = self._doc_subtype.currentText()
         if text.find(self._sep) != -1:
             index = text.find(self._sep) + len(self._sep)
             text = text[index:]
-        logging.debug(f'{text}')
         return text
 
     @property
     def product_name(self) -> str:
+        """ Наименование изделия """
+
         return self._product_name.text()
 
     @product_name.setter
     def product_name(self, text: str) -> None:
+        """ Наименование изделия """
+
         self._product_name.setText(text)
 
     @property
     def product_deno(self) -> str:
+        """ Децимальный номер изделия """
+
         return self._product_deno.text()
 
     @product_deno.setter
     def product_deno(self, text: str) -> None:
+        """ Децимальный номер изделия """
+
         self._product_deno.setText(text)
 
     @property
     def document_name(self) -> str:
+        """ Наименование документа """
+
         return self._doc_name.text()
 
     @document_name.setter
     def document_name(self, text: str) -> None:
+        """ Наименование документа """
+
         self._doc_name.setText(text)
 
     @property
     def document_deno(self) -> str:
+        """ Децимальный номер документа """
+
         if self._doc_deno.currentText() == '':
             return self.product_deno
         return self._doc_deno.currentText()
 
     @document_deno.setter
     def document_deno(self, text: str) -> None:
+        """ Децимальный номер документа """
+
         self._doc_deno.clear()
         self._doc_deno.addItems(text)
 
     @property
     def product_primary_application(self) -> str:
+        """ Первичная применяемость изделия """
+
         return self._product_papp.text()
 
     @product_primary_application.setter
     def product_primary_application(self, primary_parent: Product) -> None:
+        """ Первичная применяемость изделия """
+
         try:
             self._product_papp.setText(primary_parent.deno)
         except AttributeError:
-            logging.debug(f'Не найден децимальный номер первичной применяемости')
+            logging.debug('Не найден децимальный номер первичной применяемости')
             self._product_papp.setText('')
 
     @property
     def document_developer(self) -> str:
+        """ Разработчик документа """
+
         return self._doc_dev.text()
 
     @document_developer.setter
     def document_developer(self, text: str) -> None:
+        """ Разработчик документа """
+
         self._doc_dev.setText(text)
 
     @property
     def document_date_update(self) -> str:
+        """ Дата изменения документа """
+
         return self._doc_update.text()
 
     @document_date_update.setter
     def document_date_update(self, text: str) -> None:
+        """ Дата изменения документа """
+
         self._doc_update.setText(text)
 
     @property
     def document_organization(self) -> str | None:
+        """ Тип документа по организации """
+
         if self.document_class == 'ТД':
             return self._doc_org.currentText()
+        return None
 
     @property
     def document_organization_code(self) -> str | None:
+        """ Код документа по организации """
+
         if self.document_class == 'ТД':
             return self.organization_codes.get(self.document_organization, '')
+        return None
 
     @property
     def document_method(self) -> str | None:
+        """ Наименование метода изготовления """
+
         if self.document_class == 'ТД':
             return self._doc_method.currentText()
+        return None
 
     @property
     def document_method_code(self) -> str | None:
+        """ Код метода изготовления """
+
         if self.document_class == 'ТД':
             return self.method_codes.get(self.document_method, '')
+        return None
 
     @property
     def document_department(self) -> str | None:
+        """ Наименование отдела """
+
         if self.document_class == 'ТД':
             return self._doc_dep.currentText()
+        return None
 
     @property
     def document_department_code(self) -> str | None:
+        """ Код наименования отдела """
+
         if self.document_class == 'ТД':
             return self.department_codes.get(self.document_department, '')
+        return None
 
     @property
     def document_lit(self) -> str:
+        """ Литера документа """
+
         return self._doc_lit.currentText()
 
     @property
     def document_stage(self) -> str:
+        """ Этап разработки документа """
+
         text = self._doc_stage.currentText()
         if text == 'Доступен для регистрации':
             text = 'Зарегистрирован'
@@ -415,58 +534,77 @@ class NewDocumentMainFrame(FrameBasic):
 
     @document_stage.setter
     def document_stage(self, text: str) -> None:
+        """ Этап разработки документа """
+
         self._doc_stage.setCurrentText(text)
 
     @property
     def document_pages(self) -> str:
+        """ Количество страниц документа """
+
         return self._doc_pages.currentText()
 
     @property
     def document_complex(self) -> list:
+        """ Список изделий входящих в составные документы """
+
         return self._complex_list
 
     @document_complex.setter
     def document_complex(self, _complex_list: list) -> None:
+        """ Список изделий входящих в составные документы """
+
         self._complex_list = _complex_list
         text = f'{len(_complex_list)} изготавливается совместно в {self.document_deno}'
         self._doc_complex.setText(text)
 
 
-# Рамка для изделий входящих в спецификацию
 class NewDocumentSpecProducts(FrameWithTable):
+    """ Родительский класс для изделий входящих в спецификацию """
+
 
     def __init__(self, frame_name) -> None:
         super().__init__(frame_name=frame_name)
         self.addNewRow()
 
     def initTableSettings(self) -> None:
-        # Определен в наследниках
-        pass
+        """ Параметры таблицы """
 
     def showContextMenu(self, point: QPoint) -> None:
+        """ Вызов контекстного меню """
+
         self.context_menu = ContextMenuForSpecProductsTable(self)
-        qp = self.sender().mapToGlobal(point)
-        self.context_menu.exec_(qp)
+        qpoint = self.sender().mapToGlobal(point)
+        self.context_menu.exec_(qpoint)
 
     def comboboxType(self) -> QComboBox:
-        cb = QComboBox()
-        cb.addItems([product_type.type_name for product_type in ProductType.getAllTypes()])
-        cb.setCurrentText(CONFIG.data['product_settings']['default_type'])
-        return cb
+        """ Комбобокс с типами изделий по спецификации """
+
+        combobox = QComboBox()
+        combobox.addItems([product_type.type_name for product_type in ProductType.getAllTypes()])
+        combobox.setCurrentText(CONFIG.data['product_settings']['default_type'])
+        return combobox
 
     def comboboxUnit(self) -> QComboBox:
-        cb = QComboBox()
-        cb.addItems(CONFIG.data['product_settings']['units'].replace(' ', '').split(','))
-        return cb
+        """ Комбобокс с видами единиц измерения """
+
+        combobox = QComboBox()
+        combobox.addItems(CONFIG.data['product_settings']['units'].replace(' ', '').split(','))
+        return combobox
 
     def comboboxCode(self) -> QComboBox:
-        cb = QComboBox()
-        cb.addItems(CONFIG.data['product_settings']['organization_codes'].replace(' ', '').split(','))
-        cb.setCurrentText('АЦИЕ')
-        cb.setEditable(True)
-        return cb
+        """ Комбобокс с кодами децимальных номеров различных производителей """
+
+        combobox = QComboBox()
+        combobox.addItems(
+            CONFIG.data['product_settings']['organization_codes'].replace(' ', '').split(','))
+        combobox.setCurrentText('АЦИЕ')
+        combobox.setEditable(True)
+        return combobox
 
     def addNewRow(self, row: int = 0) -> None:
+        """ Добавление новой строки таблицы"""
+
         row = self.addRow(row)
         self.table.setCellWidget(row, 0, self.comboboxCode())
         self.table.setCellWidget(row, 6, self.comboboxUnit())
@@ -478,6 +616,9 @@ class NewDocumentSpecProducts(FrameWithTable):
         self.table.setItem(row, 5, QTableWidgetItem())
 
     def addRow(self, row):
+        """ Добавление нового ряда таблицы
+            в зависимости от текущего ряда """
+
         if row == 0:
             self.table.setRowCount(self.table.rowCount() + 1)
             row = self.table.rowCount() - 1
@@ -486,30 +627,33 @@ class NewDocumentSpecProducts(FrameWithTable):
         return row
 
     def copyRow(self):
+        """ Копирование строки таблицы """
+
         row = self.table.currentRow()+1
         self.addNewRow(row)
         for col in range(self.table.columnCount()):
             try:
                 self.table.item(row, col).setText(self.table.item(row-1, col).text())
             except AttributeError:
-                self.table.cellWidget(row, col).setCurrentText(self.table.cellWidget(row-1, col).currentText())
+                self.table.cellWidget(row, col).\
+                    setCurrentText(self.table.cellWidget(row-1, col).currentText())
 
     def defaultValues(self, default_values: list[dict[str, str | int]]) -> None:
-        # Определен в наследниках
-        pass
+        """ Внесение значений по умолчанию """
 
     def getData(self) -> list[dict[str, str | int]]:
-        # Определяется в наследниках
-        pass
+        """ Получить данные """
 
 
-# Рамка для изделий входящих в спецификацию
 class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
+    """ Рамка для изделий входящих в спецификацию """
 
     def __init__(self) -> None:
         super().__init__(frame_name='Изделия с ДН')
 
     def initTableSettings(self) -> None:
+        """ Параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 90, 'name': 'Код'},
                                 {'col': 1, 'width': 60, 'name': 'Класс'},
                                 {'col': 2, 'width': 60, 'name': 'Номер'},
@@ -522,6 +666,8 @@ class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
         self.start_cols = 8
 
     def addNewRow(self, row: int = 0) -> None:
+        """ Добавление новой строки таблицы """
+
         row = self.addRow(row)
         self.table.setCellWidget(row, 0, self.comboboxCode())
         self.table.setCellWidget(row, 6, self.comboboxUnit())
@@ -533,6 +679,8 @@ class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
         self.table.setItem(row, 5, QTableWidgetItem())
 
     def defaultValues(self, default_values: list[dict[str, str | int]]) -> None:
+        """ Внесение значений по умолчанию """
+
         for row_data in default_values:
             row = self.table.rowCount() - 1
             if row_data['Код'] is not None:
@@ -545,6 +693,8 @@ class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
                 self.addNewRow()
 
     def getData(self) -> list[dict[str, str | int]]:
+        """ Получить данные """
+
         children_data = []
         for row in range(self.table.rowCount()):
             child_data = {}
@@ -564,13 +714,15 @@ class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
         return children_data
 
 
-# Рамка для изделий без децимального номера, входящих в спецификацию
 class NewDocumentSpecProductsNoDeno(NewDocumentSpecProducts):
+    """ Рамка для изделий без децимального номера, входящих в спецификацию """
 
     def __init__(self) -> None:
         super().__init__(frame_name='Изделия без ДН')
 
     def initTableSettings(self) -> None:
+        """ Параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 450, 'name': 'Наименование'},
                                 {'col': 1, 'width': 60, 'name': 'Кол-во'},
                                 {'col': 2, 'width': 60, 'name': 'Ед.\nизм.'},
@@ -579,6 +731,8 @@ class NewDocumentSpecProductsNoDeno(NewDocumentSpecProducts):
         self.start_cols = 4
 
     def addNewRow(self, row: int = 0) -> None:
+        """ Добавление новой строки таблицы """
+
         row = self.addRow(row)
         self.table.setCellWidget(row, 2, self.comboboxUnit())
         self.table.setCellWidget(row, 3, self.comboboxType())
@@ -586,6 +740,8 @@ class NewDocumentSpecProductsNoDeno(NewDocumentSpecProducts):
         self.table.setItem(row, 1, QTableWidgetItem())
 
     def defaultValues(self, default_values: list[dict[str, str | int]]) -> None:
+        """ Внесение значений по умолчанию """
+
         for row_data in default_values:
             row = self.table.rowCount() - 1
             if row_data['Код'] is None:
@@ -598,6 +754,8 @@ class NewDocumentSpecProductsNoDeno(NewDocumentSpecProducts):
                 self.addNewRow()
 
     def getData(self) -> list[dict[str, str | int]]:
+        """ Получить данные """
+
         children_data = []
         for row in range(self.table.rowCount()):
             child_data = {}
@@ -613,14 +771,16 @@ class NewDocumentSpecProductsNoDeno(NewDocumentSpecProducts):
         return children_data
 
 
-# Рамка для документов входящих в спецификацию
 class NewDocumentDocumentTypes(FrameWithTable):
+    """ Рамка для документов входящих в спецификацию """
 
     def __init__(self) -> None:
         super().__init__(frame_name='Документы')
         self.addNewRow()
 
     def initTableSettings(self) -> None:
+        """ Параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 100, 'name': 'Код'},
                                 {'col': 1, 'width': 200, 'name': 'Вид'})
         self.start_rows = 0
@@ -629,31 +789,43 @@ class NewDocumentDocumentTypes(FrameWithTable):
         self.cb_items = sorted(list(set([db_type.sign for db_type in self.db_types])))
 
     def combobox(self) -> QComboBox:
-        cb = QComboBox()
-        cb.addItems(self.cb_items)
-        cb.setCurrentText('')
-        cb.setEditable(True)
-        cb.currentTextChanged.connect(self.documentChangedEvent)
-        return cb
+        """ Комбобокс с кодами видов документов """
+
+        combobox = QComboBox()
+        combobox.addItems(self.cb_items)
+        combobox.setCurrentText('')
+        combobox.setEditable(True)
+        combobox.currentTextChanged.connect(self.documentChangedEvent)
+        return combobox
 
     def documentChangedEvent(self) -> None:
+        """ Реакция на изменение значения комбобокса
+            с кодами видов документов """
+
         row = self.table.currentRow()
         sign = self.sender().currentText()
         self.addDocumentSubTypeName(sign, row)
         self.cellChanged()
 
     def addDocumentSubTypeName(self, sign: str, row: int) -> None:
+        """ Вносит наименование вида документа
+            в зависимости от кода вида документа """
+
         for db_type in self.db_types:
             if db_type.sign == sign:
                 subtype_name = db_type.subtype_name
                 self.table.item(row, 1).setText(subtype_name)
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки таблицы """
+
         self.table.setRowCount(self.table.rowCount() + 1)
         self.table.setItem(self.table.rowCount() - 1, 1, QTableWidgetItem())
         self.table.setCellWidget(self.table.rowCount() - 1, 0, self.combobox())
 
     def getData(self) -> list[str]:
+        """ Получить данные """
+
         subtype_names = []
         for row in range(self.table.rowCount()):
             subtype_name = self.table.item(row, 1).text()
@@ -662,8 +834,8 @@ class NewDocumentDocumentTypes(FrameWithTable):
         return subtype_names
 
 
-# Рамка для отображения изделий в составе
 class FrameComplexDocument(FrameWithTable):
+    """ Рамка для отображения изделий в составе """
 
     def __init__(self) -> None:
         super().__init__(frame_name='Изготавливается\nсовместно')
@@ -673,6 +845,8 @@ class FrameComplexDocument(FrameWithTable):
         self.addNewRow()
 
     def initTableSettings(self) -> None:
+        """ Параметры таблицы """
+
         self.header_settings = ({'col': 0, 'width': 30, 'name': ' '},
                                 {'col': 1, 'width': 200, 'name': 'Обозначение'},
                                 {'col': 2, 'width': 300, 'name': 'Наименование'})
@@ -680,6 +854,8 @@ class FrameComplexDocument(FrameWithTable):
         self.start_cols = 3
 
     def addNewRow(self) -> None:
+        """ Добавление новой строки таблицы """
+
         self.table.blockSignals(True)
         self.table.setRowCount(self.table.rowCount() + 1)
         self.table.setItem(self.table.rowCount() - 1, 0, QTableWidgetItem())
@@ -688,6 +864,8 @@ class FrameComplexDocument(FrameWithTable):
         self.table.blockSignals(False)
 
     def defaultValues(self, default_values: list[dict[str, str | int]]) -> None:
+        """ Внесение текущих значений таблицы изделий составного документа"""
+
         for row_data in default_values:
             row = self.table.rowCount() - 1
             self.table.item(row, 0).setIcon(self.icon_ok)
@@ -696,11 +874,15 @@ class FrameComplexDocument(FrameWithTable):
             self.addNewRow()
 
     def cleanValues(self):
+        """ Очистка значений таблицы """
+
         for row in range(self.table.rowCount() - 1, -1, -1):
             self.table.removeRow(row)
         self.addNewRow()
 
     def checkProduct(self):
+        """ Проверка наличия изделия с таким децимальным номером """
+
         if self.table.currentRow() != -1 and self.table.currentColumn() not in [0, 2]:
             deno = self.table.currentItem().text()
             builder = ProductBuilder()
@@ -713,6 +895,8 @@ class FrameComplexDocument(FrameWithTable):
                 self.table.item(self.table.currentRow(), 0).setIcon(self.icon_cross)
 
     def getData(self) -> list[dict[str, str | int]]:
+        """ Получить данные """
+
         children_data = []
         for row in range(self.table.rowCount()):
             child_data = {}
