@@ -1,9 +1,8 @@
+""" Тулбары окна иерархической таблицы изделия """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from STC.gui.windows.hierarchy.window import WindowTable
 
 from PyQt5.Qt import QColor
 from PyQt5.QtGui import QFont
@@ -15,9 +14,12 @@ from PyQt5.QtWidgets import QToolBar
 
 from STC.config.config import CONFIG
 
+if TYPE_CHECKING:
+    from STC.gui.windows.hierarchy.window import WindowTable
 
-# Базовый тулбар
+
 class ToolBar(QToolBar):
+    """ Базовый тулбар """
 
     def __init__(self, window_table: WindowTable, title: str = 'toolbar') -> None:
         super().__init__(title)
@@ -25,58 +27,67 @@ class ToolBar(QToolBar):
         self.initActions()
 
     def initActions(self):
-        pass
+        """ Родительский класс инициализации QAction """
 
     def actionNewColumn(self, name: str) -> QAction:
+        """ Возвращает действие с определенным названием
+            триггерящее добавление нового столбца к
+            иерархической таблице """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(lambda: self.window_table.tree_view.addNewColumn(action.data()))
         return action
 
 
-# Тулбар для уровней иерархии
 class ToolBarHierarchyLevels(ToolBar):
-
-    """Тулбар для открытия/скрытия определенных уровней в иерархической таблице"""
+    """ Тулбар для уровней иерархии """
 
     def __init__(self, window_table: WindowTable) -> None:
         super().__init__(window_table=window_table, title='Уровни')
         self.setStyleSheet(f"color: {CONFIG.style.toolbar_text_color}")
 
     def initActions(self) -> None:
+        """ Добавляет действия по уровням иерархии """
+
         self.font = QFont(CONFIG.style.font,
                           CONFIG.style.font_size_toolbar, 1)
         self.getUniqueHierarchyLevels()
-        for level in self.levels:
+        for level in self.getUniqueHierarchyLevels():
             action = QAction(self.window_table.main_window)
             action.setText(str(level))
             action.setFont(self.font)
             action.setShortcut(QKeySequence(f"Ctrl+{level}"))
-            action.triggered.connect(lambda:
-                                     self.window_table.tree_view.customSetExpandToLevel(
-                                         self.window_table.sender().text()))
+            action.triggered.connect(
+                lambda: self.window_table.tree_view.customSetExpandToLevel(
+                    self.window_table.sender().text()))
             self.addAction(action)
 
-    def getUniqueHierarchyLevels(self) -> None:
-        # all_levels = [int(row['level']) for row in self.window_table.tree_view.data]
-        all_levels = [branch.level for branch in self.window_table.tree_view.model.tree.tree_dicts]
-        self.levels = sorted(set(all_levels))
+    def getUniqueHierarchyLevels(self) -> list:
+        """ Возвращает список уровней входимости
+            иерархического древа """
+
+        tree_dicts = self.window_table.tree_view.model.tree.tree_dicts
+        all_levels = [branch.level for branch in tree_dicts]
+        return sorted(set(all_levels))
 
     def upd(self) -> None:
+        """ Обновить тулбар (количество уровней может изменяться) """
+
         self.clear()
         self.initActions()
 
 
-# Тулбар с цветом выделения ячеек
 class ToolBarColors(ToolBar):
-
-    """Тулбар для открытия/скрытия определенных уровней в иерархической таблице"""
+    """ Тулбар с цветом выделения строк """
 
     def __init__(self, window_table: WindowTable) -> None:
         super().__init__(window_table=window_table, title='Цвета')
         self.setStyleSheet(f"color: {CONFIG.style.toolbar_text_color}")
 
     def initActions(self) -> None:
+        """ Добавления действий в тулбар """
+
         colors = {'red': {'color': QColor(200, 0, 0, 200),
                           'shortcut': 'Shift+R'},
                   'green': {'color': QColor(0, 200, 0, 200),
@@ -91,17 +102,21 @@ class ToolBarColors(ToolBar):
             action = QAction(self.window_table.main_window)
             action.setShortcut(QKeySequence(color_dict['shortcut']))
             action.setIcon(QIcon(pixmap))
-            action.triggered.connect(lambda: self.window_table.setColor())
+            action.triggered.connect(self.window_table.setColor)
             self.addAction(action)
 
 
-# Тулбар управления приложением
 class ToolBarOptions(ToolBar):
+    """ Тулбар управления приложением """
+
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, window_table: WindowTable) -> None:
         super().__init__(window_table=window_table, title='Управление составом')
 
     def initActions(self):
+        """ Добавление действий в тулбар """
+
         self.action_dbsync = self.actionSyncTreeView('Синхронизация с БД')
         self.action_dbsync.setIcon(CONFIG.style.arrow_repeat_red)
         self.action_dbsync.setShortcut(QKeySequence("Ctrl+F5"))
@@ -148,67 +163,88 @@ class ToolBarOptions(ToolBar):
         self.addAction(self.action_export_ntd)
 
     def actionSyncTreeView(self, name: str) -> QAction:
+        """ "Полное" обновление иерархической таблицы
+            с подгрузкой последних данных из БД """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.syncTreeView)
         return action
 
     def actionUpdTreeView(self, name: str) -> QAction:
+        """ Обновление отображаемых в БД данных """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.updTreeView)
         return action
 
     def actionShowWindowFilter(self, name: str) -> QAction:
+        """ Вывести окно фильтра """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.showWindowFilter)
         return action
 
     def actionShowProductSelector(self, name: str) -> QAction:
+        """ Вывести окно открытия нового изделия """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.showWindowProductSelector)
         return action
 
     def actionNewDocumentWindow(self, name: str) -> QAction:
+        """ Окно создания нового документа """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.showWindowNewDocument)
         return action
 
     def actionShowWindowSearch(self, name: str) -> QAction:
+        """ Окно поиска в таблице """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.showWindowSearch)
         return action
 
     def actionExportToExcel(self, name: str) -> QAction:
+        """ Экспорт данных в Excel (шаблон состава изделия) """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.exportToExcel)
         return action
 
     def actionExportToExcelNorm(self, name: str) -> QAction:
+        """ Экспорт данных в Excel (шаблон нормирования) """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.exportToExcelNorm)
         return action
 
     def actionExportToExcelNTD(self, name: str) -> QAction:
+        """ Экспорт данных в Excel (шаблон НТД) """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.exportToExcelNTD)
         return action
 
 
-# Тулбар управления свойствами изделий
 class ToolBarProductOptions(ToolBar):
+    """ Тулбар управления свойствами изделий """
 
     def __init__(self, window_table: WindowTable) -> None:
         super().__init__(window_table=window_table, title='Свойства изделий')
 
     def initActions(self):
+        """ Инициализация действий тулбара """
+
         actions = [('Индекс', {'header': 'Индекс'}),
                    ('Вид\nизделия', {'type': 'product',
                                      'header': 'Вид',
@@ -242,13 +278,15 @@ class ToolBarProductOptions(ToolBar):
             self.addAction(action)
 
 
-# Тулбар управления свойствами документов
 class ToolBarDocumentOptions(ToolBar):
+    """ Тулбар управления свойствами документов """
 
     def __init__(self, window_table: WindowTable) -> None:
         super().__init__(window_table=window_table, title='Закладки')
 
     def initActions(self):
+        """ Инициализация действий тулбара """
+
         actions = [('МК', {'type': 'document',
                            'header': 'ТД\nМК\nОбозначение',
                            'class_name': 'ТД',
@@ -268,7 +306,8 @@ class ToolBarDocumentOptions(ToolBar):
                    ('КТТП', {'type': 'document',
                              'header': 'ТД\nКТТП\nОбозначение',
                              'class_name': 'ТД',
-                             'subtype_name': 'Карта типового (группового) технологического процесса',
+                             'subtype_name': 'Карта типового (группового) '
+                                             'технологического процесса',
                              'organization_code': '2',
                              'setting': 'deno',
                              'delegate': 'DelegateKTTP',
@@ -277,7 +316,8 @@ class ToolBarDocumentOptions(ToolBar):
                    ('КГТП', {'type': 'document',
                              'header': 'ТД\nКГТП\nОбозначение',
                              'class_name': 'ТД',
-                             'subtype_name': 'Карта типового (группового) технологического процесса',
+                             'subtype_name': 'Карта типового (группового) '
+                                             'технологического процесса',
                              'organization_code': '3',
                              'setting': 'deno',
                              'delegate': 'DelegateKTTP',
@@ -304,13 +344,15 @@ class ToolBarDocumentOptions(ToolBar):
             self.addAction(action)
 
 
-# Тулбар расширенного управления свойствами изделий
 class ToolBarDocumentOptionsMain(ToolBar):
+    """ Тулбар расширенного управления свойствами изделий """
 
     def __init__(self, window_table: WindowTable) -> None:
         super().__init__(window_table=window_table, title='Документы')
 
     def initActions(self):
+        """ Инициализация действий тулбара """
+
         action = self.actionAllDocumentTypes('Виды\nдокументов')
         self.addAction(action)
 
@@ -318,16 +360,22 @@ class ToolBarDocumentOptionsMain(ToolBar):
         self.addAction(action)
 
     def actionDocumentSettings(self, name: str) -> QAction:
+        """ Окно выбора свойств документов и изделий """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.showWindowDocumentSettings)
         return action
 
     def actionAllDocumentTypes(self, name: str) -> QAction:
+        """ Дополняет таблицу столбцами видов документов """
+
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.showAllDocTypes)
         return action
 
     def showAllDocTypes(self):
+        """ Вызывает метод дополнения таблицы столбцами видов документов """
+
         self.window_table.tree_view.showAllDocumentTypes()
