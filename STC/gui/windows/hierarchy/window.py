@@ -128,6 +128,22 @@ class WindowTable(WindowBasic):
         self.reverse = reverse
         self.tree_view = HierarchicalView(product_denotation=product_denotation, reverse=self.reverse)
         self.mark_index = {}
+        self.main_menu = None
+        self.file_menu = None
+        self.excel_menu = None
+        self.action_import_db = None
+        self.action_menu_product = None
+        self.action_menu_mk = None
+        self.admin_menu = None
+        self.color_theme_menu = None
+        self.context_menu = None
+        self.toolbar_for_options = None
+        self.toolbar_document_settings_main = None
+        self.toolbar_document_settings = None
+        self.toolbar_product_settings = None
+        self.toolbar_for_hierarchy = None
+        self.toolbar_for_colors = None
+        self.header_labels = None
         self.current_context_menu_kttp = None
         self.current_context_menu_kind = None
         self.context_menu_kttp = self.tree_view.model.tree.kttp
