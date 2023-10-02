@@ -224,11 +224,16 @@ class Controller:
             logging.warning('Изделие не определено')
         if product:
             self.selector_window = WindowSelectorMk(product)
-            self.windows.append(self.selector_window)
-            self.selector_window.closeWindow.connect(self.deleteFromWindows)
-            self.selector_window.documentChanged.connect(self.showCreateMkWindow)
-            if len(self.selector_window.documents) == 1:
-                self.showCreateMkWindow()
+            match len(self.selector_window.documents):
+                case 1:
+                    self.showCreateMkWindow()
+                case 0:
+                    show_dialog(text='Документ не найден', m_type='warning')
+                case _:
+                    self.windows.append(self.selector_window)
+                    self.selector_window.closeWindow.connect(self.deleteFromWindows)
+                    self.selector_window.documentChanged.connect(self.showCreateMkWindow)
+
 
     # Окно создания маршрутной карты
     def showCreateMkWindow(self) -> None:

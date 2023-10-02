@@ -237,13 +237,7 @@ class WindowSelectorMk(WindowBasic):
                                                        subtype_name=name,
                                                        only_relevant=True,
                                                        only_text=False)
-        if len(documents) > 1:
-            return self.convertToDict(documents=documents)
-        elif len(documents) == 1:
-            return self.convertToDict(documents=documents)
-        else:
-            show_dialog(text='Документ не найден', m_type='warning')
-            return self.convertToDict(documents=documents)
+        return self.convertToDict(documents=documents)
 
     @staticmethod
     def convertToDict(documents: list[Document]) -> dict[str, Document]:
