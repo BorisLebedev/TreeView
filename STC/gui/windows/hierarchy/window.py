@@ -91,8 +91,8 @@ class SettingsWindowTable:
                     QItemSelection(index_main_start, index_main_end),
                     QItemSelectionModel.ClearAndSelect)
             except IndexError:
-                pass
-                #TODO Обработать исключение (обновление состава из одной строки)
+                self.current_code = ''
+                self.setCurrentCode(tree=tree)
 
     def getColumnSettings(self, tree: HierarchicalView) -> None:
         self.column_settings = tree.column_settings
