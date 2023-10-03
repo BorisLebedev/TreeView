@@ -55,7 +55,6 @@ class NewDocumentMainFrame(FrameBasic):
         self.initWidgetLabel()
         self.initWidgetLineEdit()
         self.initWidgetCombobox()
-        self.initWidgetButton()
         visibility_settings_td = {'КД': False,
                                   'ТД': True,
                                   'PLM': False}
@@ -66,8 +65,7 @@ class NewDocumentMainFrame(FrameBasic):
                            self._doc_method: visibility_settings_td,
                            self._doc_dep: visibility_settings_td,
                            self._l_doc_complex: visibility_settings_td,
-                           self._doc_complex: visibility_settings_td,
-                           self._btn_doc_complex: visibility_settings_td}
+                           self._doc_complex: visibility_settings_td}
         self.initWidgetComboboxDefault()
         self.initWidgetComboboxConnection()
 
@@ -129,12 +127,6 @@ class NewDocumentMainFrame(FrameBasic):
         self._doc_pages = QComboBox()
         self._doc_deno = QComboBox()
         self._doc_deno.currentTextChanged.connect(self.changeDocument)
-
-    def initWidgetButton(self) -> None:
-        """ Кнопка вызова рамки с изделиями в составных документах """
-
-        self._btn_doc_complex = QPushButton()
-        self._btn_doc_complex.setIcon(CONFIG.style.arrow_right)
 
     def initWidgetPosition(self) -> None:
         """ Расположение виджетов в рамке """
