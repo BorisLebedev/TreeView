@@ -134,6 +134,7 @@ class HierarchicalTree:
                                    str_num=db_hierarchy.quantity),
                                child_unit=db_hierarchy.unit)
                            )
+
     @classmethod
     def initClassVars(cls):
         """ Изменяет переменные класса

@@ -1,14 +1,8 @@
+"""  """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from PyQt5.Qt import QModelIndex
-    from PyQt5.Qt import QColor
-    from PyQt5.Qt import QPaintEvent
-    from PyQt5.Qt import QStyleOptionViewItem
-    from PyQt5.Qt import QWidget
-    from STC.product.product import Product
 
 import datetime
 import logging
@@ -29,8 +23,18 @@ from STC.product.hierarchical_tree import HierarchicalTree
 from STC.product.product import ProductKind
 from STC.gui.splash_screen import show_dialog
 
+if TYPE_CHECKING:
+    from PyQt5.Qt import QModelIndex
+    from PyQt5.Qt import QColor
+    from PyQt5.Qt import QPaintEvent
+    from PyQt5.Qt import QStyleOptionViewItem
+    from PyQt5.Qt import QWidget
+    from STC.product.product import Product
+
 
 class HierarchicalModel(QStandardItemModel):
+    """ Модель иерархического древа """
+
     updKttpSignal = pyqtSignal(list)
     addKttpSignal = pyqtSignal(list)
     delKttpSignal = pyqtSignal(list)
@@ -41,24 +45,35 @@ class HierarchicalModel(QStandardItemModel):
         self.tree = HierarchicalTree(product_denotation, reverse)
 
     def updKttp(self, names: list) -> None:
+        """ Посылает сигнал со списком типовых
+            технологических процессов, выбирая
+            их по их наименованиям """
+
         documents = []
         for name in names:
-            # documents.append(self.tree.kttp_deno_only[name])
             documents.append(HierarchicalTree.kttp_deno_only[name])
         self.updKttpSignal.emit(documents)
 
     def addKttp(self):
-        # self.addKttpSignal.emit([self.tree.kttp[self.sender().text()]])
+        """ Посылает сигнал с типовым технологическим процессом
+            (для привязки КТТП к изделию) """
+
         self.addKttpSignal.emit([HierarchicalTree.kttp[self.sender().text()]])
 
     def delKttp(self):
-        # self.delKttpSignal.emit([self.tree.kttp[self.sender().text()]])
+        """ Посылает сигнал с типовым технологическим процессом
+            (для удаления связи КТТП и изделия) """
+
         self.delKttpSignal.emit([HierarchicalTree.kttp[self.sender().text()]])
 
     def updProductKind(self, kind_name: str) -> None:
+        """ Посылает сигнал на изменение вида изделия """
+
         self.updProductKindSignal.emit(kind_name)
 
     def selectedProduct(self, index) -> Product:
+        """ Возвращает изделие по индексу """
+
         try:
             logging.info(f'Попытка определить изделие')
             product = index.model().itemFromIndex(index.sibling(0, 0)).data()
@@ -70,9 +85,8 @@ class HierarchicalModel(QStandardItemModel):
 
 
 class HierarchicalView(QTreeView):
-
-    """Представление иерархического древа, которое
-    отображается в главном окне"""
+    """ Представление иерархического древа, которое
+        отображается в главном окне """
 
     def __init__(self, product_denotation: str, reverse: bool = False,
                  header_labels=('Индекс', 'Уровень', 'Наименование', 'Обозначение', 'Тип согласно\nспецификации',
@@ -97,6 +111,8 @@ class HierarchicalView(QTreeView):
 
     @ property
     def headerHorizontal(self) -> list[str]:
+        """ Список названий столбцов """
+
         header = []
         for column in range(self.model.columnCount()):
             header.append(self.model.horizontalHeaderItem(column).text())
@@ -104,12 +120,13 @@ class HierarchicalView(QTreeView):
 
     @ headerHorizontal.setter
     def headerHorizontal(self, header: list[str]) -> None:
-        logging.debug(f'Установлен header: {header}')
+        """ Изменяет названия столбцов """
+
         self.model.setHorizontalHeaderLabels(header)
 
-    # Параметры модели
     def modifyModelSettings(self) -> None:
-        logging.info(f'Установка параметров таблицы')
+        """ Настройка внешнего вида представления """
+
         self.blockSignals(True)
         self.expandAll()
         self.setSortingEnabled(True)
@@ -124,14 +141,16 @@ class HierarchicalView(QTreeView):
         self.blockSignals(False)
         self.modifyModelSettingsOnUpdate()
 
-    # Параметры, применяемые при обновлении
     def modifyModelSettingsOnUpdate(self) -> None:
-        logging.debug(f'Установка параметров после обновления')
+        """ Установка параметров после обновления """
+
         for column in range(self.model.columnCount()):
             self.resizeColumnToContents(column)
 
     @staticmethod
     def qDataRow(data_row: list[str, int, None]) -> list[QStandardItem]:
+        """ Записывает данные в модель """
+
         q_data_row = []
         for item in data_row:
             q_item = QStandardItem()
@@ -139,8 +158,9 @@ class HierarchicalView(QTreeView):
             q_data_row.append(q_item)
         return q_data_row
 
-    # Вносит в модель данные родитель: дети (root)
     def importData(self, root: QStandardItem | None = None) -> None:
+        """ Вносит в модель данные родитель: дети """
+
         self.model.setRowCount(0)
         if root is None:
             root = self.model.invisibleRootItem()
@@ -162,11 +182,12 @@ class HierarchicalView(QTreeView):
                          level=0,
                          main_index='')
 
-    # Вносит в модель данные родитель: дети (древо)
     def addChildren(self, parent: QStandardItem,
                     parent_id: int,
                     level: int,
                     main_index: str) -> None:
+        """ Рекурсивно вносит в модель данные родитель: дети """
+
         for branch in self.model.tree.tree_dicts:
             if branch.parent_id == parent_id:
                     index = main_index + str(parent.rowCount() + 1) + '.'
@@ -195,16 +216,18 @@ class HierarchicalView(QTreeView):
                         SplashScreen().close()
                         show_dialog(f'Обнаружена рекурсивная зависимость в {name} {deno}')
 
-    # Раскрывает модель до определенного уровня
     def setExpandToLevel(self, expand_level: int) -> None:
+        """ Раскрывает представление модели до определенного уровня """
+
         expand_level = expand_level - 1
         self.collapseAll()
         if expand_level >= 0:
             self.expandToDepth(expand_level)
 
-    # Добавляет новый столбец и заполняет данными по названию столбца
     def addNewColumn(self, data: dict[str, str | bool | None | dict[Product, str]],
                      modify_settings: bool = True, new_column: bool = True) -> None:
+        """ Добавляет новый или скрывает/показывает уже имеющийся столбец """
+
         header = data['header']
         root = self.model.invisibleRootItem()
         if header not in self.headerHorizontal:
@@ -216,7 +239,9 @@ class HierarchicalView(QTreeView):
             self.column_settings[data['header']] = {'data': data,
                                                     'visible': True}
             if 'delegate' in data:
-                self.delegate_settings.setDelegate(delegate_name=data['delegate'], column=column)
+                self.delegate_settings.setDelegate(
+                    delegate_name=data['delegate'],
+                    column=column)
         else:
             column = self.headerHorizontal.index(header)
             visibility = not self.isColumnHidden(column)
@@ -226,20 +251,34 @@ class HierarchicalView(QTreeView):
         if modify_settings:
             self.modifyModelSettingsOnUpdate()
 
-    # Запрашивает значения аттрибутов (рекурсивно)
     def getDataFromProduct(self, data: dict[str, str | bool | None | dict[Product, str]],
                            item: QStandardItem, column: int, new_column: bool) -> None:
+        """ Изменяет данные столбца, запрашивая
+            определенный аттрибут для каждой строки """
+
         if new_column:
-            item.appendColumn([QStandardItem() for row in range(item.rowCount())])
+            item.appendColumn([QStandardItem() for _ in range(item.rowCount())])
         for row in range(item.rowCount()):
             child = item.child(row)
-            data = self.addDataToModel(item=item, child=child, data=data, row=row, column=column)
-            self.getDataFromProduct(item=child, data=data, column=column, new_column=new_column)
+            data = self.addDataToModel(item=item,
+                                       child=child,
+                                       data=data,
+                                       row=row,
+                                       column=column)
+            self.getDataFromProduct(item=child,
+                                    data=data,
+                                    column=column,
+                                    new_column=new_column)
 
-    # Вносит значения аттрибутов в модель
     def addDataToModel(self, item: QStandardItem, child: QStandardItem, row: int, column: int,
                        data: dict[str, str | bool | None | dict[Product, str]]
                        ) -> dict[str, str | bool | None | dict[Product, str]]:
+        """ Запрос определенных аттрибутов у определенного изделия.
+            В случае, когда определенный аттрибут относиться
+            к нескольким изделиям (несколько изделий изготавливаются
+            совместно по одному технологическому процессу) вызывается
+            метод дополняющий данные аттрибутов для этих изделий """
+
         product = child.data()
         text = product.getData(data=data)
         if 'sub_products' in data.keys():
@@ -253,9 +292,11 @@ class HierarchicalView(QTreeView):
             item.child(row, column).setData(text, Qt.DisplayRole)
         return data
 
-    # Добавить информацию о составной МК к списку МК
     @staticmethod
-    def addComplexDocumentText(product, data: dict[str, str | bool | None | dict[Product, str]], text: str) -> str:
+    def addComplexDocumentText(product, text: str,
+                               data: dict[str, str | bool | None | dict[Product, str]]) -> str:
+        """ Дополняет данными для документов совместного изготовления """
+
         product_dict = data['sub_products']
         additional_text = product_dict.pop(product, None)
         if additional_text is not None:
@@ -264,12 +305,12 @@ class HierarchicalView(QTreeView):
             return additional_text
         return text
 
-    # Сохраняет данные о изделиях в составе составной МК
     def addComplexDocumentInfo(self, data: dict[str, str | bool | None | dict[Product, str]],
                                product: Product) -> dict[str, str | bool | None | dict[Product, str]]:
+        """ Сохраняет данные об изделиях в составе составной МК """
+
         sub_data = data.copy()
         sub_data['setting'] = 'sub_products_new'
-        # sub_data['first'] = True
         sub_data['only_text'] = False
         documents_data = product.getData(sub_data)
 
@@ -281,9 +322,10 @@ class HierarchicalView(QTreeView):
                                                                                 text=f'В составе {document.deno}')
         return data
 
-    # Найти элемент в модели (рекурсивно)
     def findText(self, text: str, item: QStandardItem | None = None,
                  indexes: list[QModelIndex] | None = None) -> list[QModelIndex]:
+        """ Возвращает список индексов по совпадению текста """
+
         if indexes is None:
             indexes = []
         item = self.model.invisibleRootItem() if item is None else item
@@ -296,8 +338,10 @@ class HierarchicalView(QTreeView):
                                             flags=Qt.MatchFixedString | Qt.MatchContains | Qt.MatchRecursive))
         return indexes
 
-    # Найти элемент в определенном столбце модели (рекурсивно)
     def findTextInColumn(self, text, item=None, column=0, indexes: tuple[QModelIndex] = ()) -> list[QModelIndex]:
+        """ Возвращает список индексов по совпадению текста, но
+            ищет только в одном столбце """
+
         indexes = list(indexes)
         item = self.model.invisibleRootItem() if item is None else item
         index = self.model.index(0, column, item.index())
@@ -308,8 +352,9 @@ class HierarchicalView(QTreeView):
                                         flags=Qt.MatchExactly | Qt.MatchRecursive))
         return indexes
 
-    # Считывает открытые и закрытые уровни
     def getExpandSettings(self, item: QStandardItem | None = None) -> None:
+        """ Сохраняет какие строки скрыты/показаны """
+
         if item is None:
             item = self.model.invisibleRootItem()
         for row in range(item.rowCount()):
@@ -319,8 +364,9 @@ class HierarchicalView(QTreeView):
             self.expand_settings[code] = self.isExpanded(index)
             self.getExpandSettings(child)
 
-    # Разворачивает и сворачивает уровни
     def setExpandSettings(self, item: QStandardItem | None = None) -> None:
+        """ Разворачивает и сворачивает уровни """
+
         if item is None:
             item = self.model.invisibleRootItem()
         for row in range(item.rowCount()):
@@ -333,8 +379,9 @@ class HierarchicalView(QTreeView):
                 self.setExpanded(index, False)
             self.setExpandSettings(child)
 
-    # Возвращает индекс выделенной ячейки
     def customSelectedIndexes(self, column: int = 0) -> QModelIndex | None:
+        """ Возвращает индекс выделенной ячейки """
+
         try:
             self.setColumnHidden(0, False)
             index = self.selectedIndexes()[column]
@@ -344,14 +391,20 @@ class HierarchicalView(QTreeView):
             self.setColumnHidden(0, True)
             return None
 
-    # SetExpandToLevel с блокировкой сигналов и настройкой столбцов (сделать через декоратор?)
     def customSetExpandToLevel(self, expand_level: int) -> None:
+        """ SetExpandToLevel с блокировкой сигналов и настройкой столбцов
+            (сделать через декоратор?) """
+
         self.blockSignals(True)
         self.setExpandToLevel(int(expand_level))
         self.modifyModelSettingsOnUpdate()
         self.blockSignals(False)
 
     def showAllDocumentTypes(self):
+        """ Вывести столбцы наличия определенного вида документа,
+            но для всех видов документов, которые можно встретить
+            в этом изделии и его дочерних """
+
         self.blockSignals(True)
         self.getExpandSettings()
         self.collapseAll()
@@ -359,7 +412,6 @@ class HierarchicalView(QTreeView):
         logging.debug(self.document_types)
         self.addMultipleColumns()
         self.setExpandSettings()
-        logging.debug(f'Индекс строки: {self.customSelectedIndexes(1)}')
         try:
             self.scrollTo(self.customSelectedIndexes(1))
         except IndexError:
@@ -370,6 +422,8 @@ class HierarchicalView(QTreeView):
         self.modifyModelSettingsOnUpdate()
 
     def addMultipleColumns(self) -> None:
+        """ Добавление нескольких столбцов, а не одного """
+
         types_num = len(self.document_types)
         for num, document_type in enumerate(self.document_types):
             SplashScreen().newMessage(message=f'{document_type.subtype_name}',
@@ -390,7 +444,8 @@ class HierarchicalView(QTreeView):
         SplashScreen().closeWithWindow()
 
     def setRowColor(self, mark_index: str, color: QColor) -> None:
-        # Обернуть
+        """ Изменить цвет строки """
+
         if self.isColumnHidden(0):
             self.setColumnHidden(0, False)
             indexes = self.findTextInColumn(text=mark_index)
@@ -405,6 +460,8 @@ class HierarchicalView(QTreeView):
             pass
 
     def redrawColumn(self, data: dict[str, str | bool | None | dict[Product, str]]) -> None:
+        """ Обновить данные определенного столбца """
+
         header = data['header']
         if header in self.headerHorizontal:
             root = self.model.invisibleRootItem()
@@ -415,29 +472,37 @@ class HierarchicalView(QTreeView):
                                     new_column=False)
 
     def redrawAllColumns(self) -> None:
+        """ Обновить данные всех столбцов """
+
         for header in self.column_settings:
             if header != 'Индекс':
                 self.redrawColumn(self.column_settings[header]['data'])
 
-    # Обновить список типовых ТП
     def updKttp(self, documents: list) -> None:
+        """ Обновить список типовых ТП, относящихся
+            к определенному изделию """
+
         product = self.selectedProduct
         product.updKttp(documents=documents)
         self.redrawAllColumns()
 
-    # Привязать типовой ТП к изделию
     def addKttp(self, documents: list) -> None:
+        """ Привязать типовой ТП к изделию """
+
         product = self.selectedProduct
         product.addDocument(documents[0])
         self.redrawAllColumns()
 
-    # Отвязать типовой ТП от изделия
     def delKttp(self, documents: list) -> None:
+        """ Отвязать типовой ТП от изделия """
+
         product = self.selectedProduct
         product.delDocument(documents[0])
         self.redrawAllColumns()
 
     def updProductKind(self, kind_name) -> None:
+        """ Изменить вид изделия """
+
         product = self.selectedProduct
         kind_dict = ProductKind.all_db_kinds()
         product.product_kind = kind_dict[kind_name]
@@ -445,18 +510,19 @@ class HierarchicalView(QTreeView):
 
     @property
     def selectedProduct(self) -> Product:
+        """ Определить изделие, которое относиться к выбранной строке """
+
         try:
-            logging.info(f'Попытка определить изделие')
             index = self.customSelectedIndexes()
             product = index.model().itemFromIndex(index).data()
-            logging.info(f'Изделие определено: {product.name} {product.deno}')
         except (IndexError, AttributeError):
-            logging.warning(f'Определить изделие не удалось')
             product = None
         return product
 
     @property
     def selectedProductIndex(self) -> QModelIndex:
+        """ Индекс, выбранной строки """
+
         try:
             index = self.customSelectedIndexes().data()
         except (IndexError, AttributeError):
@@ -465,32 +531,42 @@ class HierarchicalView(QTreeView):
 
 
 class DelegateSettings:
+    """  """
 
     def __init__(self, view: HierarchicalView) -> None:
         self.view = view
         self.settings = {}
 
     def setDelegate(self, delegate_name: str, column: int) -> None:
+        """  """
+
         delegate = getattr(self, delegate_name)
         self.view.setItemDelegateForColumn(column, delegate)
         self.settings[column] = delegate
 
     @property
     def DelegateKTTP(self) -> DelegateKTTP:
+        """  """
+
         return DelegateKTTP()
 
     @property
     def DelegateProductKind(self) -> DelegateProductKind:
+        """  """
+
         return DelegateProductKind()
 
 
 class DelegateKTTP(QStyledItemDelegate):
+    """  """
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
 
     @staticmethod
     def setItems(current_text: str, model: HierarchicalModel) -> list[str]:
+        """  """
+
         items = sorted(model.tree.kttp_deno_only.keys())
         if current_text:
             current_item = current_text.split('\n')
@@ -500,6 +576,8 @@ class DelegateKTTP(QStyledItemDelegate):
         return items
 
     def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex) -> ComboboxWithCheckBox:
+        """  """
+
         editor = ComboboxWithCheckBox(parent)
         current_text = str(index.model().itemData(index)[0])
         editor.current_items = current_text.split('\n')
@@ -508,16 +586,21 @@ class DelegateKTTP(QStyledItemDelegate):
         return editor
 
     def setModelData(self, editor: ComboboxWithCheckBox, model: HierarchicalModel, index: QModelIndex) -> None:
+        """  """
+
         model.updKttp(names=editor.checkItems())
         model.setData(index, '\n'.join(editor.checkItems()), Qt.EditRole)
 
 
 class DelegateProductKind(QStyledItemDelegate):
+    """  """
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
 
     def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex) -> QComboBox:
+        """  """
+
         editor = QComboBox(parent)
         current_text = str(index.model().itemData(index)[0])
         editor.addItems(ProductKind.all_db_kinds().keys())
@@ -525,11 +608,15 @@ class DelegateProductKind(QStyledItemDelegate):
         return editor
 
     def setModelData(self, editor: QComboBox, model: HierarchicalModel, index: QModelIndex) -> None:
+        """  """
+
         model.updProductKind(kind_name=editor.currentText())
         model.setData(index, editor.currentText(), Qt.EditRole)
 
 
 class ComboboxWithCheckBox(QComboBox):
+    """  """
+
 
     def __init__(self, parent) -> None:
         super(ComboboxWithCheckBox, self).__init__(parent)
@@ -537,6 +624,8 @@ class ComboboxWithCheckBox(QComboBox):
         self.text = ''
 
     def addItem(self, text: str, *args, **kwargs) -> None:
+        """  """
+
         super(ComboboxWithCheckBox, self).addItem(text)
         item = self.model().item(self.count() - 1, 0)
         item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
@@ -546,14 +635,20 @@ class ComboboxWithCheckBox(QComboBox):
             item.setCheckState(Qt.Unchecked)
 
     def addItems(self, items: list[str]) -> None:
+        """  """
+
         for item in items:
             self.addItem(item)
 
     def itemChecked(self, index) -> bool:
+        """  """
+
         item = self.model().item(index, 0)
         return item.checkState() == Qt.Checked
 
     def checkItems(self) -> list[str]:
+        """  """
+
         checkedItems = []
         for i in range(self.count()):
             if self.itemChecked(i):
@@ -561,9 +656,13 @@ class ComboboxWithCheckBox(QComboBox):
         return checkedItems
 
     def showPopup(self) -> None:
+        """  """
+
         super(ComboboxWithCheckBox, self).showPopup()
 
     def paintEvent(self, event: QPaintEvent) -> None:
+        """  """
+
         painter = QStylePainter(self)
         painter.setPen(self.palette().color(QPalette.Text))
         opt = QStyleOptionComboBox()
