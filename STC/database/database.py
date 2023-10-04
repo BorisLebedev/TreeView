@@ -358,6 +358,8 @@ class DbProductKind(Base):
         default_kind = DbProductKind.data['неизвестно']
         deno = str(db_product.deno)
         name = str(db_product.name)
+        if db_product.purchased:
+            return DbProductKind.data['ПКИ']
         if re.fullmatch(r'\w{4}[.]\d{5}-\d{2}', deno):
             return DbProductKind.data['СПО']
         if deno == name:
