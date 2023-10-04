@@ -40,7 +40,7 @@ class ExcelSync:
         ExcelProduct.document_signs = ['СП','СБ','Э4']
         ExcelProduct.subproducts = [ExcelSubProduct1, ExcelSubProduct2, ExcelSubProduct3]"""
 
-    def __init__(self) -> None:
+    def __init__(self, upd: bool = False) -> None:
         self.document_type_builder = DocumentTypeBuilder()
         stages = 10
         SplashScreen().newMessage(message='Импорт данных Excel...', stage=0, stages=stages)
@@ -56,7 +56,7 @@ class ExcelSync:
         self.addPrimaryApplication()
 
         SplashScreen().newMessage(message='Привязка дочерних изделий...')
-        self.addChildren()
+        self.addChildren(upd=upd)
 
         SplashScreen().newMessage(message='Внесение документов по спецификациям...')
         self.addDocumentsKD()
@@ -117,7 +117,7 @@ class ExcelSync:
                 products[excel_product.deno] = product
         DbPrimaryApplication.addDbPrimaryApplications(products=products)
 
-    def addChildren(self) -> None:
+    def addChildren(self, upd) -> None:
         """ Вносит дочерние изделия в таблицу Product и
             вносит запись об их вхождении, типе и количестве в
             родительское изделие в таблицу Hierarchy. """
@@ -131,10 +131,9 @@ class ExcelSync:
                              'id_type': excel_subproduct.product_type.id_type,
                              'quantity': excel_subproduct.quantity}
                     children.append(child)
-                if children and excel_product.product.date_check >= excel_product.upd_date:
-                    hierarchy = {'parent': excel_product.product,
-                                 'products': children}
-                    hierarchies[excel_product.product] = hierarchy
+                if children and excel_product.product.date_check >= excel_product.upd_date and upd:
+                    hierarchies[excel_product.product] = {'parent': excel_product.product,
+                                                          'products': children}
         if hierarchies:
             DbHierarchy.addDbHierarchies(hierarchies=hierarchies)
 

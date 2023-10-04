@@ -274,7 +274,12 @@ class Controller:
 
     # Импорт данных из иерархических таблиц Excel
     def syncWithExcel(self) -> None:
-        ExcelSync()
+        msg_box = show_dialog(text='Сохранить структуру изделия?',
+                              m_type='continue_project')
+        upd = False
+        if msg_box.standardButton(msg_box.clickedButton()) == QMessageBox.No:
+            upd = True
+        ExcelSync(upd=upd)
         self.updProductSelector()
         show_dialog(text='Импорт данных из иерархических таблиц Excel завершен', m_type='info')
 
