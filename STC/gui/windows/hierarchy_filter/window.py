@@ -1,10 +1,8 @@
+""" Окно фильтра иерархической таблицы """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from PyQt5.Qt import QPoint
-    from STC.gui.windows.ancestors.model import SortFilterProxyModel
 
 import logging
 
@@ -14,9 +12,13 @@ from PyQt5.QtWidgets import QTableView
 from STC.gui.windows.ancestors.window import WindowBasic
 from STC.gui.windows.hierarchy_filter.frame import TableViewFilter
 
+if TYPE_CHECKING:
+    from PyQt5.Qt import QPoint
+    from STC.gui.windows.ancestors.model import SortFilterProxyModel
 
-# Окно фильтра иерархической таблицы
+
 class WindowFilter(WindowBasic):
+    """ Окно фильтра иерархической таблицы """
 
     def __init__(self, model: SortFilterProxyModel) -> None:
         super().__init__()
@@ -26,6 +28,8 @@ class WindowFilter(WindowBasic):
         self.initUI()
 
     def initUI(self) -> None:
+        """ Настройка внешнего вида окна """
+
         self.setWindowFlags(Qt.CustomizeWindowHint)
         self.basic_layout.itemAt(0).widget().layout.itemAt(0).widget().setText(self.title)
         self.setGeometry(200, 200, 500, 100)
@@ -35,6 +39,8 @@ class WindowFilter(WindowBasic):
         self.updStatusBar()
 
     def widgets(self) -> None:
+        """ Виджеты окна """
+
         self.table = QTableView()
         self.table.setModel(self.base_model)
         # self.initDelegates()
@@ -45,20 +51,28 @@ class WindowFilter(WindowBasic):
         self.windowSizeAdjustment()
 
     def initDelegates(self) -> None:
+        """ Инициализация делегатов для представления модели """
+
         for column in range(self.table.model().columnCount()):
             delegate = self.base_model.tree_view.itemDelegateForColumn(column)
             self.table.setItemDelegateForColumn(column, delegate)
 
     def setFilterMenu(self) -> None:
+        """ Окно фильтрации данных в качестве контекстного меню """
+
         self.table.horizontalHeader().setContextMenuPolicy(Qt.CustomContextMenu)
         self.table.horizontalHeader().customContextMenuRequested.connect(self.showFilterMenu)
 
     def showFilterMenu(self, point: QPoint) -> None:
+        """ Окно фильтрации данных для определенного столбца """
+
         logging.debug(self.base_model)
         logicalIndex = self.table.horizontalHeader().logicalIndexAt(point)
         TableViewFilter(window=self, logicalIndex=logicalIndex)
 
     def windowSizeAdjustment(self) -> None:
+        """ Настройка размеров окна и столбцов таблицы """
+
         self.table.setSortingEnabled(True)
         for column in range(self.table.horizontalHeader().count()):
             self.table.resizeColumnToContents(column)
@@ -68,6 +82,8 @@ class WindowFilter(WindowBasic):
                     120 + self.table.verticalHeader().length() + self.table.horizontalHeader().height())
 
     def updStatusBar(self) -> None:
+        """ Изменение текста статусбара окна """
+
         find = self.table.model().rowCount()
         percent = int(find/self.total*100)
         msg = f'Найдено: {find} из {self.total}. {percent}% от общего количества.'
