@@ -104,10 +104,10 @@ class FrameCheckboxSettings(FrameBasic):
     def readSettings(self) -> None:
         for cb in self.checkboxes.values():
             cb.blockSignals(True)
-            if self.header(cb) not in self.tree_model.headerHorizontal:
+            if self.header(cb) not in self.tree_model.header_horizontal:
                 cb.setChecked(False)
             else:
-                column = self.tree_model.headerHorizontal.index(self.header(cb))
+                column = self.tree_model.header_horizontal.index(self.header(cb))
                 cb.setChecked(not self.tree_model.isColumnHidden(column))
             cb.blockSignals(False)
 
@@ -193,10 +193,10 @@ class FrameMainSettings(FrameCheckboxSettings):
         self.documentType()
         for cb in self.checkboxes.values():
             cb.blockSignals(True)
-            if self.header(cb) not in self.tree_model.headerHorizontal:
+            if self.header(cb) not in self.tree_model.header_horizontal:
                 cb.setChecked(False)
             else:
-                column = self.tree_model.headerHorizontal.index(self.header(cb))
+                column = self.tree_model.header_horizontal.index(self.header(cb))
                 cb.setChecked(not self.tree_model.isColumnHidden(column))
             cb.blockSignals(False)
 

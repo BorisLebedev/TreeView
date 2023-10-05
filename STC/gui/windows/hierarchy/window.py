@@ -50,9 +50,9 @@ class SettingsWindowTable:
 
         header_visibility = {}
         header_column = {}
-        header_labels = tree.headerHorizontal
+        header_labels = tree.header_horizontal
         for label in header_labels:
-            column = tree.header().visualIndex(tree.headerHorizontal.index(label))
+            column = tree.header().visualIndex(tree.header_horizontal.index(label))
             header_visibility[label] = tree.isColumnHidden(column)
             header_column[column] = label
         return header_visibility, header_column
@@ -80,7 +80,7 @@ class SettingsWindowTable:
             в текущей таблице их нет, а согласно настройкам
             таблицы эти столбцы должны быть """
 
-        current_labels = tree.headerHorizontal
+        current_labels = tree.header_horizontal
         for column in sorted(self.header_column.keys()):
             label = self.header_column[column]
             if label not in current_labels:
@@ -305,7 +305,7 @@ class WindowTable(WindowBasic):
     def updTreeModel(self, product_denotation: str) -> None:
         """ Обновить данные иерархического древа """
 
-        self.header_labels = self.tree_view.headerHorizontal
+        self.header_labels = self.tree_view.header_horizontal
         self.settings = SettingsWindowTable(self.tree_view)
         self.settings.getCurrentCode(self.tree_view)
         self.settings.getColumnSettings(self.tree_view)
@@ -332,7 +332,7 @@ class WindowTable(WindowBasic):
         """ Изменить цвет строки и привязать цвет к индексу древа """
 
         color = QColor(self.sender().icon().pixmap(16, 16).toImage().pixelColor(0, 0))
-        self.mark_index.update({self.tree_view.selectedProductIndex: color})
+        self.mark_index.update({self.tree_view.selected_product_index: color})
         self.colorizeTree()
 
     def colorizeTree(self) -> None:

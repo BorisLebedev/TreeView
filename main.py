@@ -155,7 +155,7 @@ class Controller:
     # Окно реквизитов документа
     def showNewDocumentWindow(self) -> None:
         try:
-            product = self.table.tree_view.selectedProduct
+            product = self.table.tree_view.selected_product
         except AttributeError:
             product = None
             logging.warning('Ввод нового изделия')
@@ -218,7 +218,7 @@ class Controller:
     # Окно выбора маршрутной карты
     def showSelectMkWindow(self) -> None:
         try:
-            product = self.table.tree_view.selectedProduct
+            product = self.table.tree_view.selected_product
         except AttributeError:
             product = None
             logging.warning('Изделие не определено')
@@ -249,7 +249,7 @@ class Controller:
     # Определяет вид изделия
     def assignKind(self) -> None:
         if self.table.current_context_menu_kind is not None:
-            product = self.table.tree_view.selectedProduct
+            product = self.table.tree_view.selected_product
             product.product_kind = self.table.current_context_menu_kind
             pass
 

@@ -69,7 +69,7 @@ class ContextMenuForTree(ContextMenu):
             технологического процесса и определенного изделия """
 
         kttp_menu_del = self.kttp_menu.addMenu('Отвязать КТТП')
-        documents = self.object.tree_view.selectedProduct.getDocumentByType(
+        documents = self.object.tree_view.selected_product.getDocumentByType(
             class_name='ТД',
             subtype_name='Карта типового (группового) технологического процесса',
             org_code='2',
