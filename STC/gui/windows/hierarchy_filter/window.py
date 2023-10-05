@@ -37,7 +37,7 @@ class WindowFilter(WindowBasic):
     def widgets(self) -> None:
         self.table = QTableView()
         self.table.setModel(self.base_model)
-        self.initDelegates()
+        # self.initDelegates()
         self.main_layout.addWidget(self.table, 0, 0)
         self.table.clicked.connect(lambda: self.table.model().selectionChanged(self.table.currentIndex()))
         self.table.setColumnHidden(0, True)
