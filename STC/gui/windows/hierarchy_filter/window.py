@@ -72,7 +72,7 @@ class WindowFilter(WindowBasic):
 
         logging.debug(self.base_model)
         logical_index = self.table.horizontalHeader().logicalIndexAt(point)
-        TableViewFilter(window=self, logicalIndex=logical_index)
+        TableViewFilter(window=self, logical_index=logical_index)
 
     def windowSizeAdjustment(self) -> None:
         """ Настройка размеров окна и столбцов таблицы """
