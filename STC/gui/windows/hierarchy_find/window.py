@@ -1,9 +1,8 @@
+""" Окно поиска по тексту в данных иерархического древе """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from STC.gui.windows.hierarchy_find.model import StandartModelSearch
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import pyqtSignal
@@ -14,18 +13,28 @@ from PyQt5.QtWidgets import QTableView
 
 from STC.gui.windows.ancestors.window import WindowBasic
 
+if TYPE_CHECKING:
+    from STC.gui.windows.hierarchy_find.model import StandartModelSearch
 
-# Окно поиска по столбцам иерархической таблицы
+
 class WindowSearchTreeView(WindowBasic):
+    """ Окно поиска по столбцам иерархической таблицы """
+
     findData = pyqtSignal()
 
     def __init__(self) -> None:
+        self.line = QLineEdit()
+        self.model = None
+        self.table = None
+        self.label = None
         super().__init__()
         self.title = "Поиск"
-        self.InitUI()
+        self.initUI()
         self.line.setFocus()
 
-    def InitUI(self) -> None:
+    def initUI(self) -> None:
+        """ Внешний вид и размер окна """
+
         self.setWindowFlags(Qt.CustomizeWindowHint)
         self.basic_layout.itemAt(0).widget().layout.itemAt(0).widget().setText(self.title)
         self.basic_layout.itemAt(0).widget().layout.itemAt(1).widget().setHidden(True)
@@ -36,6 +45,8 @@ class WindowSearchTreeView(WindowBasic):
         self.widgets()
 
     def widgets(self) -> None:
+        """ Инициализация виджетов окна """
+
         label = QLabel('Найти')
         self.line = QLineEdit('')
 
@@ -46,6 +57,8 @@ class WindowSearchTreeView(WindowBasic):
         button_search.clicked.connect(self.findData)
 
     def showSearchResults(self, model: StandartModelSearch) -> None:
+        """ Выводит результат поиска """
+
         self.model = model
         if model.rowCount() == 0:
             self.label = QLabel('Не найдено')
@@ -55,14 +68,21 @@ class WindowSearchTreeView(WindowBasic):
             self.drawTableView()
 
     def windowSizeAdjustment(self) -> None:
+        """ Изменяет размер окна поиска """
+
         self.table.setSortingEnabled(True)
         for column in range(self.table.horizontalHeader().count()):
             self.table.resizeColumnToContents(column)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.resize(70 + self.table.horizontalHeader().length(),
-                    120 + self.table.verticalHeader().length() + self.table.horizontalHeader().height())
+                    120 + self.table.verticalHeader().length() +
+                    self.table.horizontalHeader().height())
 
     def drawTableView(self) -> None:
+        """ Представление для модели найденных данных.
+            Таблица с текстом ячеек и ссылкой на строку
+            в иерархическом представлении """
+
         self.table = QTableView()
         self.table.setModel(self.model)
         self.main_layout.addWidget(self.table, 2, 0, 1, 2)
