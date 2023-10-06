@@ -119,6 +119,7 @@ class ExcelExport:
 
     def getData(self):
         """ Генерация модели из древа со считыванием данных """
+
         self._standart_model = StandartModel(tree_view=self.tree_model)
         self._standart_model.getIndexes()
         self._standart_model.addData()
