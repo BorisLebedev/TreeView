@@ -18,12 +18,15 @@ if TYPE_CHECKING:
 
 
 class WindowFilter(WindowBasic):
-    """ Окно фильтра иерархической таблицы """
+    """ Окно фильтра иерархической таблицы
+        Представление реализовано как стандартный QTableView,
+        а не переопределено как HierarchicalView """
 
     def __init__(self, model: SortFilterProxyModel) -> None:
         super().__init__()
         self.title = "Результат фильтра"
         self.base_model = model
+        self.table = None
         self.total = self.base_model.rowCount()
         self.initUI()
 
@@ -45,7 +48,8 @@ class WindowFilter(WindowBasic):
         self.table.setModel(self.base_model)
         # self.initDelegates()
         self.main_layout.addWidget(self.table, 0, 0)
-        self.table.clicked.connect(lambda: self.table.model().selectionChanged(self.table.currentIndex()))
+        self.table.clicked.connect(
+            lambda: self.table.model().selectionChanged(self.table.currentIndex()))
         self.table.setColumnHidden(0, True)
         self.table.horizontalHeader().setSectionsMovable(True)
         self.windowSizeAdjustment()
@@ -67,8 +71,8 @@ class WindowFilter(WindowBasic):
         """ Окно фильтрации данных для определенного столбца """
 
         logging.debug(self.base_model)
-        logicalIndex = self.table.horizontalHeader().logicalIndexAt(point)
-        TableViewFilter(window=self, logicalIndex=logicalIndex)
+        logical_index = self.table.horizontalHeader().logicalIndexAt(point)
+        TableViewFilter(window=self, logicalIndex=logical_index)
 
     def windowSizeAdjustment(self) -> None:
         """ Настройка размеров окна и столбцов таблицы """
@@ -78,8 +82,9 @@ class WindowFilter(WindowBasic):
             self.table.resizeColumnToContents(column)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.resizeRowsToContents()
-        self.resize(100 + self.table.verticalHeader().width() + self.table.horizontalHeader().length(),
-                    120 + self.table.verticalHeader().length() + self.table.horizontalHeader().height())
+        self.resize(
+            100 + self.table.verticalHeader().width() + self.table.horizontalHeader().length(),
+            120 + self.table.verticalHeader().length() + self.table.horizontalHeader().height())
 
     def updStatusBar(self) -> None:
         """ Изменение текста статусбара окна """
