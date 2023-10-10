@@ -44,17 +44,18 @@ class StructureCreateMK(StructureSideMenu):
         self.buttons_frame = FrameOperationButtons()
         self.buttons_frame.showFrame.connect(
             lambda: self.frameSwitcher(self.buttons_frame.current_frame))
-        self.scrollarea = QScrollArea()
-        self.scrollarea.setWidgetResizable(True)
-        self.menu_frame.layout().addWidget(self.scrollarea, self.menu_frame.layout().count(), 0)
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.menu_frame.layout().addWidget(self.scroll_area, self.menu_frame.layout().count(), 0)
         self.menu_frame.layout().setRowStretch(self.menu_frame.layout().count() - 1, 100)
-        self.scrollarea.setWidget(self.buttons_frame)
+        self.scroll_area.setWidget(self.buttons_frame)
 
     def newOperation(self, document: Document) -> None:
         """ Создание рамки с данными определенной операции """
 
         new_operation = self.operations_frame.new_operation
-        operation_frame = FrameMkOperationMain(document=document, operation=new_operation)
+        operation_frame = FrameMkOperationMain(document=document,
+                                               operation=new_operation)
         self.data_frame.layout().addWidget(operation_frame)
         operation_frame.hide()
         self.frames.append(operation_frame)
