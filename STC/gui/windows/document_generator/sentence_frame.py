@@ -1,16 +1,11 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
+""" Рамки для таблицы с параметрами переходов,
+    которые содержат переменные данные об
+    оснастке, материалах, оборудовании и ИОТ """
 
-if TYPE_CHECKING:
-    from PyQt5.QtCore import QPoint
-    from PyQt5.QtWidgets import QComboBox
-    from STC.product.product import IOT
-    from STC.product.product import Rig
-    from STC.product.product import Mat
-    from STC.product.product import Equipment
-    from STC.product.product import Document
-    from STC.product.product import Sentence
-    from STC.gui.windows.document_generator.frame import FrameOperationText
+from __future__ import annotations
+
+import logging
+from typing import TYPE_CHECKING
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFrame
@@ -34,11 +29,26 @@ from STC.gui.windows.document_generator.combobox import ComboBoxMatByType
 from STC.gui.windows.document_generator.combobox import ComboBoxRigByName
 from STC.gui.windows.document_generator.combobox import ComboBoxRigByType
 
+if TYPE_CHECKING:
+    from PyQt5.QtCore import QPoint
+    from PyQt5.QtWidgets import QComboBox
+    from STC.product.product import IOT
+    from STC.product.product import Rig
+    from STC.product.product import Mat
+    from STC.product.product import Equipment
+    from STC.product.product import Document
+    from STC.product.product import Sentence
+    from STC.gui.windows.document_generator.frame import FrameOperationText
 
-# Виджет рамки с двумя столбцами комбобоксов
+
 class SentenceFrame(QFrame):
+    """ Родительский класс для рамки с двумя столбцами комбобоксов """
+
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, frame: FrameOperationText, sentence: Sentence) -> None:
+        self.item_type = None
+        self.item_name = None
         super().__init__()
         self.frame = frame
         self.sentence = sentence
@@ -52,9 +62,11 @@ class SentenceFrame(QFrame):
         self.initDefaultWidgets()
 
     def initDefaultWidgets(self) -> None:
-        pass
+        """ Начальные виджеты рамки """
 
     def initSettings(self) -> None:
+        """ Геометрические параметры рамки """
+
         # self.setLayout(QGridLayout())
         self.combobox_height = 30
         self.row = 0
@@ -64,46 +76,66 @@ class SentenceFrame(QFrame):
         self.main_layout.setSpacing(0)
 
     def initWidget(self, item: None) -> None:
+        """ Инициализация виджетов рамки """
+
+        logging.debug(item)
         self.item_type = ComboBox(frame=self.frame, cb_frame=self)
         self.item_type.currentTextChanged.connect(self.typeChanged)
         self.item_name = ComboBox(frame=self.frame, cb_frame=self)
         self.widgets[self.item_type] = self.item_name
 
     def addWidget(self, item: Document | IOT | Mat | Rig | Equipment | None = None) -> None:
+        """ Инициализация и добавление виджетов на рамку """
+
         self.initWidget(item)
         self.initWidgetPosition()
 
     def typeChanged(self) -> None:
+        """ Обновление списка элементов комбобоксов """
+
         self.widgets[self.sender()].updItems()
         self.upd()
 
     def initWidgetPosition(self) -> None:
+        """ Добавление виджетов из self.addWidget в рамку """
+
         self.main_layout.addWidget(self.item_type, self.row, 0)
         self.main_layout.addWidget(self.item_name, self.row, 1)
         self.main_layout.setRowMinimumHeight(self.row, self.combobox_height)
         self.row += 1
 
     def newWidget(self, item=None) -> None:
+        """ Добавление нового виджета в рамку
+            с изменением параметров рамки и
+            различными методами обновлений """
+
         self.addWidget(item=item)
         self.upd()
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def showContextMenu(self, point: QPoint) -> None:
-        qp = self.sender().mapToGlobal(point)
-        self.context_menu.exec_(qp)
+        """ Контекстное меню """
+
+        qpoint = self.sender().mapToGlobal(point)
+        self.context_menu.exec_(qpoint)
 
     def nameChanged(self) -> None:
+        """ Вызывает методы при изменении
+            данных комбобоксов """
+
         self.upd()
         self.sentence.convertToCustom()
 
     def delWidget(self, combobox: QComboBox) -> None:
+        """ Удаление определенных комбобоксов из рамки """
+
         for row in range(self.main_layout.rowCount()):
             item_type_item = self.main_layout.itemAtPosition(row, 0)
             item_name_item = self.main_layout.itemAtPosition(row, 1)
             if item_type_item is not None and item_name_item is not None:
                 item_type = item_type_item.widget()
                 item_name = item_name_item.widget()
-                if combobox == item_type or combobox == item_name:
+                if combobox in (item_type, item_name):
                     self.main_layout.removeWidget(item_type)
                     self.main_layout.removeWidget(item_name)
                     self.main_layout.setRowMinimumHeight(row, 0)
@@ -113,9 +145,11 @@ class SentenceFrame(QFrame):
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def upd(self) -> None:
-        pass
+        """ Вызов сторонних методов при изменении значений комбобоксов """
 
     def itemVisibility(self, state: str) -> None:
+        """ Изменение отображения виджетов в рамке """
+
         if state == 'full':
             for widget1, widget2 in self.widgets.items():
                 widget1.setVisible(True)
@@ -133,22 +167,32 @@ class SentenceFrame(QFrame):
                 self.main_layout.setColumnStretch(1, 1)
 
     def convertSentenceToCustom(self) -> None:
+        """ Изменение перехода:
+            "переход с типовым текстом" ->
+            "переход с нетиповым текстом"
+            """
+
         self.sentence.convertToCustom()
 
 
-# Виджет для отображения ИОТ в таблице с переходами
 class SentenceIot(SentenceFrame):
+    """ Виджет для отображения ИОТ в таблице с переходами """
 
     def __init__(self, frame: FrameOperationText, sentence: Sentence) -> None:
         super().__init__(frame=frame, sentence=sentence)
         self.context_menu = ContextMenuForSentenceIot(self)
 
     def initDefaultWidgets(self) -> None:
+        """ Виджеты рамки при ее инициализации
+            По списку ИОТ, привязанных к переходу """
+
         for iot in self.sentence.iot.values():
             self.addWidget(item=iot)
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def initWidget(self, item: IOT) -> None:
+        """ Создание комбобоксов """
+
         self.item_type = ComboBoxIotByType(frame=self.frame,
                                            cb_frame=self,
                                            item=item)
@@ -162,13 +206,15 @@ class SentenceIot(SentenceFrame):
         self.widgets[self.item_type] = self.item_name
 
     def delWidget(self, combobox: ComboBoxIotByType) -> None:
+        """ Удаление определенных комбобоксов из рамки """
+
         for row in range(self.main_layout.rowCount()):
             item_type_item = self.main_layout.itemAtPosition(row, 0)
             item_name_item = self.main_layout.itemAtPosition(row, 1)
             if item_type_item is not None and item_name_item is not None:
                 item_type = item_type_item.widget()
                 item_name = item_name_item.widget()
-                if combobox == item_type or combobox == item_name:
+                if combobox in (item_type, item_name):
                     self.main_layout.removeWidget(item_type)
                     self.main_layout.removeWidget(item_name)
                     self.main_layout.setRowMinimumHeight(row, 0)
@@ -179,6 +225,8 @@ class SentenceIot(SentenceFrame):
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def upd(self) -> None:
+        """ Обновление перехода и рамок, связанных с изменением значений комбобокса """
+
         new_iot = {}
         for row in range(self.main_layout.rowCount()):
             item_name_item = self.main_layout.itemAtPosition(row, 1)
@@ -190,19 +238,24 @@ class SentenceIot(SentenceFrame):
         self.frame.updIot.emit()
 
 
-# Виджет для отображения оснастки в таблице с переходами
 class SentenceRig(SentenceFrame):
+    """ Виджет для отображения оснастки в таблице с переходами """
 
     def __init__(self, frame: FrameOperationText, sentence: Sentence) -> None:
         super().__init__(frame=frame, sentence=sentence)
         self.context_menu = ContextMenuForSentenceRig(self)
 
     def initDefaultWidgets(self) -> None:
+        """ Виджеты рамки при ее инициализации
+            По списку оснастки, привязанной к переходу """
+
         for rig in self.sentence.rig.values():
             self.addWidget(item=rig)
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def initWidget(self, item: Rig) -> None:
+        """ Создание комбобоксов """
+
         self.item_type = ComboBoxRigByType(frame=self.frame,
                                            cb_frame=self,
                                            item=item)
@@ -215,13 +268,15 @@ class SentenceRig(SentenceFrame):
         self.widgets[self.item_type] = self.item_name
 
     def delWidget(self, combobox: ComboBoxRigByType) -> None:
+        """ Удаление определенных комбобоксов из рамки """
+
         for row in range(self.main_layout.rowCount()):
             item_type_item = self.main_layout.itemAtPosition(row, 0)
             item_name_item = self.main_layout.itemAtPosition(row, 1)
             if item_type_item is not None and item_name_item is not None:
                 item_type = item_type_item.widget()
                 item_name = item_name_item.widget()
-                if combobox == item_type or combobox == item_name:
+                if combobox in (item_type, item_name):
                     self.main_layout.removeWidget(item_type)
                     self.main_layout.removeWidget(item_name)
                     self.main_layout.setRowMinimumHeight(row, 0)
@@ -232,6 +287,8 @@ class SentenceRig(SentenceFrame):
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def upd(self) -> None:
+        """ Обновление перехода и рамок, связанных с изменением значений комбобокса """
+
         new_rig = {}
         for row in range(self.main_layout.rowCount()):
             item_name_item = self.main_layout.itemAtPosition(row, 1)
@@ -244,19 +301,24 @@ class SentenceRig(SentenceFrame):
         self.frame.updRig.emit()
 
 
-# Виджет для отображения материалов в таблице с переходами
 class SentenceMat(SentenceFrame):
+    """ Виджет для отображения материалов в таблице с переходами """
 
     def __init__(self, frame: FrameOperationText, sentence: Sentence) -> None:
         super().__init__(frame=frame, sentence=sentence)
         self.context_menu = ContextMenuForSentenceMat(self)
 
     def initDefaultWidgets(self) -> None:
+        """ Виджеты рамки при ее инициализации
+            По списку материалов, привязанных к переходу """
+
         for mat in self.sentence.mat.values():
             self.addWidget(item=mat)
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def initWidget(self, item: Mat) -> None:
+        """ Создание комбобоксов """
+
         self.item_type = ComboBoxMatByType(frame=self.frame,
                                            cb_frame=self,
                                            item=item)
@@ -270,13 +332,15 @@ class SentenceMat(SentenceFrame):
         self.widgets[self.item_type] = self.item_name
 
     def delWidget(self, combobox: ComboBoxMatByType) -> None:
+        """ Удаление определенных комбобоксов из рамки """
+
         for row in range(self.main_layout.rowCount()):
             item_type_item = self.main_layout.itemAtPosition(row, 0)
             item_name_item = self.main_layout.itemAtPosition(row, 1)
             if item_type_item is not None and item_name_item is not None:
                 item_type = item_type_item.widget()
                 item_name = item_name_item.widget()
-                if combobox == item_type or combobox == item_name:
+                if combobox in (item_type, item_name):
                     self.main_layout.removeWidget(item_type)
                     self.main_layout.removeWidget(item_name)
                     self.main_layout.setRowMinimumHeight(row, 0)
@@ -287,6 +351,8 @@ class SentenceMat(SentenceFrame):
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def upd(self) -> None:
+        """ Обновление перехода и рамок, связанных с изменением значений комбобокса """
+
         new_mat = {}
         for row in range(self.main_layout.rowCount()):
             item_name_item = self.main_layout.itemAtPosition(row, 1)
@@ -299,19 +365,24 @@ class SentenceMat(SentenceFrame):
         self.frame.updMat.emit()
 
 
-# Виджет для отображения оснастки в таблице с переходами
 class SentenceEquipment(SentenceFrame):
+    """ Виджет для отображения оснастки в таблице с переходами """
 
     def __init__(self, frame: FrameOperationText, sentence: Sentence) -> None:
         super().__init__(frame=frame, sentence=sentence)
         self.context_menu = ContextMenuForSentenceEquipment(self)
 
     def initDefaultWidgets(self) -> None:
+        """ Виджеты рамки при ее инициализации
+            По списку оборудования, привязанному к переходу """
+
         for equipment in self.sentence.equipment.values():
             self.addWidget(item=equipment)
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def initWidget(self, item: Equipment) -> None:
+        """ Создание комбобоксов """
+
         self.item_type = ComboBoxEquipmentByType(frame=self.frame,
                                                  cb_frame=self,
                                                  item=item)
@@ -324,13 +395,15 @@ class SentenceEquipment(SentenceFrame):
         self.widgets[self.item_type] = self.item_name
 
     def delWidget(self, combobox: ComboBoxEquipmentByType) -> None:
+        """ Удаление определенных комбобоксов из рамки """
+
         for row in range(self.main_layout.rowCount()):
             item_type_item = self.main_layout.itemAtPosition(row, 0)
             item_name_item = self.main_layout.itemAtPosition(row, 1)
             if item_type_item is not None and item_name_item is not None:
                 item_type = item_type_item.widget()
                 item_name = item_name_item.widget()
-                if combobox == item_type or combobox == item_name:
+                if combobox in (item_type, item_name):
                     self.main_layout.removeWidget(item_type)
                     self.main_layout.removeWidget(item_name)
                     self.main_layout.setRowMinimumHeight(row, 0)
@@ -341,6 +414,8 @@ class SentenceEquipment(SentenceFrame):
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def upd(self) -> None:
+        """ Обновление перехода и рамок, связанных с изменением значений комбобокса """
+
         new_equipment = {}
         for row in range(self.main_layout.rowCount()):
             item_name_item = self.main_layout.itemAtPosition(row, 1)
@@ -353,19 +428,24 @@ class SentenceEquipment(SentenceFrame):
         self.frame.updEquipment.emit()
 
 
-# Виджет для отображения документов в таблице с переходами
 class SentenceDoc(SentenceFrame):
+    """ Виджет для отображения документов в таблице с переходами """
 
     def __init__(self, frame: FrameOperationText, sentence: Sentence) -> None:
         super().__init__(frame=frame, sentence=sentence)
         self.context_menu = ContextMenuForSentenceDoc(self)
 
     def initDefaultWidgets(self) -> None:
+        """ Виджеты рамки при ее инициализации
+            По списку видов документов, привязанных к переходу """
+
         for doc in self.sentence.doc.values():
             self.addWidget(item=doc)
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def initWidget(self, item: Document) -> None:
+        """ Создание комбобоксов """
+
         documents = self.sentence.product.documents
         self.item_type = ComboBoxDocByType(frame=self.frame,
                                            cb_frame=self,
@@ -382,13 +462,15 @@ class SentenceDoc(SentenceFrame):
         self.widgets[self.item_type] = self.item_name
 
     def delWidget(self, combobox: ComboBoxDocByType) -> None:
+        """ Удаление определенных комбобоксов из рамки """
+
         for row in range(self.main_layout.rowCount()):
             item_type_item = self.main_layout.itemAtPosition(row, 0)
             item_name_item = self.main_layout.itemAtPosition(row, 1)
             if item_type_item is not None and item_name_item is not None:
                 item_type = item_type_item.widget()
                 item_name = item_name_item.widget()
-                if combobox == item_type or combobox == item_name:
+                if combobox in (item_type, item_name):
                     self.main_layout.removeWidget(item_type)
                     self.main_layout.removeWidget(item_name)
                     self.main_layout.setRowMinimumHeight(row, 0)
@@ -399,6 +481,8 @@ class SentenceDoc(SentenceFrame):
         self.frame.sentenceResized(self.frame.table.currentRow())
 
     def upd(self) -> None:
+        """ Обновление перехода и рамок, связанных с изменением значений комбобокса """
+
         new_doc = {}
         for row in range(self.main_layout.rowCount()):
             item_name_item = self.main_layout.itemAtPosition(row, 1)
