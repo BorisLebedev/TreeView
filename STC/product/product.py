@@ -1023,7 +1023,7 @@ class ProfessionBuilder:
 
 
 class Product:
-    """ Cодержит данные о изделии и оформленных к нему документов """
+    """ Cодержит данные об изделии и оформленных к нему документов """
 
     def __init__(self) -> None:
         self.db_product = None
@@ -1031,7 +1031,8 @@ class Product:
         self.documents = set()
 
     def getData(self, data: dict[str, str | None]):
-        """  """
+        """ Возвращает как значения аттрибутов изделия, так и
+            значения аттрибутов документов этого изделия """
 
         if data['type'] == 'document':
             data = add_missing_keys(dictionary=data, keys=['class_name',
@@ -1061,13 +1062,14 @@ class Product:
                           meth_code: str | None = None,
                           only_relevant: bool | None = None,
                           first: bool | None = None,
-                          only_text: bool = True):
-        """  """
+                          only_text: bool = True) -> list | str | None:
+        """ Метод для запроса аттрибутов документов определенного изделия.
+            Может возвращать результат как текст или список """
 
         result = []
         # only_relevant и first определены как None, т.к. add_missing_keys в getData восстанавливает ключи с None
-        only_relevant = False if only_relevant is None else True
-        first = False if first is None else True
+        only_relevant = not only_relevant is None
+        first = not first is None
         document_type = return_document_type(
             class_name=class_name,
             subtype_name=subtype_name,
@@ -1083,17 +1085,15 @@ class Product:
                         result.append(document)
         if only_text:
             if first:
-                return '' if result == [] else result[0]
-            else:
-                return '' if result == [] else chr(10).join(result)
+                return '' if not result else result[0]
+            return '' if not result else chr(10).join(result)
         else:
             if first:
-                return None if result == [] else result[0]
-            else:
-                return result
+                return None if not result else result[0]
+            return result
 
     def addDocument(self, document: DbDocumentReal) -> None:
-        """  """
+        """ Добавление документа """
 
         db_document = DbDocument.addDbDocument(product=self,
                                                document_real=document)
@@ -1102,7 +1102,7 @@ class Product:
         self.documents.add(builder.document)
 
     def delDocument(self, document: DbDocumentReal) -> None:
-        """  """
+        """ Удаление документа """
 
         builder = DocumentBuilder()
         builder.setDbDocument(DbDocument.getData(document_real=document,
@@ -1112,7 +1112,9 @@ class Product:
                                  document_real=document)
 
     def getProjects(self, with_documents: bool) -> str:
-        """  """
+        """ Возвращает список каким технологическим документом
+            закрыто изделие в различных проектах Excel
+            * НЕ ИСПОЛЬЗУЕТСЯ """
 
         result = []
         self.projects = self.db_product.projects
@@ -1129,19 +1131,23 @@ class Product:
         return '\n'.join(result)
 
     def setChildren(self, children: list[DbProduct]) -> None:
-        """  """
-
-        logging.info(f'установить дочерние изделия: {children}')
+        """ Устанавливает дочерние изделия """
+        msg = f'установить дочерние изделия: {children}'
+        logging.info(msg)
         DbHierarchy.setChildren(parent=self.db_product,
                                 products=children)
 
     def getChildren(self) -> list[DbHierarchy]:
-        """  """
+        """ Возвращает дочерние изделия ввиде
+            списка экземпляров DbHierarchy """
 
         return DbHierarchy.getByParent(self.db_product)
 
     def children(self) -> list[dict[str, Product | int]]:
-        """  """
+        """ Возвращает дочерние изделия ввиде
+            списка словарей:
+            {'product' : экземпляр Product(),
+             'quantity': количество в родительском изделии}"""
 
         children = []
         builder = ProductBuilder()
@@ -1153,7 +1159,8 @@ class Product:
         return children
 
     def updDocuments(self) -> None:
-        """  """
+        """ Обновить список документов изделия,
+            подгрузив данные из БД """
 
         self.documents = set()
         builder = DocumentBuilder()
@@ -1163,7 +1170,9 @@ class Product:
             self.documents.add(builder.document)
 
     def updKttp(self, documents: list[DbDocumentReal]) -> None:
-        """  """
+        """ Обновить список типовых технологических процессов
+            (относящихся ко многим изделиям) которые относятся
+            к данному изделию """
 
         old_documents = self.getDocumentByType(
             class_name='ТД',
@@ -1200,13 +1209,18 @@ class Product:
 
     @staticmethod
     def newTdDocumentNum(code: str) -> str:
-        """  """
+        #TODO Стоит вынести из Product
+        """ Возвращает первый незанятый номер технологического документа """
 
         return Document.getLastNum(code)
 
     @staticmethod
     def getAllProductsInDict(upd=False) -> list[dict[str, int | str | DbProduct]]:
-        """  """
+        """ Возвращает список словарей всех изделий
+            {'id_product': id изделия в БД,
+             'name': наименование изделия или проекта,
+             'denotation': децимальный номер изделия,
+             'db_product': экземпляр ORM класса изделия} """
 
         if upd:
             DbProduct.updData()
@@ -1229,7 +1243,7 @@ class Product:
 
     @property
     def id_product(self) -> int:
-        """  """
+        """ id в БД """
 
         return int(self.db_product.id_product)
 
@@ -1239,19 +1253,19 @@ class Product:
 
     @property
     def name(self) -> str:
-        """  """
+        """ Наименование """
 
         return str(self.db_product.name)
 
     @name.setter
     def name(self, value: str) -> None:
-        """  """
+        """ Наименование """
 
         self.db_product.name = value
 
     @property
     def deno(self) -> str:
-        """  """
+        """ Децимальный номер """
 
         if self.db_product.name == self.db_product.deno:
             return ''
@@ -1259,19 +1273,19 @@ class Product:
 
     @deno.setter
     def deno(self, value: str) -> None:
-        """  """
+        """ Децимальный номер """
 
         self.db_product.deno = str(value)
 
     @property
     def purchased(self):
-        """  """
+        """ Изготавливается ли по кооперации """
 
         return self.db_product.purchased if self.db_product.purchased is not None else ''
 
     @property
     def primary_parent(self) -> DbProduct | None:
-        """  """
+        """ Изделие, которое является первичной применяемостью """
 
         db_primary_application = DbPrimaryApplication.getData(self.db_product)
         if db_primary_application is not None:
@@ -1287,7 +1301,7 @@ class Product:
 
     @property
     def primary_project(self) -> str:
-        """  """
+        """ Последнее изделие при проходе цепочки первичных применяемостей """
 
         if self.db_product.primary_parent:
             parent_product = self.db_product.primary_parent[0].parent
@@ -1295,7 +1309,6 @@ class Product:
                 if parent_product == parent_product.primary_parent[0].parent:
                     break
                 parent_product = parent_product.primary_parent[0].parent
-            logging.debug(f'Найдено: {self.db_product.name} {parent_product.deno} {parent_product.name}')
             projects = parent_product.projects
             project_names = [project.project.project_name for project in projects]
             return f'{parent_product.deno} {parent_product.name}' + '\n' + '\n'.join(project_names)
@@ -1304,32 +1317,35 @@ class Product:
 
     @property
     def all_projects(self) -> str:
-        """  """
+        """ Все проекты Excel в которых было это изделие
+            *НЕ ИСПОЛЬЗУЕТСЯ """
 
         return self.getProjects(with_documents=False)
 
     @property
     def all_projects_with_doc(self) -> str:
-        """  """
+        """ Все проекты Excel в которых было это изделие
+            + документы которыми оно закрыто
+            *НЕ ИСПОЛЬЗУЕТСЯ """
 
         return self.getProjects(with_documents=True)
 
     @property
-    def upd_date(self) -> datetime:
-        """  """
+    def upd_date(self) -> datetime | None:
+        """ Дата последнего обновления """
 
         if self.db_product.date_check != datetime.min:
             return self.db_product.date_check
 
     @property
     def upd_date_f(self) -> str:
-        """  """
+        """ Дата последнего обновления как текст """
 
         return date_format(self.upd_date)
 
     @property
     def hierarchy_relevance(self) -> str:
-        """  """
+        """ Актуальность данных родитель - дети """
 
         upd_date = self.db_product.date_check
         plm_date = None
@@ -1341,7 +1357,6 @@ class Product:
                 break
         if plm_date and upd_date:
             if plm_date > upd_date:
-                time = plm_date - upd_date
                 status = f'Устарело'
             else:
                 status = 'Актуально'
@@ -1355,7 +1370,8 @@ class Product:
 
     @property
     def hierarchy_relevance_days(self) -> int | None:
-        """  """
+        """ Актуальность данных родитель - дети с отсчетом дней
+            *НЕ ИСПОЛЬЗУЕТСЯ"""
 
         upd_date = self.db_product.date_check
         plm_date = None
@@ -1375,53 +1391,52 @@ class Product:
 
     @property
     def product_type(self) -> ProductType:
-        """  """
+        """ Тип изделия по разделу спецификации """
 
         product_types = [parent.product_type for parent in self.db_product.parents]
         if product_types:
             return product_types[0]
-        else:
-            return ProductType(product_type='неизвестно')
+        return ProductType(product_type='неизвестно')
 
     @property
     def product_type_name(self) -> str:
-        """  """
+        """ Название типа изделия по разделу спецификации """
 
         return self.product_type.type_name
 
     @property
     def product_kind_imenitelnyy(self) -> str:
-        """  """
+        """ Вид изделия (именительный) """
 
         return self.product_kind.imenitelnyy
 
     @property
     def product_kind_tvoritelnyy(self) -> str:
-        """  """
+        """ Вид изделия (творительный) """
 
         return self.product_kind.tvoritelnyy
 
     @property
     def product_kind_predlozhnyy(self) -> str:
-        """  """
+        """ Вид изделия (предложный) """
 
         return self.product_kind.predlozhnyy
 
     @property
     def product_kind_roditelnyy(self) -> str:
-        """  """
+        """ Вид изделия (родительный) """
 
         return self.product_kind.roditelnyy
 
     @property
     def product_kind_datelnyy(self) -> str:
-        """  """
+        """ Вид изделия (винительный) """
 
         return self.product_kind.datelnyy
 
     @property
     def product_kind(self) -> ProductKind:
-        """  """
+        """ Вид изделия """
 
         if self.db_product.kind:
             return ProductKind(self.db_product.kind)
@@ -1429,7 +1444,7 @@ class Product:
 
     @product_kind.setter
     def product_kind(self, kind: ProductKind) -> None:
-        """  """
+        """ Изменить вид изделия """
 
         SplashScreen().newMessage(message=f'Изменение вида изделия',
                                   stage=0,
@@ -1446,19 +1461,19 @@ class Product:
 
     @property
     def product_kind_name(self) -> str:
-        """  """
+        """ Вид изделия (Наименование) """
 
         return self.product_kind.name
 
     @property
     def product_kind_name_short(self) -> str:
-        """  """
+        """ Вид изделия (Наименование сокращенное) """
 
         return self.product_kind.name_short
 
     @property
     def project_name(self) -> str:
-        """  """
+        """ Наименование проекта """
 
         projects = self.db_product.project
         project_name = [project.project_name for project in projects]
@@ -1466,7 +1481,10 @@ class Product:
 
     @property
     def has_real_deno(self) -> bool:
-        """  """
+        """ Являются ли данные децимального номера
+            децимальным номером.
+            Материалы и изделия без децимального номера
+            имеют копию названия в качестве децимального номера """
 
         return self.db_product.name != self.db_product.deno
 
