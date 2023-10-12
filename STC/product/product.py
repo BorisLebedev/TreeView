@@ -637,7 +637,10 @@ class DocumentTypeBuilder:
 
 
 class IotBuilder:
-    """ Конструктор для класса IOT """
+    """ Конструктор для класса IOT
+        (инструкции по охране труда)
+        Создает уникальные экземпляры IOT по:
+        1) Номер инструкции  """
 
     iots = {}
 
@@ -646,13 +649,17 @@ class IotBuilder:
         self.reset()
 
     def reset(self) -> None:
-        """  """
+        """ Создает экземпляр IOT
+            без привязки к данным БД """
 
         self._iot = IOT()
 
     @property
     def iot(self) -> IOT:
-        """  """
+        """ Возвращает экземпляр IOT,
+            сохраняет его как используемый и
+            создает новый экземпляр IOT
+            без привязки к данным из БД """
 
         iot = self._iot
         self.__class__.iots.update({iot.deno: iot})
@@ -660,7 +667,8 @@ class IotBuilder:
         return iot
 
     def ifExists(self, deno: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            IOT c определенным номером """
 
         if deno in self.__class__.iots:
             self._iot = self.__class__.iots[deno]
@@ -668,12 +676,14 @@ class IotBuilder:
             self.initIot(deno=deno)
 
     def createIot(self, deno: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            IOT c определенным номером """
 
         self.ifExists(deno=deno)
 
     def initIot(self, deno: str) -> None:
-        """  """
+        """ Создает экземпляр IOT c
+            определенным номером """
 
         DbIOT.updCheck()
         if deno in DbIOT.data:
@@ -683,7 +693,9 @@ class IotBuilder:
 
 
 class RigBuilder:
-    """ Конструктор для класса Rig """
+    """ Конструктор для класса Rig (оснастка)
+        Создает уникальные экземпляры Rig по:
+        1) Наименованию """
 
     rigs = {}
 
@@ -692,13 +704,17 @@ class RigBuilder:
         self.reset()
 
     def reset(self) -> None:
-        """  """
+        """ Создает экземпляр Rig
+            без привязки к данным БД """
 
         self._rig = Rig()
 
     @property
     def rig(self) -> Rig:
-        """  """
+        """ Возвращает экземпляр Rig,
+            сохраняет его как используемый и
+            создает новый экземпляр Rig
+            без привязки к данным из БД """
 
         rig = self._rig
         self.__class__.rigs.update({rig.name: rig})
@@ -706,7 +722,8 @@ class RigBuilder:
         return rig
 
     def ifExists(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Rig с определенным наименованием """
 
         if name in self.__class__.rigs:
             self._rig = self.__class__.rigs[name]
@@ -714,12 +731,14 @@ class RigBuilder:
             self.initRig(name=name)
 
     def createRig(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Rig с определенным наименованием """
 
         self.ifExists(name=name)
 
     def initRig(self, name: str) -> None:
-        """  """
+        """ Создает экземпляр Rig с
+            определенным наименованием """
 
         DbRig.updCheck()
         if name in DbRig.data:
@@ -729,7 +748,9 @@ class RigBuilder:
 
 
 class EquipmentBuilder:
-    """ Конструктор для класса Equipment """
+    """ Конструктор для класса Equipment (оборудование)
+        Создает уникальные экземпляры Equipment по:
+        1) Наименованию """
 
     equipments = {}
 
@@ -738,13 +759,17 @@ class EquipmentBuilder:
         self.reset()
 
     def reset(self) -> None:
-        """  """
+        """ Создает экземпляр Equipment
+            без привязки к данным БД """
 
         self._equipment = Equipment()
 
     @property
     def equipment(self) -> Equipment:
-        """  """
+        """ Возвращает экземпляр Equipment,
+            сохраняет его как используемый и
+            создает новый экземпляр Equipment
+            без привязки к данным из БД """
 
         equipment = self._equipment
         self.__class__.equipments.update({equipment.name: equipment})
@@ -752,7 +777,8 @@ class EquipmentBuilder:
         return equipment
 
     def ifExists(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Equipment c определенным наименованием """
 
         if name in self.__class__.equipments:
             self._equipment = self.__class__.equipments[name]
@@ -760,22 +786,26 @@ class EquipmentBuilder:
             self.initEquipment(name=name)
 
     def createEquipment(self, name: str) -> None:
-        """  """
+        """ Создает экземпляр Equipment с
+            определенным наименованием """
 
         self.ifExists(name=name)
 
     def initEquipment(self, name: str) -> None:
-        """  """
+        """ Создает экземпляр Equipment с
+            определенным наименованием """
 
         DbEquipment.updCheck()
         if name in DbEquipment.data:
             self._equipment.db_equipment = DbEquipment.data[name]
         else:
-            logging.warning(f'Не найдена оснастка {name}')
+            logging.warning(f'Не найдено оборудование {name}')
 
 
 class MatBuilder:
-    """ Конструктор для класса Material """
+    """ Конструктор для класса Material
+        Создает уникальные экземпляры Material по:
+        1) Наименованию """
 
     mats = {}
 
@@ -784,13 +814,17 @@ class MatBuilder:
         self.reset()
 
     def reset(self) -> None:
-        """  """
+        """ Создает экземпляр Material
+            без привязки к данным БД """
 
         self._mat = Mat()
 
     @property
     def mat(self) -> None:
-        """  """
+        """ Возвращает экземпляр Material,
+            сохраняет его как используемый и
+            создает новый экземпляр Material
+            без привязки к данным из БД """
 
         mat = self._mat
         self.__class__.mats.update({mat.name: mat})
@@ -798,7 +832,8 @@ class MatBuilder:
         return mat
 
     def ifExists(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Material с определенным наименованием """
 
         if name in self.__class__.mats:
             self._mat = self.__class__.mats[name]
@@ -806,12 +841,14 @@ class MatBuilder:
             self.initMat(name=name)
 
     def createMat(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Material с определенным наименованием """
 
         self.ifExists(name=name)
 
     def initMat(self, name: str) -> None:
-        """  """
+        """ Создает экземпляр Material с
+            определенным наименованием """
 
         DbMaterial.updCheck()
         if name in DbMaterial.data:
@@ -821,7 +858,9 @@ class MatBuilder:
 
 
 class AreaBuilder:
-    """ Конструктор для класса Area """
+    """ Конструктор для класса Area
+        Создает уникальные экземпляры Area по:
+        1) Наименованию """
 
     areas = {}
 
@@ -830,13 +869,17 @@ class AreaBuilder:
         self.reset()
 
     def reset(self) -> None:
-        """  """
+        """ Создает экземпляр Rig
+            без привязки к данным БД """
 
         self._area = Area()
 
     @property
     def area(self) -> Area:
-        """  """
+        """ Возвращает экземпляр Area,
+            сохраняет его как используемый и
+            создает новый экземпляр Area
+            без привязки к данным из БД """
 
         area = self._area
         self.__class__.areas.update({area.name: area})
@@ -844,7 +887,8 @@ class AreaBuilder:
         return area
 
     def ifExists(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Area с определенным наименованием """
 
         if name in self.__class__.areas:
             self._area = self.__class__.areas[name]
@@ -852,12 +896,14 @@ class AreaBuilder:
             self.initArea(name=name)
 
     def createArea(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Area с определенным наименованием """
 
         self.ifExists(name=name)
 
     def initArea(self, name: str) -> None:
-        """  """
+        """ Создает экземпляр Area с
+            определенным наименованием """
 
         DbArea.updCheck()
         if name in DbArea.data:
@@ -867,7 +913,9 @@ class AreaBuilder:
 
 
 class WorkplaceBuilder:
-    """ Конструктор для класса Workplace """
+    """ Конструктор для класса Workplace
+        Создает уникальные экземпляры Workplace по:
+        1) Наименованию """
 
     workplaces = {}
 
@@ -876,13 +924,17 @@ class WorkplaceBuilder:
         self.reset()
 
     def reset(self) -> None:
-        """  """
+        """ Создает экземпляр Workplace
+            без привязки к данным БД """
 
         self._workplace = Workplace()
 
     @property
     def workplace(self) -> Workplace:
-        """  """
+        """ Возвращает экземпляр Workplace,
+            сохраняет его как используемый и
+            создает новый экземпляр Workplace
+            без привязки к данным из БД """
 
         workplace = self._workplace
         self.__class__.workplaces.update({workplace.name: workplace})
@@ -890,7 +942,8 @@ class WorkplaceBuilder:
         return workplace
 
     def ifExists(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Workplace с определенным наименованием """
 
         if name in self.__class__.workplaces:
             self._workplace = self.__class__.workplaces[name]
@@ -898,12 +951,14 @@ class WorkplaceBuilder:
             self.initWorkplace(name=name)
 
     def createWorkplace(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Workplace с определенным наименованием """
 
         self.ifExists(name=name)
 
     def initWorkplace(self, name: str) -> None:
-        """  """
+        """ Создает экземпляр Workplace с
+            определенным наименованием """
 
         DbWorkplace.updCheck()
         if name in DbWorkplace.data:
@@ -913,7 +968,9 @@ class WorkplaceBuilder:
 
 
 class ProfessionBuilder:
-    """ Конструктор для класса Profession """
+    """ Конструктор для класса Profession
+        Создает уникальные экземпляры Profession по:
+        1) Наименованию """
 
     professions = {}
 
@@ -922,13 +979,17 @@ class ProfessionBuilder:
         self.reset()
 
     def reset(self) -> None:
-        """  """
+        """ Создает экземпляр Profession
+            без привязки к данным БД """
 
         self._profession = Profession()
 
     @property
     def profession(self) -> None:
-        """  """
+        """ Возвращает экземпляр Profession,
+            сохраняет его как используемый и
+            создает новый экземпляр Profession
+            без привязки к данным из БД """
 
         profession = self._profession
         self.__class__.professions.update({profession.name: profession})
@@ -936,7 +997,8 @@ class ProfessionBuilder:
         return profession
 
     def ifExists(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Profession с определенным наименованием """
 
         if name in self.__class__.professions:
             self._profession = self.__class__.professions[name]
@@ -944,12 +1006,14 @@ class ProfessionBuilder:
             self.initProfession(name=name)
 
     def createProfession(self, name: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            Profession с определенным наименованием """
 
         self.ifExists(name=name)
 
     def initProfession(self, name: str) -> None:
-        """  """
+        """ Создает экземпляр Profession с
+            определенным наименованием """
 
         DbProfession.updCheck()
         if name in DbProfession.data:
