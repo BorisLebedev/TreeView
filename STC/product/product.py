@@ -426,7 +426,11 @@ class OperationBuilder:
 
 
 class DocumentTypeBuilder:
-    """ Конструктор для класса DocumentType """
+    """ Конструктор для класса DocumentType
+        Создает уникальные экземпляры DocumentType по:
+        1) Децимальный номер
+        2) КД/ТД + наименование вида документа
+        3) Экземпляр DbDocumentType """
 
     document_types = {}
     _exceptions = {'Структурная схема изделия': 'Схема деления структурная',
@@ -446,13 +450,17 @@ class DocumentTypeBuilder:
         self.reset()
 
     def reset(self) -> None:
-        """  """
+        """ Создает экземпляр DocumentType
+            без привязки к данным БД """
 
         self._document_type = DocumentType()
 
     @property
     def document_type(self) -> DocumentType:
-        """  """
+        """ Возвращает экземпляр DocumentType,
+            сохраняет его как используемый и
+            создает новый экземпляр DocumentType
+            без привязки к данным из БД """
 
         document_type = self._document_type
         key = (document_type.document_type,
@@ -465,7 +473,8 @@ class DocumentTypeBuilder:
     def ifExists(self, db_document_type: DbDocumentType,
                  method_code: str,
                  organization_code: str) -> None:
-        """  """
+        """ Проверяет наличие или создает экземпляр
+            класса DocumentType (тип документа) """
 
         key = (db_document_type, method_code, organization_code)
         if key in self.__class__.document_types:
@@ -482,7 +491,10 @@ class DocumentTypeBuilder:
                         sign: str = None,
                         deno: str = None,
                         db_document_type: DbDocumentType = None) -> None:
-        """  """
+        """ Определяет экземпляр класса DbDocumentType
+            (ORM представление типа документа из БД) и
+            вызывает метод, который проверяет наличие
+            или создает экземпляр класса DocumentType """
 
         if deno:
             db_document_type, organization_code, method_code = self.typeByDeno(deno)
@@ -507,7 +519,7 @@ class DocumentTypeBuilder:
     def initDocumentType(self, db_document_type: DbDocumentType,
                          method_code: str,
                          organization_code: str) -> None:
-        """  """
+        """ Инициализация параметров экземпляра DocumentType """
 
         if db_document_type.class_name == 'ТД':
             type_code = self.type_codes[db_document_type.subtype_name]
@@ -522,7 +534,7 @@ class DocumentTypeBuilder:
         self._document_type._db_document_type = db_document_type
 
     def typeByDeno(self, deno: str) -> tuple[DbDocumentType | None, str | None, str | None]:
-        """  """
+        """ Определение типа документа по децимальному номеру """
 
         deno = deno.replace(' ', '')
         if re.fullmatch('Всоставе' + r'\w{4}.\d{5}.\d{5}', deno):
@@ -535,7 +547,8 @@ class DocumentTypeBuilder:
         return db_document_type, organization_code, method_code
 
     def typeByDenoTd(self, deno: str) -> tuple[DbDocumentType | None, str | None, str | None]:
-        """  """
+        """ Определение типа документа по децимальному номеру
+            (Для технологической документации) """
 
         #       0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17
         # (ТД)  У  И  Е  С  .  1  2  3  4  5  .  1  2  3  4  5
@@ -550,7 +563,10 @@ class DocumentTypeBuilder:
 
     @property
     def type_codes(self) -> dict[str, str]:
-        """  """
+        """ Создает:
+            1) _type_codes: {Наименование типа ТД : код типа ТД}
+            2) _type_codes_inv: {код типа ТД : Наименование типа ТД}
+            Возвращает _type_codes """
 
         if not self.__class__._type_codes:
             for type_name, code in self.__class__._config.data['document_td_type_code'].items():
@@ -560,7 +576,10 @@ class DocumentTypeBuilder:
 
     @property
     def type_codes_inv(self) -> dict[str, str]:
-        """  """
+        """ Создает:
+            1) _type_codes: {Наименование типа ТД : код типа ТД}
+            2) _type_codes_inv: {код типа ТД : Наименование типа ТД}
+            Возвращает _type_codes_inv """
 
         if not self.__class__._type_codes_inv:
             for type_name, code in self.__class__._config.data['document_td_type_code'].items():
@@ -570,7 +589,10 @@ class DocumentTypeBuilder:
 
     @property
     def method_codes(self) -> dict[str, str]:
-        """  """
+        """ Создает:
+            1) _method_codes: {Метод изготовления: код типа ТД}
+            2) _method_codes_inv: {код типа ТД : Метод изготовления}
+            Возвращает _method_codes """
 
         if not self.__class__._method_codes:
             for method_name, code in self.__class__._config.data['document_method'].items():
@@ -580,7 +602,10 @@ class DocumentTypeBuilder:
 
     @property
     def method_codes_inv(self) -> dict[str, str]:
-        """  """
+        """ Создает:
+            1) _method_codes: {Метод изготовления: код типа ТД}
+            2) _method_codes_inv: {код типа ТД : Метод изготовления}
+            Возвращает _method_codes_inv """
 
         if not self.__class__._method_codes_inv:
             for method_name, code in self.__class__._config.data['document_method'].items():
@@ -590,7 +615,9 @@ class DocumentTypeBuilder:
 
     @property
     def organization_codes(self) -> dict[str, str]:
-        """  """
+        """ Создает:
+            1) _organization_codes: {Метод организации: код типа ТД}
+            Возвращает _organization_codes """
 
         if not self.__class__._organization_codes:
             for organization_type, code in self.__class__._config.data['document_organization'].items():
@@ -599,7 +626,9 @@ class DocumentTypeBuilder:
 
     @property
     def organization_codes_inv(self) -> dict[str, str]:
-        """  """
+        """ Создает:
+            1) _organization_codes_inv: {код типа ТД: Метод организации}
+            Возвращает _organization_codes_inv """
 
         if not self.__class__._organization_codes_inv:
             for organization_type, code in self.__class__._config.data['document_organization'].items():
