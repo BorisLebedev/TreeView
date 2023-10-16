@@ -1498,25 +1498,26 @@ class ProductType:
 
     @staticmethod
     def getAllTypes() -> list[DbProductType]:
-        """  """
+        """ Возвращает список типов изделий """
 
         return list(set([prod_type for prod_type in DbProductType.data.values()]))
 
     @property
     def id_type(self) -> int:
-        """  """
+        """ id типа изделия """
 
         return self.product_type.id_type
 
     @property
     def type_name(self) -> str:
-        """  """
+        """ Наименования типа изделия """
 
         return self.product_type.type_name
 
 
 class ProductKind:
-    """  """
+    """ Вид изделия согласно произвольной
+        таблице видов изделий """
 
     def __init__(self, product_kind: DbProductKind) -> None:
         DbProductKind.updCheck()
@@ -1524,13 +1525,13 @@ class ProductKind:
 
     @property
     def db_product_kind(self) -> DbProductKind:
-        """  """
+        """ ORM класс представления вида изделия в БД """
 
         return self._db_product_kind
 
     @db_product_kind.setter
     def db_product_kind(self, product_kind: DbProductKind) -> None:
-        """  """
+        """ ORM класс представления вида изделия в БД """
 
         if isinstance(product_kind, DbProductKind):
             self._db_product_kind = product_kind
@@ -1541,7 +1542,8 @@ class ProductKind:
 
     @classmethod
     def all_db_kinds(cls) -> dict[str, DbProductKind]:
-        """  """
+        """ Словарь из всех видов изделий в БД
+            {Наименование вида: экземпляр DbProductKind}"""
 
         kind_dict = {}
         for kind in DbProductKind.data.values():
@@ -1550,55 +1552,56 @@ class ProductKind:
 
     @classmethod
     def all_db_kinds_names_short(cls) -> list[str]:
-        """  """
+        """ Сортированный список сокращенных
+            наименований видов документов """
 
         return sorted([db_kind.name_short for db_kind in DbProductKind.uniqueData()])
 
     @property
     def id_kind(self) -> int:
-        """  """
+        """ id вида изделия """
 
         return self._db_product_kind.id_kind
 
     @property
     def name(self) -> str:
-        """  """
+        """ Наименование вида изделия """
 
         return self._db_product_kind.name
 
     @property
     def name_short(self) -> str:
-        """  """
+        """ Сокращенное наименование изделия """
 
         return self._db_product_kind.name_short
 
     @property
     def imenitelnyy(self) -> str:
-        """  """
+        """ Наименование вида изделия (именительный) """
 
         return self._db_product_kind.imenitelnyy
 
     @property
     def tvoritelnyy(self) -> str:
-        """  """
+        """ Наименование вида изделия (творительный) """
 
         return self._db_product_kind.tvoritelnyy
 
     @property
     def predlozhnyy(self) -> str:
-        """  """
+        """ Наименование вида изделия (предложный) """
 
         return self._db_product_kind.predlozhnyy
 
     @property
     def roditelnyy(self) -> str:
-        """  """
+        """ Наименование вида изделия (родительный) """
 
         return self._db_product_kind.roditelnyy
 
     @property
     def datelnyy(self) -> str:
-        """  """
+        """ Наименование вида изделия (дательный) """
 
         return self._db_product_kind.datelnyy
 
