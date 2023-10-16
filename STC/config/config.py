@@ -325,6 +325,23 @@ class ConfigXLMk(Config):
             ed_document_postfix=self.data[cfg]['ed_document_postfix'],
             ed_document_quantity=self.data[cfg]['ed_document_quantity'],
             last_page_start_text=self.data[cfg]['last_page_start_text'],
+            first_page_text_iots=self.data[cfg]['first_page_text_iots'],
+            first_page_text_prof=self.data[cfg]['first_page_text_prof'],
+            first_page_text_wkpl=self.data[cfg]['first_page_text_wkpl'],
+            first_page_text_mat1=self.data[cfg]['first_page_text_mat1'],
+            first_page_text_mat2=self.data[cfg]['first_page_text_mat2'],
+            first_page_text_met1=self.data[cfg]['first_page_text_met1'],
+            first_page_text_inst=self.data[cfg]['first_page_text_inst'],
+            first_page_text_stat=self.data[cfg]['first_page_text_stat'],
+            first_page_text_abbr_tu=self.data[cfg]['first_page_text_abbr_tu'],
+            first_page_text_abbr_po=self.data[cfg]['first_page_text_abbr_po'],
+            first_page_text_abbr_spo=self.data[cfg]['first_page_text_abbr_spo'],
+            first_page_text_abbr_nku=self.data[cfg]['first_page_text_abbr_nku'],
+            first_page_text_abbr_tu_find=self.data[cfg]['first_page_text_abbr_tu_find'][1:][:-1],
+            first_page_text_abbr_po_find=self.data[cfg]['first_page_text_abbr_po_find'][1:][:-1],
+            first_page_text_abbr_spo_find=self.data[cfg]['first_page_text_abbr_spo_find'][1:][:-1],
+            first_page_text_abbr_nku_find=self.data[cfg]['first_page_text_abbr_nku_find'][1:][:-1],
+            first_page_text_abbrlist=self.data[cfg]['first_page_text_abbrlist'],
         )
 
     def initXLMkDocFilePath(self) -> CfgXLMkDocFilePath:
@@ -668,6 +685,8 @@ class CfgXLMkDocTextLp:
     """ Хранит текст переходов для
         общих данных маршрутной карты"""
 
+    # pylint: disable=too-many-instance-attributes
+
     by_document: str
     in_document: str
     document_not_found: str
@@ -675,6 +694,24 @@ class CfgXLMkDocTextLp:
     ed_document_postfix: str
     ed_document_quantity: str
     last_page_start_text: str
+    first_page_text_iots: str
+    first_page_text_prof: str
+    first_page_text_wkpl: str
+    first_page_text_mat1: str
+    first_page_text_mat2: str
+    first_page_text_met1: str
+    first_page_text_inst: str
+    first_page_text_stat: str
+    first_page_text_abbr_tu: str
+    first_page_text_abbr_po: str
+    first_page_text_abbr_spo: str
+    first_page_text_abbr_nku: str
+    first_page_text_abbr_tu_find: str
+    first_page_text_abbr_po_find: str
+    first_page_text_abbr_spo_find: str
+    first_page_text_abbr_nku_find: str
+    first_page_text_abbrlist: str
+
 
 
 @dataclass

@@ -8,6 +8,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QFontMetrics
 
 from STC.config.config import CONFIG
+from STC.config.config import CFG_TD
 from STC.config.config import CFG_DB
 from STC.database.database import DbArea
 from STC.database.database import DbConnection
@@ -1705,60 +1706,44 @@ class Document:
                                   logging_level='INFO')
         SplashScreen().closeWithWindow(msg=f'Документ {self.name} {self.deno} сохранен', m_type='info')
 
-    # Для ТД
     def generateCommonProperties(self) -> list[str]:
         # TODO Вынести метод в класс технологических документов
         """ Создание списка строк с текстом общих данных для МК """
 
-        self.config = CONFIG
-        self.config_type = 'excel_document'
-        iots = self.config.data[self.config_type]['first_page_text_iots']
-        prof = self.config.data[self.config_type]['first_page_text_prof']
-        wkpl = self.config.data[self.config_type]['first_page_text_wkpl']
-        mat1 = self.config.data[self.config_type]['first_page_text_mat1']
-        mat2 = self.config.data[self.config_type]['first_page_text_mat2']
-        met1 = self.config.data[self.config_type]['first_page_text_met1']
-        inst = self.config.data[self.config_type]['first_page_text_inst']
-        stat = self.config.data[self.config_type]['first_page_text_stat']
-        abbr_tu = self.config.data[self.config_type]['first_page_text_abbr_tu']
-        abbr_po = self.config.data[self.config_type]['first_page_text_abbr_po']
-        abbr_spo = self.config.data[self.config_type]['first_page_text_abbr_spo']
-        abbr_nku = self.config.data[self.config_type]['first_page_text_abbr_nku']
-        abbr_tu_find = self.config.data[self.config_type]['first_page_text_abbr_tu_find'][1:][:-1]
-        abbr_po_find = self.config.data[self.config_type]['first_page_text_abbr_po_find'][1:][:-1]
-        abbr_spo_find = self.config.data[self.config_type]['first_page_text_abbr_spo_find'][1:][:-1]
-        abbr_nku_find = self.config.data[self.config_type]['first_page_text_abbr_nku_find'][1:][:-1]
-        abbr_start = self.config.data[self.config_type]['first_page_text_abbrlist']
-        result = [iots, prof, wkpl, inst]
+        abbr_start = CFG_TD.first_page_text_abbrlist
+        result = [CFG_TD.first_page_text_iots,
+                  CFG_TD.first_page_text_prof,
+                  CFG_TD.first_page_text_wkpl,
+                  CFG_TD.first_page_text_inst]
         abbreviations = set()
         for num, operation in self.operations.items():
             if operation.mat:
-                if mat1 not in result:
-                    result.append(mat1)
-                if mat2 not in result:
-                    result.append(mat2)
-            # if operation.name == 'Настройка, регулировка':
+                if CFG_TD.first_page_text_mat1 not in result:
+                    result.append(CFG_TD.first_page_text_mat1)
+                if CFG_TD.first_page_text_mat2 not in result:
+                    result.append(CFG_TD.first_page_text_mat2)
             if 'Контрольно-измерительная' in operation.rig:
-                if met1 not in result:
-                    result.append(met1)
-            # if 'контрольно-измерительная аппаратура' in operation.rig:
-            #     if inst not in result:
-            #         result.append(inst)
+                if CFG_TD.first_page_text_met1 not in result:
+                    result.append(CFG_TD.first_page_text_met1)
             if operation.workplace.name == 'Рабочее место сборщика':
-                if stat not in result:
-                    result.append(stat)
+                if CFG_TD.first_page_text_stat not in result:
+                    result.append(CFG_TD.first_page_text_stat)
             for sentence in operation.sentences.values():
                 if 'работоспособ' in sentence.text:
-                    if met1 not in result:
-                        result.append(met1)
-                if abbr_tu_find in sentence.text:
-                    abbreviations.update([abbr_tu])
-                if abbr_po_find in sentence.text:
-                    abbreviations.update([abbr_po])
-                if abbr_spo_find in sentence.text:
-                    abbreviations.update([abbr_spo])
-                if abbr_nku_find in sentence.text:
-                    abbreviations.update([abbr_nku])
+                    if CFG_TD.first_page_text_met1 not in result:
+                        result.append(CFG_TD.first_page_text_met1)
+                if CFG_TD.first_page_text_abbr_tu_find in sentence.text:
+                    abbreviations.update(
+                        [CFG_TD.first_page_text_abbr_tu])
+                if CFG_TD.first_page_text_abbr_po_find in sentence.text:
+                    abbreviations.update(
+                        [CFG_TD.first_page_text_abbr_po])
+                if CFG_TD.first_page_text_abbr_spo_find in sentence.text:
+                    abbreviations.update(
+                        [CFG_TD.first_page_text_abbr_spo])
+                if CFG_TD.first_page_text_abbr_nku_find in sentence.text:
+                    abbreviations.update(
+                        [CFG_TD.first_page_text_abbr_nku])
         if abbreviations:
             abbr_text = ';\n'.join(list(abbreviations))
             result.append(f'{abbr_start}\n{abbr_text}.')
