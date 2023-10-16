@@ -1680,14 +1680,15 @@ class Document:
         """ Сохранить данные маршрутной карты в БД """
 
         DbOperationDoc.delOutdatedOperations(operations=self.operations)
-        SplashScreen().newMessage(message=f'Cохранение документа...',
+        SplashScreen().newMessage(message='Cохранение документа...',
                                   stage=0,
                                   stages=len(self.operations) + 2,
                                   log=True,
                                   logging_level='INFO')
 
         for operation in self.operations.values():
-            SplashScreen().newMessage(message=f'Сохранение операции {operation.num} {operation.name}',
+            msg = f'Сохранение операции {operation.num} {operation.name}'
+            SplashScreen().newMessage(message=msg,
                                       log=True,
                                       logging_level='INFO')
             DbOperationDoc.addOperation(operation=operation)
@@ -1764,11 +1765,7 @@ class Document:
         """ Возвращает следующий свободный
             порядковый номер маршрутной карты """
 
-        documents = []
         data = DbDocumentReal.getDbDocumentRealByCode(code=code)
-        # for deno, id_type in DbDocumentReal.data.keys():
-        #     if re.fullmatch(r'\w{4}' + f'.{code}' + r'\d{4}', deno):
-        #         documents.append(deno)
         documents = [db_document[0].deno for db_document in data]
         try:
             last_document = sorted(documents, reverse=True)[0]
@@ -1780,14 +1777,6 @@ class Document:
             return last_num
         except IndexError:
             return '0001'
-
-    # # Для ТД (возвращает db_product)
-    # @property
-    # def sub_products(self) -> list[DbProduct]:
-    #     return [db_document_complex.product for db_document_complex in
-    #             self.db_document.document_real.products_in_complex_documents]
-
-    # Для ТД (возвращает product)
 
     @property
     def sub_products_new(self) -> list[Product]:
@@ -1825,10 +1814,6 @@ class Document:
 
         return self.db_document.id_document
 
-    # @id_document.setter
-    # def id_document(self, value: int) -> None:
-    #     self.db_document.id_document = value
-
     @property
     def id_document_real(self) -> int:
         """ id документа """
@@ -1841,10 +1826,6 @@ class Document:
             которому относится документ"""
 
         return self.db_document.id_product
-
-    # @id_product.setter
-    # def id_product(self, value):
-    #     self.db_document.id_product = value
 
     @property
     def id_type(self) -> int:
@@ -1875,7 +1856,7 @@ class Document:
 
     @property
     def link(self) -> str:
-        """  """
+        """ Ссылка на файл изделия """
 
         return self.db_document.document_real.link
 
@@ -1981,8 +1962,7 @@ class Document:
 
         if self.db_document.document_real.document_type.sign is None:
             return ''
-        else:
-            return self.db_document.document_real.document_type.sign
+        return self.db_document.document_real.document_type.sign
 
     @property
     def sign_with_exceptions(self) -> str:
@@ -2292,6 +2272,7 @@ class DocumentStage:
 
 
 class Operation:
+    """ Операция в маршрутной карте """
 
     def __init__(self) -> None:
         DbOperationDef.updCheck()
@@ -2318,7 +2299,8 @@ class Operation:
         self._profession_builder = ProfessionBuilder()
 
     def addSentence(self, order: int, sentence: Sentence):
-        """  """
+        """ Добавление перехода операции с
+            определенным порядковым номером """
 
         if order not in self._sentences.keys():
             self._sentences[order] = sentence
@@ -2332,13 +2314,15 @@ class Operation:
             self._sentences = temp_sentences
 
     def delSentence(self, order: num):
-        """  """
+        """ Удалить переход с определенным порядковым номером """
 
         self._sentences_for_del.append(self._sentences[order])
         del self._sentences[order]
 
     def restoreSentenceOrder(self) -> None:
-        """  """
+        """ Восстановление нумерации словаря
+            переходов self._sentences при
+            удалении переходов """
 
         temp_sentences = {}
         orders = sorted(self._sentences.keys())
@@ -2347,7 +2331,11 @@ class Operation:
         self._sentences = temp_sentences
 
     def initSentences(self) -> None:
-        """  """
+        """ Инициализация переход операции
+            Проверяет в БД наличие переходов для операции с определенным id
+            Если существует переход, то проверяется, является ли переход
+            переходом по умолчанию или созданным
+            Переходы хранятся в self._sentences """
 
         self._sentences = {}
         DbSentenceDoc.updCheck()
@@ -2374,7 +2362,7 @@ class Operation:
                 key = (self.id_operation_doc, operation_order)
 
     def possibleAreas(self) -> list[Area]:
-        """  """
+        """ Возвращает список возможных участков изготовления """
 
         self._possible_areas = set()
         product_kind = self._document_main.product.product_kind
@@ -2392,7 +2380,7 @@ class Operation:
         return self._possible_areas
 
     def possibleWorkplaces(self) -> list[Workplace]:
-        """  """
+        """ Возвращает список рабочих мест для данной операции """
 
         self._possible_workplaces = set()
         product_kind = self._document_main.product.product_kind
@@ -2411,7 +2399,7 @@ class Operation:
         return self._possible_workplaces
 
     def possibleProfessions(self) -> list[Profession]:
-        """  """
+        """ Возвращает список профессий для этой операции """
 
         self._possible_professions = set()
         product_kind = self._document_main.product.product_kind
@@ -2432,7 +2420,7 @@ class Operation:
 
     @staticmethod
     def defaultOperationsName(product: Product | None = None) -> list[str]:
-        """  """
+        """ Список операций для данного вида изделий """
 
         if product:
             id_kind = product.product_kind.id_kind
@@ -2440,15 +2428,9 @@ class Operation:
                 return sort_un([item.operation.name for item in DbOperationDef.data[id_kind]])
         return sort_un([operation.name for operation in DbOperation.uniqueData()])
 
-    @staticmethod
-    def dbOperationByName(name: str) -> list[DbOperation]:
-        """  """
-
-        return [operation for operation in DbOperation.uniqueData() if operation.name == name]
-
     @property
     def settings(self) -> dict[DbSetting, Setting]:
-        """  """
+        """ Словарь свойств операции """
 
         if not self._def_settings:
             for db_setting in DbSetting.uniqueData():
@@ -2459,7 +2441,7 @@ class Operation:
 
     @property
     def documents(self) -> dict[Document]:
-        """  """
+        """ Список документов данной операции """
 
         self._documents = {}
         for sentence in self._sentences.values():
@@ -2468,7 +2450,7 @@ class Operation:
 
     @property
     def documents_from_text(self) -> set[str]:
-        """  """
+        """ Извлечь данные о документе из текста операции """
 
         denos = set()
         for sentence in self._sentences.values():
@@ -2477,7 +2459,7 @@ class Operation:
 
     @property
     def documents_text(self) -> str:
-        """  """
+        """ Строка информации об используемых документах  """
 
         denos = set()
         if self.documents:
@@ -2488,46 +2470,45 @@ class Operation:
 
     @property
     def default_operation(self) -> DbOperation:
-        """  """
+        """ Операция по умолчанию """
 
         return self._def_operation
 
     @default_operation.setter
     def default_operation(self, operation: DbOperation) -> None:
-        """  """
+        """ Операция по умолчанию """
 
         self._def_operation = operation
 
     @property
     def id(self) -> int:
-        """  """
+        """ id операции по умолчанию"""
 
         return self._def_operation.id_operation
 
     @property
     def name(self) -> str:
-        """  """
+        """ Наименование операции """
 
         return self._def_operation.name
 
     @name.setter
     def name(self, value: str) -> None:
-        """  """
+        """ Наименование операции """
 
         self.name = value
 
     @property
     def area(self) -> Area:
-        """  """
+        """ Участок """
 
         if self._doc_area is None:
             return self.default_area
-        else:
-            return self._doc_area
+        return self._doc_area
 
     @area.setter
     def area(self, name: str) -> None:
-        """  """
+        """ Участок """
 
         self._area_builder.createArea(name=name)
         self._doc_area = self._area_builder.area
@@ -2536,40 +2517,39 @@ class Operation:
 
     @property
     def default_area(self) -> Area:
-        """  """
+        """ Участок по умолчанию """
 
         return self._def_area
 
     @property
     def possible_areas_names(self) -> list[str]:
-        """  """
+        """ Список возможных участков для данной операции """
 
         return [area.name for area in self._possible_areas]
 
     @property
     def default_workplace(self) -> Workplace:
-        """  """
+        """ Рабочее место по умолчанию """
 
         return self._def_workplace
 
     @property
     def possible_workplaces_names(self) -> list[Workplace]:
-        """  """
+        """ Список возможных рабочих мест """
 
         return [workplace.name for workplace in self._possible_workplaces]
 
     @property
     def workplace(self) -> Workplace:
-        """  """
+        """ Рабочее место """
 
         if self._doc_workplace is None:
             return self.default_workplace
-        else:
-            return self._doc_workplace
+        return self._doc_workplace
 
     @workplace.setter
     def workplace(self, name: str) -> None:
-        """  """
+        """ Рабочее место """
 
         self._workplace_builder.createWorkplace(name=name)
         self._doc_workplace = self._workplace_builder.workplace
@@ -2578,47 +2558,48 @@ class Operation:
 
     @property
     def profession(self) -> Profession:
-        """  """
+        """ Профессия исполнителя """
 
         if self._doc_profession is None:
             return self.default_profession
-        else:
-            return self._doc_profession
+        return self._doc_profession
 
     @profession.setter
     def profession(self, name: str) -> None:
-        """  """
+        """ Профессия исполнителя """
 
         self._profession_builder.createProfession(name=name)
         self._doc_profession = self._profession_builder.profession
 
     @property
     def default_profession(self) -> Profession:
-        """  """
+        """ Профессия исполнителя по умолчанию """
 
         return self._def_profession
 
     @property
     def possible_professions_names(self) -> list[str]:
-        """  """
+        """ Список допустимых профессий """
 
         return [profession.name for profession in self._possible_professions]
 
     @property
     def num(self) -> str:
-        """  """
+        """ Номер операции в формате:
+            1 -> 005
+            2 -> 010 """
 
         return '0' * (3 - len(str((self.order + 1) * 5))) + str((self.order + 1) * 5)
 
     @property
     def order(self) -> int:
-        """  """
+        """ Порядковый номер операции """
 
         return self._order
 
     @order.setter
     def order(self, value: int) -> None:
-        """  """
+        """ Порядковый номер операции """
 
         if self._order != value:
             del self.order
@@ -2630,7 +2611,7 @@ class Operation:
 
     @order.deleter
     def order(self) -> None:
-        """  """
+        """ Порядковый номер операции """
 
         key = (self.document_main,
                self._order)
@@ -2643,82 +2624,77 @@ class Operation:
 
     @property
     def documents_and_iot(self) -> str:
-        """  """
+        """ Строка информации о документах и ИОТ в МК """
 
         return ', '.join([text for text in [self.documents_text, self.iot] if text != ''])
 
     @property
     def document_main(self) -> Document:
-        """  """
+        """ К какому документу относиться операция """
 
         return self._document_main
 
     @document_main.setter
     def document_main(self, document: Document) -> None:
-        """  """
+        """ К какому документу относиться операция """
 
         self._document_main = document
 
     @property
     def id_operation_def(self) -> int:
-        """  """
+        """ id операции по умолчанию """
 
         if self.default_operation is not None:
             return self.default_operation.id_operation
 
     @property
     def db_operation_doc(self) -> DbOperationDoc:
-        """  """
+        """ Экземпляр DbOperationDoc в основе текущей операции """
 
         return self._db_operation_doc
-        # try:
-        #     key = (self.document_main.id_document_real,
-        #            self.default_operation.id_operation,
-        #            self.order)
-        #     return DbOperationDoc.data.get(key, None)
-        # except AttributeError:
-        #     return None
 
     @db_operation_doc.setter
     def db_operation_doc(self, value: DbOperationDoc) -> None:
-        """  """
+        """ Экземпляр DbOperationDoc в основе текущей операции """
 
         self._db_operation_doc = value
 
     @property
     def id_operation_doc(self) -> int:
-        """  """
+        """ id этой операции в БД """
 
         if self.db_operation_doc is not None:
             return self.db_operation_doc.id_operation_doc
 
     @property
     def sentences(self) -> dict[num, Sentence]:
-        """  """
+        """ Словарь переходов операции
+            {№ перехода: текст перехода} """
 
         return self._sentences
 
     @sentences.setter
     def sentences(self, value: dict[num, Sentence]) -> None:
-        """  """
+        """ Словарь переходов операции
+            {№ перехода: текст перехода} """
 
         self._sentences = value
 
     @property
     def sentences_for_del(self) -> list[Sentence]:
-        """  """
+        """ Переходы, которые будут удалены """
 
         return self._sentences_for_del
 
     @sentences_for_del.setter
     def sentences_for_del(self, value: dict[num, Sentence]) -> None:
-        """  """
+        """ Переходы, которые будут удалены """
 
         self._sentences_for_del = value
 
     @property
     def iot(self) -> str:
-        """  """
+        """ Текст ИОТ """
 
         _iot = set()
         for sentence in self._sentences.values():
@@ -2731,7 +2707,7 @@ class Operation:
 
     @property
     def rig(self) -> str:
-        """  """
+        """ Текст оснастки """
 
         _rig = set()
         for sentence in self._sentences.values():
@@ -2745,7 +2721,7 @@ class Operation:
 
     @property
     def equipment(self) -> str:
-        """  """
+        """ Текст оборудования """
 
         _equipment = set()
         for sentence in self._sentences.values():
@@ -2759,7 +2735,7 @@ class Operation:
 
     @property
     def mat(self) -> str:
-        """  """
+        """ Текст материалов """
 
         _mat = set()
         for sentence in self._sentences.values():
