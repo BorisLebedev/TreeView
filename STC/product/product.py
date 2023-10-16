@@ -1620,7 +1620,7 @@ class Document:
         self._operations = {}
 
     def getAttrValueByName(self, attr_name, only_text=True):
-        """  """
+        """ Возвращает значение аттрибута по его наименованию """
 
         attr_value = getattr(self, attr_name)
         if only_text:
@@ -1628,7 +1628,9 @@ class Document:
         return attr_value
 
     def getSignatureSurname(self, position: str) -> str:
-        """  """
+        """ Возвращает ФИО для определенной должности.
+            Если ФИО не определено, то возвращает ФИО
+            по умолчанию для данной должности """
 
         signature_position = self._config.data['document_settings'][f'{position}']
         key = (self.id_document_real, signature_position)
@@ -1639,7 +1641,7 @@ class Document:
         return DbDocumentSignature.data[key].signature_surname if key in DbDocumentSignature.data else default
 
     def updSignatureSurname(self, position: str, surname: str) -> None:
-        """  """
+        """ Изменить ФИО для определенной должности """
 
         signature_position = self._config.data['document_settings'][f'{position}']
         DbDocumentSignature.updDocumentSignature(id_document_real=self.id_document_real,
@@ -1648,9 +1650,11 @@ class Document:
                                                  signature_signdate=None,
                                                  commit_later=True)
 
-    # Для ТД
     def dbOperations(self) -> dict[int, Operation]:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Возвращает словарь операций для данного документа
+            (исходя их данных в БД)
+            {Порядковый номер операции: экземпляр Operation} """
 
         _operations = {}
         builder = OperationBuilder()
@@ -1665,13 +1669,14 @@ class Document:
 
     # Для ТД
     def addOperation(self, operation: Operation) -> None:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Добавить операцию в документ """
 
         self._operations[operation.order] = operation
 
-    # Для ТД
     def createMk(self) -> None:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Сохранить данные маршрутной карты в БД """
 
         DbOperationDoc.delOutdatedOperations(operations=self.operations)
         SplashScreen().newMessage(message=f'Cохранение документа...',
@@ -1702,7 +1707,8 @@ class Document:
 
     # Для ТД
     def generateCommonProperties(self) -> list[str]:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Создание списка строк с текстом общих данных для МК """
 
         self.config = CONFIG
         self.config_type = 'excel_document'
@@ -1760,17 +1766,18 @@ class Document:
         result.append(product_abbreviation)
         return result
 
-    # Для ТД
     def changeStageOfMk(self):
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Изменение статуса маршрутных карт """
 
         if self.operations and self.stage == 'Зарегистрирован':
             self.stage = 'В разработке'
 
-    # Для ТД
     @staticmethod
     def getLastNum(code: str) -> str:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Возвращает следующий свободный
+            порядковый номер маршрутной карты """
 
         documents = []
         data = DbDocumentReal.getDbDocumentRealByCode(code=code)
@@ -1799,7 +1806,9 @@ class Document:
 
     @property
     def sub_products_new(self) -> list[Product]:
-        """  """
+        """ Возвращает список изделий,
+            изготавливаемых совместно
+            по данному документу """
 
         builder = ProductBuilder()
         result = []
@@ -1811,7 +1820,8 @@ class Document:
 
     @staticmethod
     def getAllDocuments(document_type, only_deno=False) -> dict[str, DbDocumentReal]:
-        """  """
+        """ Словарь из всех документов вида
+            {Децимальный номер Наименование: Экземпляр DbDocumentReal} """
 
         result = {}
         db_documents_real = DbDocumentReal.getAllDocumentsRealByType(id_type=document_type.id_type)
@@ -1826,7 +1836,7 @@ class Document:
 
     @property
     def id_document(self) -> int:
-        """  """
+        """ id записи связи документа и изделия """
 
         return self.db_document.id_document
 
@@ -1836,13 +1846,14 @@ class Document:
 
     @property
     def id_document_real(self) -> int:
-        """  """
+        """ id документа """
 
         return self.db_document.document_real.id_document_real
 
     @property
     def id_product(self) -> int:
-        """  """
+        """ id основного изделия к
+            которому относится документ"""
 
         return self.db_document.id_product
 
@@ -1852,13 +1863,13 @@ class Document:
 
     @property
     def id_type(self) -> int:
-        """  """
+        """ id типа документа по спецификации """
 
         return self.db_document.document_real.id_type
 
     @property
     def name(self) -> str:
-        """  """
+        """ Наименование документа """
 
         if self.db_document.document_real.name is not None:
             return self.db_document.document_real.name
@@ -1867,13 +1878,13 @@ class Document:
 
     @property
     def deno(self) -> str:
-        """  """
+        """ Децимальный номер изделия """
 
         return self.db_document.document_real.deno
 
     @property
     def file_name(self) -> str:
-        """  """
+        """ Наименование файла изделия """
 
         return self.db_document.document_real.file_name
 
@@ -1885,103 +1896,103 @@ class Document:
 
     @property
     def date_created(self) -> datetime:
-        """  """
+        """ Дата создания """
 
         return self.db_document.document_real.date_created
 
     @property
     def date_changed(self) -> datetime:
-        """  """
+        """ Дата изменения """
 
         return self.db_document.document_real.date_changed
 
     @property
     def date_changed_str(self) -> str:
-        """  """
+        """ Дата изменения как текст """
 
         return date_format(self.date_changed)
 
     @property
     def date_created_str(self) -> str:
-        """  """
+        """ Дата создания как текст """
 
         return date_format(self.date_created)
 
     @property
     def name_created(self) -> str:
-        """  """
+        """ ФИО создателя документа """
 
         return self.db_document.document_real.name_created
 
     @property
     def name_changed(self) -> str:
-        """  """
+        """ ФИО последнего изменившего документ """
 
         return self.db_document.document_real.name_changed
 
     @property
     def name_developer(self) -> str:
-        """  """
+        """ ФИО разработчика документа """
 
         return self.getSignatureSurname('developer')
 
     @name_developer.setter
     def name_developer(self, surname):
-        """  """
+        """ ФИО разработчика документа """
 
         self.updSignatureSurname(position='developer', surname=surname)
 
     @property
     def name_checker(self) -> str:
-        """  """
+        """ ФИО проверяющего """
 
         return self.getSignatureSurname('checker')
 
     @name_checker.setter
     def name_checker(self, surname):
-        """  """
+        """ ФИО проверяющего """
 
         self.updSignatureSurname(position='checker', surname=surname)
 
     @property
     def name_approver(self) -> str:
-        """  """
+        """ ФИО утверждающего """
 
         return self.getSignatureSurname('approver')
 
     @name_approver.setter
     def name_approver(self, surname):
-        """  """
+        """ ФИО утверждающего """
 
         self.updSignatureSurname(position='approver', surname=surname)
 
     @property
     def name_n_contr(self) -> str:
-        """  """
+        """ ФИО нормоконтролера """
 
         return self.getSignatureSurname('n_contr')
 
     @name_n_contr.setter
     def name_n_contr(self, surname):
-        """  """
+        """ ФИО нормоконтролера """
 
         self.updSignatureSurname(position='n_contr', surname=surname)
 
     @property
     def name_m_contr(self) -> str:
-        """  """
+        """ ФИО метролога """
 
         return self.getSignatureSurname('m_contr')
 
     @name_m_contr.setter
     def name_m_contr(self, surname):
-        """  """
+        """ ФИО метролога """
 
         self.updSignatureSurname(position='m_contr', surname=surname)
 
     @property
     def sign(self) -> str:
-        """  """
+        """ Буквенный код вида документа """
 
         if self.db_document.document_real.document_type.sign is None:
             return ''
@@ -1990,31 +2001,33 @@ class Document:
 
     @property
     def sign_with_exceptions(self) -> str:
-        """  """
+        """ Буквенный код вида документа
+            с учетом, что у спецификации и
+            детали код вида документа отсутствует """
 
         return self.document_type.sign_with_exceptions
 
     @property
     def class_name(self) -> str:
-        """  """
+        """ Класс документа (КД/ТД/ЭД) """
 
         return self.db_document.document_real.document_type.class_name
 
     @property
     def subtype_name(self) -> str:
-        """  """
+        """ Подтип документа """
 
         return self.db_document.document_real.document_type.subtype_name
 
     @property
     def stage(self) -> str:
-        """  """
+        """ Этап разработки """
 
         return self.db_document.document_real.stage.stage
 
     @stage.setter
     def stage(self, stage_name: str) -> None:
-        """  """
+        """ Этап разработки """
 
         stage = DbDocumentStage.addDbDocumentStage(stage_name)
         self.db_document.document_real.updDocumentReal(db_document_stage=stage)
@@ -2022,13 +2035,14 @@ class Document:
 
     @property
     def db_type(self) -> DbDocumentType:
-        """  """
+        """ Экземпляр DbDocumentType
+            (типа документа по спецификации) """
 
         return self.db_document.document_real.document_type
 
     @property
     def product(self) -> Product:
-        """  """
+        """ Основное изделие к которому относиться документ """
 
         builder = ProductBuilder()
         builder.setDbProduct(db_product=self.db_document.product)
@@ -2036,37 +2050,44 @@ class Document:
 
     @property
     def operations_db(self) -> dict[int, Operation]:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Возвращает словарь операций для данного документа
+            сохраненных в БД на данный момент
+            {Порядковый номер операции: экземпляр Operation} """
 
         return self.dbOperations()
 
     @property
     def operations(self) -> dict[int, Operation]:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Возвращает словарь операций для данного документа
+            {Порядковый номер операции: экземпляр Operation} """
 
         return self._operations
 
     @operations.setter
     def operations(self, new_operations: dict[int, Operation]):
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Перезаписывает словарь операций для данного документа
+            {Порядковый номер операции: экземпляр Operation} """
 
         self._operations = new_operations
 
     @property
     def litera(self) -> str:
-        """  """
+        """ Возвращает литеру документа """
 
         return self._litera
 
     @litera.setter
     def litera(self, value: str) -> None:
-        """  """
+        """ Изменяет значение литеры документа """
 
         self._litera = value
 
     @property
     def document_type(self) -> DocumentType:
-        """  """
+        """ Возвращает тип документа """
 
         if self._document_type is None:
             document_real = self.db_document.document_real
