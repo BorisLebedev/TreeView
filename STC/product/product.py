@@ -2114,7 +2114,7 @@ class DocumentType:
         self._db_document_type = None
 
     def __eq__(self, other: DocumentType) -> bool:
-        """  """
+        """ Переопределение сравнения для класса DocumentType """
 
         type_eq = False
         meth_eq = False
@@ -2133,7 +2133,8 @@ class DocumentType:
 
     @staticmethod
     def getAllTypes(class_name: tuple = ('КД',)) -> list[DocumentType]:
-        """  """
+        """ Возвращает список типов документа для
+            определенного класса документов (КД/ТД) """
 
         result = []
         for db_document_type in DbDocumentType.data.values():
@@ -2147,43 +2148,49 @@ class DocumentType:
 
     @staticmethod
     def documentTypes() -> list[DbDocumentType]:
-        """  """
+        """ Возвращает список уникальных типов документов
+            в виде экземпляров DbDocumentType """
 
         return DbDocumentType.uniqueData()
 
     @property
     def document_type(self) -> DbDocumentType:
-        """  """
+        """ Возвращает тип документа в виде
+            экземпляра DbDocumentType """
 
         return self._db_document_type
 
     @property
     def id_type(self) -> int:
-        """  """
+        """ id типа документа """
 
         return self._db_document_type.id_type
 
     @property
     def class_name(self) -> str:
-        """  """
+        """ Класс типа документа
+            Например: КД или ТД """
 
         return self._db_document_type.class_name
 
     @property
     def subclass_name(self) -> str:
-        """  """
+        """ Подкласс типа документа
+            Например: схема"""
 
         return self._db_document_type.subclass_name
 
     @property
     def type_name(self) -> str:
-        """  """
+        """ Тип документа
+            Например: схема электрическая """
 
         return self._db_document_type.type_name
 
     @property
     def subtype_name(self) -> str:
-        """  """
+        """ Подтип документа
+            Например: схема электрическая соединений """
 
         if self._db_document_type.sign == 'КТТП':
             if self.organization_code == '2':
@@ -2193,7 +2200,8 @@ class DocumentType:
 
     @property
     def sign(self) -> str:
-        """  """
+        """ Обозначение типа документа
+            в децимальном номере"""
 
         if self._db_document_type.sign is None:
             return ''
@@ -2205,48 +2213,56 @@ class DocumentType:
 
     @property
     def sign_with_exceptions(self):
-        """  """
+        """ Обозначение типа документа с учетом когда у части типов
+            обозначение в децимальном номере не указывается
+            Например в спецификации """
 
         return self.__class__.sign_exceptions.get(self.subtype_name, self.sign)
 
     @property
     def type_code(self) -> int:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Код децимального номера ТД по типу ТД """
 
         return self._type_code
 
     @property
     def method_code(self) -> int:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Код децимального номера ТД по методу изготовления """
 
         return self._method_code
 
     @property
     def method_name(self) -> str:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Наименование метода изготовления """
 
         return self._method_name
 
     @property
     def organization_code(self) -> str:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Код децимального номера ТД по методу организации """
 
         return self._organization_code
 
     @property
     def organization_name(self) -> str:
-        """  """
+        # TODO Вынести метод в класс технологических документов
+        """ Наименование метода организации """
 
         return self._organization_name
 
     @property
     def description(self) -> int:
-        """  """
+        """ Описание типа документа """
 
         return self._db_document_type.description
 
 
 class DocumentStage:
+    """ Этап разработки документа """
 
     def __init__(self, stage: str) -> None:
         db_stages = DbDocumentStage.data
@@ -2257,19 +2273,20 @@ class DocumentStage:
 
     @staticmethod
     def getAllStages() -> list[DbDocumentStage]:
-        """  """
+        """ Список всех этапов разработки документа
+            в виде экземпляров DbDocumentStage """
 
         return DbDocumentStage.uniqueData()
 
     @property
     def id_stage(self) -> int:
-        """  """
+        """ id этапа разработки """
 
         return self.db_stage.id_document_stage
 
     @property
     def stage_name(self) -> str:
-        """  """
+        """ Название этапа разработки """
 
         return self.db_stage.stage
 
