@@ -108,7 +108,7 @@ class SentenceFrame(QFrame):
         """ Добавление нового виджета в рамку
             с изменением параметров рамки и
             различными методами обновлений """
-
+        item = None if isinstance(item, bool) else item
         self.addWidget(item=item)
         self.upd()
         self.frame.sentenceResized(self.frame.table.currentRow())
