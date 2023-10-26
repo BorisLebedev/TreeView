@@ -1,4 +1,6 @@
-"""  """
+""" Основные классы для изделий и документов """
+
+# pylint: disable=protected-access
 
 from __future__ import annotations
 import logging
@@ -8,7 +10,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QFontMetrics
 
 from STC.config.config import CONFIG
-from STC.config.config import CFG_TD
+from STC.config.config import CFG_MK
 from STC.config.config import CFG_DB
 from STC.database.database import DbArea
 from STC.database.database import DbConnection
@@ -53,8 +55,8 @@ from STC.functions.func import sort_un
 from STC.gui.splash_screen import SplashScreen
 
 
-def updDataFromDb() -> None:
-    """  """
+def upd_data_from_db() -> None:
+    """ Обновить данные из БД """
 
     DbConnection.updAllData()
 
@@ -67,6 +69,8 @@ def return_document_type(class_name: str = None,
                          deno: str = None,
                          db_document_type: DbDocumentType = None) -> DocumentType | None:
     """ Возвращает тип документа """
+
+    # pylint: disable=too-many-arguments
 
     if subtype_name == 'Карта типового технологического процесса':
         subtype_name = 'Карта типового (группового) технологического процесса'
@@ -84,7 +88,7 @@ def return_document_type(class_name: str = None,
                                 deno=deno,
                                 db_document_type=db_document_type)
         return builder.document_type
-    except AttributeError as err:
+    except AttributeError:
         msg = f'Не определить тип документации ' \
               f'class_name: {class_name},' \
               f'subtype_name: {subtype_name},' \
@@ -106,7 +110,8 @@ class Connection:
         self.connect()
         DbConnection.updAllData()
 
-    def close(self) -> None:
+    @staticmethod
+    def close() -> None:
         """ Закрытие соединения с БД """
 
         DbConnection.session.close()
@@ -123,12 +128,13 @@ class Connection:
     def connect(self) -> None:
         """ Подключение к БД """
 
-        SplashScreen().newMessage(message=f'Подключение к базе данных {self.path}\{self.name}',
+        SplashScreen().newMessage(message=rf'Подключение к базе данных {self.path}\{self.name}',
                                   log=True,
                                   logging_level='INFO')
         DbConnection.initSession(self.path, self.name)
 
-    def resetBuilders(self) -> None:
+    @staticmethod
+    def resetBuilders() -> None:
         """ Сброс хранимых в конструкторах
             экземпляров классов """
 
@@ -146,7 +152,7 @@ class Connection:
 
 
 class ProductBuilder:
-    """ Конструктор для класса Product
+    """ Конструктор для класса Product.
         Создает уникальные экземпляры Product по:
         1) децимальному номеру изделия
         2) экземпляру ORM класса DbProduct """
@@ -290,7 +296,7 @@ class OperationBuilder:
             операции в определенном документе """
 
         keys_for_del = []
-        for key in OperationBuilder.operations.keys():
+        for key in OperationBuilder.operations:
             if key[0] == document:
                 keys_for_del.append(key)
         for key in keys_for_del:
@@ -364,7 +370,8 @@ class OperationBuilder:
             self._operation._def_settings = self._operation.settings
             self._operation._sentences = self._operation.sentences
         else:
-            logging.warning(f'Базовая операция с наименованием {name} не найдена')
+            msg = f'Базовая операция с наименованием {name} не найдена'
+            logging.warning(msg)
 
     def initOperationDocData(self, order: int, new: bool) -> None:
         """ Если операция не является намеренно новой или созданной
@@ -403,7 +410,8 @@ class OperationBuilder:
         self._profession_builder.createProfession(self._operation.db_operation_doc.profession.name)
         self._operation._doc_profession = self._profession_builder.profession
 
-    def delOperation(self, operation: Operation) -> None:
+    @staticmethod
+    def delOperation(operation: Operation) -> None:
         """ Удаление операции """
 
         key = (operation.document_main,
@@ -412,7 +420,8 @@ class OperationBuilder:
         if operation.db_operation_doc:
             DbOperationDoc().delData(item=operation.db_operation_doc)
 
-    def dbOperationDoc(self, operation: Operation):
+    @staticmethod
+    def dbOperationDoc(operation: Operation):
         """ Поиск экземпляра ORM класса DbOperationDoc
             для данных операции в определенном документе
             под определенным порядковым номером """
@@ -427,7 +436,7 @@ class OperationBuilder:
 
 
 class DocumentTypeBuilder:
-    """ Конструктор для класса DocumentType
+    """ Конструктор для класса DocumentType.
         Создает уникальные экземпляры DocumentType по:
         1) Децимальный номер
         2) КД/ТД + наименование вида документа
@@ -436,7 +445,7 @@ class DocumentTypeBuilder:
     document_types = {}
     _exceptions = {'Структурная схема изделия': 'Схема деления структурная',
                    'Таблица соединений': 'Таблица',
-                   'Схема электрокинематическая расположения': 'Схема комбинированная расположения',
+                   'Схема электро кинематическая расположения': 'Схема комбинированная расположения',
                    'Конструкторский документ': 'Документы PLM'}
     _type_codes = {}
     _type_codes_inv = {}
@@ -497,6 +506,8 @@ class DocumentTypeBuilder:
             вызывает метод, который проверяет наличие
             или создает экземпляр класса DocumentType """
 
+        # pylint: disable=too-many-arguments
+
         if deno:
             db_document_type, organization_code, method_code = self.typeByDeno(deno)
         if db_document_type is None:
@@ -507,7 +518,8 @@ class DocumentTypeBuilder:
             elif class_name and sign:
                 sign = sign.upper()
                 try:
-                    db_document_type = DbDocumentType.data[(class_name, sign)]  # Точное соответствие только для КД
+                    # Точное соответствие только для КД
+                    db_document_type = DbDocumentType.data[(class_name, sign)]
                 except KeyError:
                     db_document_type = DbDocumentType.data[('КД', 'Спецификация')]
             elif class_name == 'КД' and sign is None:
@@ -531,7 +543,8 @@ class DocumentTypeBuilder:
         self._document_type._method_code = method_code
         self._document_type._organization_code = organization_code
         self._document_type._method_name = self.method_codes_inv.get(method_code, None)
-        self._document_type._organization_name = self.organization_codes_inv.get(organization_code, None)
+        self._document_type._organization_name = \
+            self.organization_codes_inv.get(organization_code, None)
         self._document_type._db_document_type = db_document_type
 
     def typeByDeno(self, deno: str) -> tuple[DbDocumentType | None, str | None, str | None]:
@@ -621,7 +634,8 @@ class DocumentTypeBuilder:
             Возвращает _organization_codes """
 
         if not self.__class__._organization_codes:
-            for organization_type, code in self.__class__._config.data['document_organization'].items():
+            for organization_type, code in \
+                    self.__class__._config.data['document_organization'].items():
                 self.__class__._organization_codes[organization_type] = code
         return self.__class__._organization_codes
 
@@ -632,7 +646,8 @@ class DocumentTypeBuilder:
             Возвращает _organization_codes_inv """
 
         if not self.__class__._organization_codes_inv:
-            for organization_type, code in self.__class__._config.data['document_organization'].items():
+            for organization_type, code in \
+                    self.__class__._config.data['document_organization'].items():
                 self.__class__._organization_codes_inv[code] = organization_type
         return self.__class__._organization_codes_inv
 
@@ -690,7 +705,8 @@ class IotBuilder:
         if deno in DbIOT.data:
             self._iot.db_iot = DbIOT.data[deno]
         else:
-            logging.warning(f'Не найдена инструкция {deno}')
+            msg = f'Не найдена инструкция {deno}'
+            logging.warning(msg)
 
 
 class RigBuilder:
@@ -745,7 +761,8 @@ class RigBuilder:
         if name in DbRig.data:
             self._rig.db_rig = DbRig.data[name]
         else:
-            logging.warning(f'Не найдена оснастка {name}')
+            msg = f'Не найдена оснастка {name}'
+            logging.warning(msg)
 
 
 class EquipmentBuilder:
@@ -800,11 +817,12 @@ class EquipmentBuilder:
         if name in DbEquipment.data:
             self._equipment.db_equipment = DbEquipment.data[name]
         else:
-            logging.warning(f'Не найдено оборудование {name}')
+            msg = f'Не найдено оборудование {name}'
+            logging.warning(msg)
 
 
 class MatBuilder:
-    """ Конструктор для класса Material
+    """ Конструктор для класса Material.
         Создает уникальные экземпляры Material по:
         1) Наименованию """
 
@@ -821,7 +839,7 @@ class MatBuilder:
         self._mat = Mat()
 
     @property
-    def mat(self) -> None:
+    def mat(self) -> Mat:
         """ Возвращает экземпляр Material,
             сохраняет его как используемый и
             создает новый экземпляр Material
@@ -855,11 +873,12 @@ class MatBuilder:
         if name in DbMaterial.data:
             self._mat.db_mat = DbMaterial.data[name]
         else:
-            logging.warning(f'Не найден материал {name}')
+            msg = f'Не найден материал {name}'
+            logging.warning(msg)
 
 
 class AreaBuilder:
-    """ Конструктор для класса Area
+    """ Конструктор для класса Area.
         Создает уникальные экземпляры Area по:
         1) Наименованию """
 
@@ -910,11 +929,12 @@ class AreaBuilder:
         if name in DbArea.data:
             self._area.db_area = DbArea.data[name]
         else:
-            logging.warning(f'Не найден участок {name}')
+            msg = f'Не найден участок {name}'
+            logging.warning(msg)
 
 
 class WorkplaceBuilder:
-    """ Конструктор для класса Workplace
+    """ Конструктор для класса Workplace.
         Создает уникальные экземпляры Workplace по:
         1) Наименованию """
 
@@ -965,11 +985,12 @@ class WorkplaceBuilder:
         if name in DbWorkplace.data:
             self._workplace.db_workplace = DbWorkplace.data[name]
         else:
-            logging.warning(f'Не найдено рабочее место {name}')
+            msg = f'Не найдено рабочее место {name}'
+            logging.warning(msg)
 
 
 class ProfessionBuilder:
-    """ Конструктор для класса Profession
+    """ Конструктор для класса Profession.
         Создает уникальные экземпляры Profession по:
         1) Наименованию """
 
@@ -986,7 +1007,7 @@ class ProfessionBuilder:
         self._profession = Profession()
 
     @property
-    def profession(self) -> None:
+    def profession(self) -> Profession:
         """ Возвращает экземпляр Profession,
             сохраняет его как используемый и
             создает новый экземпляр Profession
@@ -1020,11 +1041,14 @@ class ProfessionBuilder:
         if name in DbProfession.data:
             self._profession.db_profession = DbProfession.data[name]
         else:
-            logging.warning(f'Не найдена профессия {name}')
+            msg = f'Не найдена профессия {name}'
+            logging.warning(msg)
 
 
 class Product:
-    """ Cодержит данные об изделии и оформленных к нему документов """
+    """ Содержит данные об изделии и оформленных к нему документов """
+
+    # pylint: disable=too-many-public-methods
 
     def __init__(self) -> None:
         self.db_product = None
@@ -1067,10 +1091,13 @@ class Product:
         """ Метод для запроса аттрибутов документов определенного изделия.
             Может возвращать результат как текст или список """
 
+        # pylint: disable=too-many-arguments
+
         result = []
-        # only_relevant и first определены как None, т.к. add_missing_keys в getData восстанавливает ключи с None
-        only_relevant = not only_relevant is None
-        first = not first is None
+        # only_relevant и first определены как None,
+        # т.к. add_missing_keys в getData восстанавливает ключи с None
+        only_relevant = only_relevant is not None
+        first = first is not None
         document_type = return_document_type(
             class_name=class_name,
             subtype_name=subtype_name,
@@ -1081,22 +1108,22 @@ class Product:
                 outdated = document.db_document.document_real.stage.stage == 'Аннулирован'
                 if not (only_relevant and outdated):
                     if setting:
-                        result.append(document.getAttrValueByName(attr_name=setting, only_text=only_text))
+                        result.append(document.getAttrValueByName(attr_name=setting,
+                                                                  only_text=only_text))
                     else:
                         result.append(document)
         if only_text:
             if first:
                 return '' if not result else result[0]
             return '' if not result else chr(10).join(result)
-        else:
-            if first:
-                return None if not result else result[0]
-            return result
+        if first:
+            return None if not result else result[0]
+        return result
 
     def addDocument(self, document: DbDocumentReal) -> None:
         """ Добавление документа """
 
-        db_document = DbDocument.addDbDocument(product=self,
+        db_document = DbDocument.addDbDocument(product=self.db_product,
                                                document_real=document)
         builder = DocumentBuilder()
         builder.setDbDocument(db_document)
@@ -1107,9 +1134,9 @@ class Product:
 
         builder = DocumentBuilder()
         builder.setDbDocument(DbDocument.getData(document_real=document,
-                                                 product=self))
+                                                 product=self.db_product))
         self.documents.remove(builder.document)
-        DbDocument.delDbDocument(product=self,
+        DbDocument.delDbDocument(product=self.db_product,
                                  document_real=document)
 
     def getProjects(self, with_documents: bool) -> str:
@@ -1139,13 +1166,13 @@ class Product:
                                 products=children)
 
     def getChildren(self) -> list[DbHierarchy]:
-        """ Возвращает дочерние изделия ввиде
+        """ Возвращает дочерние изделия в виде
             списка экземпляров DbHierarchy """
 
         return DbHierarchy.getByParent(self.db_product)
 
     def children(self) -> list[dict[str, Product | int]]:
-        """ Возвращает дочерние изделия ввиде
+        """ Возвращает дочерние изделия в виде
             списка словарей:
             {'product' : экземпляр Product(),
              'quantity': количество в родительском изделии}"""
@@ -1210,8 +1237,8 @@ class Product:
 
     @staticmethod
     def newTdDocumentNum(code: str) -> str:
-        #TODO Стоит вынести из Product
         """ Возвращает первый незанятый номер технологического документа """
+        # TODO Стоит вынести из Product
 
         return Document.getLastNum(code)
 
@@ -1291,10 +1318,11 @@ class Product:
         db_primary_application = DbPrimaryApplication.getData(self.db_product)
         if db_primary_application is not None:
             return db_primary_application.parent
+        return None
 
     @property
     def primary_product(self) -> str:
-        """  """
+        """ Первичная применяемость """
 
         primary_denos = [primary_application.parent.deno for primary_application
                          in self.db_product.primary_parent]
@@ -1313,8 +1341,7 @@ class Product:
             projects = parent_product.projects
             project_names = [project.project.project_name for project in projects]
             return f'{parent_product.deno} {parent_product.name}' + '\n' + '\n'.join(project_names)
-        else:
-            return ''
+        return ''
 
     @property
     def all_projects(self) -> str:
@@ -1337,6 +1364,7 @@ class Product:
 
         if self.db_product.date_check != datetime.min:
             return self.db_product.date_check
+        return None
 
     @property
     def upd_date_f(self) -> str:
@@ -1358,7 +1386,7 @@ class Product:
                 break
         if plm_date and upd_date:
             if plm_date > upd_date:
-                status = f'Устарело'
+                status = 'Устарело'
             else:
                 status = 'Актуально'
         elif not plm_date:
@@ -1447,7 +1475,7 @@ class Product:
     def product_kind(self, kind: ProductKind) -> None:
         """ Изменить вид изделия """
 
-        SplashScreen().newMessage(message=f'Изменение вида изделия',
+        SplashScreen().newMessage(message='Изменение вида изделия',
                                   stage=0,
                                   stages=8,
                                   log=True,
@@ -1455,7 +1483,7 @@ class Product:
         DbProduct.addDbProduct(deno=self.deno,
                                name=self.name,
                                id_kind=kind.id_kind)
-        SplashScreen().newMessage(message=f'Вид изделия изменен',
+        SplashScreen().newMessage(message='Вид изделия изменен',
                                   log=True,
                                   logging_level='INFO')
         SplashScreen().closeWithWindow()
@@ -1501,11 +1529,11 @@ class ProductType:
     def getAllTypes() -> list[DbProductType]:
         """ Возвращает список типов изделий """
 
-        return list(set([prod_type for prod_type in DbProductType.data.values()]))
+        return list(set(list(DbProductType.data.values())))
 
     @property
     def id_type(self) -> int:
-        """ id типа изделия """
+        """ Id типа изделия """
 
         return self.product_type.id_type
 
@@ -1542,7 +1570,7 @@ class ProductKind:
                 self._db_product_kind = DbProductKind.data[0]
 
     @classmethod
-    def all_db_kinds(cls) -> dict[str, DbProductKind]:
+    def allDbKinds(cls) -> dict[str, DbProductKind]:
         """ Словарь из всех видов изделий в БД
             {Наименование вида: экземпляр DbProductKind}"""
 
@@ -1551,16 +1579,9 @@ class ProductKind:
             kind_dict[kind.name_short] = kind
         return kind_dict
 
-    @classmethod
-    def all_db_kinds_names_short(cls) -> list[str]:
-        """ Сортированный список сокращенных
-            наименований видов документов """
-
-        return sorted([db_kind.name_short for db_kind in DbProductKind.uniqueData()])
-
     @property
     def id_kind(self) -> int:
-        """ id вида изделия """
+        """ Id вида изделия """
 
         return self._db_product_kind.id_kind
 
@@ -1611,6 +1632,9 @@ class Document:
     """ Класс содержит базовые данные о документе.
         Базовыми являются реквизиты, одинаковые
         для конструкторских и технологических документов """
+
+    # pylint: disable=too-many-public-methods
+
     _config = CONFIG
 
     def __init__(self) -> None:
@@ -1639,7 +1663,8 @@ class Document:
             default = self.name_created
         else:
             default = self._config.data['document_settings'][f'name_{position}']
-        return DbDocumentSignature.data[key].signature_surname if key in DbDocumentSignature.data else default
+        return DbDocumentSignature.data[key].signature_surname \
+            if key in DbDocumentSignature.data else default
 
     def updSignatureSurname(self, position: str, surname: str) -> None:
         """ Изменить ФИО для определенной должности """
@@ -1668,7 +1693,6 @@ class Document:
                 _operations[operation.order] = operation
         return _operations
 
-    # Для ТД
     def addOperation(self, operation: Operation) -> None:
         # TODO Вынести метод в класс технологических документов
         """ Добавить операцию в документ """
@@ -1702,53 +1726,56 @@ class Document:
             DbMaterialDoc.updMats(sentences=operation.sentences)
         self.changeStageOfMk()
         logging.info('Документ сохранен')
-        SplashScreen().newMessage(message=f'Документ сохранен',
+        SplashScreen().newMessage(message='Документ сохранен',
                                   log=True,
                                   logging_level='INFO')
-        SplashScreen().closeWithWindow(msg=f'Документ {self.name} {self.deno} сохранен', m_type='info')
+        SplashScreen().closeWithWindow(msg=f'Документ {self.name} {self.deno} сохранен',
+                                       m_type='info')
 
     def generateCommonProperties(self) -> list[str]:
         # TODO Вынести метод в класс технологических документов
         """ Создание списка строк с текстом общих данных для МК """
 
-        abbr_start = CFG_TD.first_page_text_abbrlist
-        result = [CFG_TD.first_page_text_iots,
-                  CFG_TD.first_page_text_prof,
-                  CFG_TD.first_page_text_wkpl,
-                  CFG_TD.first_page_text_inst]
+        cfg = CFG_MK.first_page
+        abbr_start = cfg.first_page_text_abbrlist
+        result = [cfg.first_page_text_iots,
+                  cfg.first_page_text_prof,
+                  cfg.first_page_text_wkpl,
+                  cfg.first_page_text_inst]
         abbreviations = set()
-        for num, operation in self.operations.items():
+        for operation in self.operations.values():
             if operation.mat:
-                if CFG_TD.first_page_text_mat1 not in result:
-                    result.append(CFG_TD.first_page_text_mat1)
-                if CFG_TD.first_page_text_mat2 not in result:
-                    result.append(CFG_TD.first_page_text_mat2)
+                if cfg.first_page_text_mat1 not in result:
+                    result.append(cfg.first_page_text_mat1)
+                if cfg.first_page_text_mat2 not in result:
+                    result.append(cfg.first_page_text_mat2)
             if 'Контрольно-измерительная' in operation.rig:
-                if CFG_TD.first_page_text_met1 not in result:
-                    result.append(CFG_TD.first_page_text_met1)
+                if cfg.first_page_text_met1 not in result:
+                    result.append(cfg.first_page_text_met1)
             if operation.workplace.name == 'Рабочее место сборщика':
-                if CFG_TD.first_page_text_stat not in result:
-                    result.append(CFG_TD.first_page_text_stat)
+                if cfg.first_page_text_stat not in result:
+                    result.append(cfg.first_page_text_stat)
             for sentence in operation.sentences.values():
                 if 'работоспособ' in sentence.text:
-                    if CFG_TD.first_page_text_met1 not in result:
-                        result.append(CFG_TD.first_page_text_met1)
-                if CFG_TD.first_page_text_abbr_tu_find in sentence.text:
+                    if cfg.first_page_text_met1 not in result:
+                        result.append(cfg.first_page_text_met1)
+                if cfg.first_page_text_abbr_tu_find in sentence.text:
                     abbreviations.update(
-                        [CFG_TD.first_page_text_abbr_tu])
-                if CFG_TD.first_page_text_abbr_po_find in sentence.text:
+                        [cfg.first_page_text_abbr_tu])
+                if cfg.first_page_text_abbr_po_find in sentence.text:
                     abbreviations.update(
-                        [CFG_TD.first_page_text_abbr_po])
-                if CFG_TD.first_page_text_abbr_spo_find in sentence.text:
+                        [cfg.first_page_text_abbr_po])
+                if cfg.first_page_text_abbr_spo_find in sentence.text:
                     abbreviations.update(
-                        [CFG_TD.first_page_text_abbr_spo])
-                if CFG_TD.first_page_text_abbr_nku_find in sentence.text:
+                        [cfg.first_page_text_abbr_spo])
+                if cfg.first_page_text_abbr_nku_find in sentence.text:
                     abbreviations.update(
-                        [CFG_TD.first_page_text_abbr_nku])
+                        [cfg.first_page_text_abbr_nku])
         if abbreviations:
             abbr_text = ';\n'.join(list(abbreviations))
             result.append(f'{abbr_start}\n{abbr_text}.')
-        product_abbreviation = f'{self.product.name} далее по тексту - {self.product.product_kind_imenitelnyy}.'
+        product_abbreviation = f'{self.product.name} далее по тексту - ' \
+                               f'{self.product.product_kind_imenitelnyy}.'
         result.append(product_abbreviation)
         return result
 
@@ -1779,7 +1806,7 @@ class Document:
             return '0001'
 
     @property
-    def sub_products_new(self) -> list[Product]:
+    def sub_products_new(self) -> list[tuple[Product, Document]]:
         """ Возвращает список изделий,
             изготавливаемых совместно
             по данному документу """
@@ -1805,12 +1832,13 @@ class Document:
                 if only_deno:
                     result.update({f'{db_document_real.deno}': db_document_real})
                 else:
-                    result.update({f'{db_document_real.deno} {db_document_real.name}': db_document_real})
+                    result.update(
+                        {f'{db_document_real.deno} {db_document_real.name}': db_document_real})
         return result
 
     @property
     def id_document(self) -> int:
-        """ id записи связи документа и изделия """
+        """ Id записи связи документа и изделия """
 
         return self.db_document.id_document
 
@@ -1822,14 +1850,14 @@ class Document:
 
     @property
     def id_product(self) -> int:
-        """ id основного изделия к
+        """ Id основного изделия к
             которому относится документ"""
 
         return self.db_document.id_product
 
     @property
     def id_type(self) -> int:
-        """ id типа документа по спецификации """
+        """ Id типа документа по спецификации """
 
         return self.db_document.document_real.id_type
 
@@ -1839,8 +1867,7 @@ class Document:
 
         if self.db_document.document_real.name is not None:
             return self.db_document.document_real.name
-        else:
-            return self.product.name
+        return self.product.name
 
     @property
     def deno(self) -> str:
@@ -2068,6 +2095,9 @@ class Document:
 class DocumentType:
     """ Вид документа
         инициализируется по сокращению или id """
+
+    # pylint: disable=too-many-instance-attributes
+
     sign_exceptions = {'Спецификация': 'СП',
                        'Чертеж детали': 'ЧД',
                        'Ведомость': 'Вед',
@@ -2274,6 +2304,9 @@ class DocumentStage:
 class Operation:
     """ Операция в маршрутной карте """
 
+    # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self) -> None:
         DbOperationDef.updCheck()
         self._db_operation_doc = None
@@ -2306,11 +2339,11 @@ class Operation:
             self._sentences[order] = sentence
         else:
             temp_sentences = {order: sentence}
-            for old_order, sentence in self._sentences.items():
+            for old_order, _sentence in self._sentences.items():
                 if old_order < order:
-                    temp_sentences[old_order] = sentence
+                    temp_sentences[old_order] = _sentence
                 else:
-                    temp_sentences[old_order + 1] = sentence
+                    temp_sentences[old_order + 1] = _sentence
             self._sentences = temp_sentences
 
     def delSentence(self, order: num):
@@ -2331,7 +2364,7 @@ class Operation:
         self._sentences = temp_sentences
 
     def initSentences(self) -> None:
-        """ Инициализация переход операции
+        """ Инициализация переход операции.
             Проверяет в БД наличие переходов для операции с определенным id
             Если существует переход, то проверяется, является ли переход
             переходом по умолчанию или созданным
@@ -2388,7 +2421,8 @@ class Operation:
             for db_operation_def_data in DbOperationDef.data[product_kind.id_kind]:
                 if db_operation_def_data.id_operation == self.id_operation_def:
                     if db_operation_def_data.id_area == self.area.id:
-                        self._workplace_builder.createWorkplace(name=db_operation_def_data.workplace.name)
+                        self._workplace_builder.createWorkplace(
+                            name=db_operation_def_data.workplace.name)
                         self._possible_workplaces.add(self._workplace_builder.workplace)
             self._possible_workplaces = list(self._possible_workplaces)
         else:
@@ -2408,7 +2442,8 @@ class Operation:
                 if db_operation_def_data.id_operation == self.id_operation_def:
                     if db_operation_def_data.id_area == self.area.id:
                         if db_operation_def_data.id_workplace == self.workplace.id:
-                            self._profession_builder.createProfession(name=db_operation_def_data.profession.name)
+                            self._profession_builder.createProfession(
+                                name=db_operation_def_data.profession.name)
                             self._possible_professions.add(self._profession_builder.profession)
             self._possible_professions = list(self._possible_professions)
         else:
@@ -2482,7 +2517,7 @@ class Operation:
 
     @property
     def id(self) -> int:
-        """ id операции по умолчанию"""
+        """ Id операции по умолчанию"""
 
         return self._def_operation.id_operation
 
@@ -2641,11 +2676,12 @@ class Operation:
         self._document_main = document
 
     @property
-    def id_operation_def(self) -> int:
-        """ id операции по умолчанию """
+    def id_operation_def(self) -> int | None:
+        """ Id операции по умолчанию """
 
         if self.default_operation is not None:
             return self.default_operation.id_operation
+        return None
 
     @property
     def db_operation_doc(self) -> DbOperationDoc:
@@ -2660,11 +2696,12 @@ class Operation:
         self._db_operation_doc = value
 
     @property
-    def id_operation_doc(self) -> int:
-        """ id этой операции в БД """
+    def id_operation_doc(self) -> int | None:
+        """ Id этой операции в БД """
 
         if self.db_operation_doc is not None:
             return self.db_operation_doc.id_operation_doc
+        return None
 
     @property
     def sentences(self) -> dict[num, Sentence]:
@@ -2702,8 +2739,7 @@ class Operation:
         if _iot:
             _iot = sorted(list(_iot))
             return ', '.join(_iot)
-        else:
-            return ''
+        return ''
 
     @property
     def rig(self) -> str:
@@ -2716,8 +2752,7 @@ class Operation:
             _rig = sorted(list(_rig))
             text = ', '.join(_rig)
             return ''.join([text[0].upper(), text[1:]])
-        else:
-            return ''
+        return ''
 
     @property
     def equipment(self) -> str:
@@ -2730,8 +2765,7 @@ class Operation:
             _equipment = sorted(list(_equipment))
             text = ', '.join(_equipment)
             return ''.join([text[0].upper(), text[1:]])
-        else:
-            return ''
+        return ''
 
     @property
     def mat(self) -> str:
@@ -2744,92 +2778,64 @@ class Operation:
             _mat = sorted(list(_mat))
             text = ', '.join(_mat)
             return ''.join([text[0].upper(), text[1:]])
-        else:
-            return ''
+        return ''
 
 
 class Area:
-    """  """
+    """ Участок производства """
 
     def __init__(self) -> None:
         self.db_area = None
 
-    @staticmethod
-    def defaultAreaNames(product_kind: ProductKind, operation: Operation) -> list[str]:
-        """  """
-
-        DbOperationDef.updCheck()
-        if product_kind.id_kind in DbOperationDef.data:
-            if operation is not None:
-                default_areas = []
-                for item in DbOperationDef.data[product_kind.id_kind]:
-                    if item.id_operation == operation.id_operation_def:
-                        default_areas.append(item.area.name)
-                return sort_un(default_areas)
-        return list(set([area.name for area in DbArea.uniqueData()]))
-
-    @staticmethod
-    def defaultAreaShortNames() -> list[str]:
-        """  """
-
-        return list(set([area.name_short for area in DbArea.uniqueData()]))
-
     @property
     def name(self) -> str:
-        """  """
+        """ Наименование """
 
         return self.db_area.name
 
     @property
     def name_short(self) -> str:
-        """  """
+        """ Наименование (сокращенное) """
 
         return self.db_area.name_short
 
     @property
     def id(self) -> int:
-        """  """
+        """ id участка """
 
         return self.db_area.id_area
 
 
 class Workplace:
-    """  """
+    """ Рабочее место """
 
     def __init__(self) -> None:
         self.db_workplace = None
 
-    @staticmethod
-    def defaultWorkplaceNames() -> list[str]:
-        """  """
-
-        return list(set([workplace.name for workplace in DbWorkplace.uniqueData()]))
-
     @property
     def name(self) -> str:
-        """  """
+        """ Наименование """
 
         return self.db_workplace.name
 
     @property
     def id(self) -> int:
-        """  """
+        """ Id рабочего места """
 
         return self.db_workplace.id_workplace
 
 
 class Setting:
-    """  """
+    """ Свойство операции """
 
     def __init__(self, db_setting: DbSetting, operation: Operation) -> None:
         self._db_setting = db_setting
         self._operation = operation
         self._activated = False
-        self._db_setting_doc = None
         self._def_sentences = self.initDefaultSentences()
 
     def initDefaultSentences(self) -> dict[int, Sentence]:
-        """  """
+        """ Переходы по умолчанию """
 
         DbSentence.updCheck()
         DbSettingDef.updCheck()
@@ -2844,7 +2850,7 @@ class Setting:
         return self._def_sentences
 
     def addSentences(self) -> None:
-        """  """
+        """ Добавить к операции переходы данного свойства """
 
         total_sentences = len(self._operation.sentences)
         for order, sentence in self.default_sentences.items():
@@ -2852,7 +2858,7 @@ class Setting:
                                        sentence=sentence)
 
     def delSentences(self) -> None:
-        """  """
+        """ Удалить из операции переходы данного свойства """
 
         order_for_delete = []
         for order, sentence in self._operation.sentences.items():
@@ -2863,6 +2869,7 @@ class Setting:
         self._operation.restoreSentenceOrder()
 
     def sentenceById(self, id_sentence: int) -> Sentence | None:
+        """ Возвращает переходы с определенным id """
         for sentence in self.default_sentences.values():
             if sentence.id_def_sentence == id_sentence:
                 return sentence
@@ -2870,55 +2877,54 @@ class Setting:
 
     @property
     def default_setting_id(self) -> int:
-        """  """
+        """ Id свойства """
 
         return self._db_setting.id_setting
 
     @property
     def name(self) -> str:
-        """  """
+        """ Наименование """
 
         return self._db_setting.text
 
     @property
     def activated(self) -> bool:
-        """  """
+        """ Активировано ли свойство в операции """
 
         return self._activated
 
     @activated.setter
     def activated(self, value: bool) -> None:
-        """  """
+        """ Активировано ли свойство в операции """
 
         self._activated = value
 
     @property
     def operation(self) -> Operation:
-        """  """
+        """ Операция к которой относиться это свойство """
 
         return self._operation
 
     @property
     def default_sentences(self) -> dict[int, Sentence]:
-        """  """
+        """ Переходы по умолчанию ля этого свойства """
 
         return self._def_sentences
 
     @property
     def db_setting(self):
-        """  """
+        """ экземпляр DbSetting """
 
         return self._db_setting
 
-    @property
-    def db_setting_doc(self):
-        """  """
-
-        return self._db_setting_doc
-
 
 class Sentence:
-    """  """
+    """ Переход (законченное действие в
+        маршрутной карте) """
+
+    # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-arguments
 
     related_documents = {}
 
@@ -2949,7 +2955,10 @@ class Sentence:
         self.initMat()
 
     def initIot(self) -> None:
-        """  """
+        """ Инициализация инструкций по охране труда,
+            которые относятся к этому переходу в
+            зависимости от того, является ли
+            данный переход переходом по умолчанию """
 
         self.iot_builder = IotBuilder()
         if self._def_db_sentence is not None:
@@ -2960,7 +2969,8 @@ class Sentence:
             self._iot = {}
 
     def initDefaultIot(self) -> dict[str, IOT]:
-        """  """
+        """ Инициализация инструкций по охране труда для
+            перехода по умолчанию """
 
         DbIOTDef.updCheck()
         self._iot = {}
@@ -2970,7 +2980,8 @@ class Sentence:
         return self._iot
 
     def initDocumentIot(self) -> dict[str, IOT]:
-        """  """
+        """ Инициализация инструкций по охране труда
+            для редактированного перехода """
 
         self._iot = {}
         DbIOTDoc.updCheck()
@@ -2980,7 +2991,8 @@ class Sentence:
         return self._iot
 
     def createIot(self, db_iot: DbIOT) -> IOT:
-        """  """
+        """ Возвращает экземпляр IOT по экземпляру
+            ORM класса DbIOT """
 
         self.iot_builder.createIot(deno=db_iot.deno)
         iot = self.iot_builder.iot
@@ -2988,7 +3000,10 @@ class Sentence:
         return iot
 
     def initDoc(self) -> None:
-        """  """
+        """ Инициализация видов документов,
+            которые относятся к этому переходу в
+            зависимости от того, является ли
+            данный переход переходом по умолчанию """
 
         self.doc_builder = DocumentBuilder()
         if self._def_db_sentence is not None:
@@ -2999,42 +3014,50 @@ class Sentence:
             self._doc = {}
 
     def initDefaultDoc(self) -> dict[str, Document]:
-        """  """
+        """ Инициализация видов документов для
+            перехода по умолчанию """
 
         DbDocDef.updCheck()
         self._doc = {}
         if self.id_def_sentence in DbDocDef.data:
             for db_doc_def in DbDocDef.data[self.id_def_sentence]:
-                document = self.product.getDocumentByType(class_name=db_doc_def.document_type.class_name,
-                                                          subtype_name=db_doc_def.document_type.subtype_name,
-                                                          only_text=False,
-                                                          only_relevant=True)
+                document = self.product.getDocumentByType(
+                    class_name=db_doc_def.document_type.class_name,
+                    subtype_name=db_doc_def.document_type.subtype_name,
+                    only_text=False,
+                    only_relevant=True)
                 if document:
                     self.createDoc(document=document[0])
         return self._doc
 
     def initDocumentDoc(self) -> dict[str, Document]:
-        """  """
+        """ Инициализация видов документов для
+            перехода не по умолчанию """
 
         self._doc = {}
         DbDocDoc.updCheck()
         if self.id_sentence_doc in DbDocDoc.data:
             for db_doc in DbDocDoc.data[self.id_sentence_doc]:
-                document = self.product.getDocumentByType(class_name=db_doc.document_real.document_type.class_name,
-                                                          subtype_name=db_doc.document_real.document_type.subtype_name,
-                                                          only_text=False,
-                                                          only_relevant=True)
+                document = self.product.getDocumentByType(
+                    class_name=db_doc.document_real.document_type.class_name,
+                    subtype_name=db_doc.document_real.document_type.subtype_name,
+                    only_text=False,
+                    only_relevant=True)
                 if document:
                     self.createDoc(document=document[0])
         return self._doc
 
     def createDoc(self, document: Document) -> None:
-        """  """
+        """ Добавление документа к словарю документов перехода
+            {Децимальный номер: экземпляр Document} """
 
         self._doc[document.deno] = document
 
     def initRig(self) -> None:
-        """  """
+        """ Инициализация оснастки,
+            которая относится к этому переходу в
+            зависимости от того, является ли
+            данный переход переходом по умолчанию """
 
         self.rig_builder = RigBuilder()
         if self._def_db_sentence is not None:
@@ -3045,7 +3068,8 @@ class Sentence:
             self._rig = {}
 
     def initDefaultRig(self) -> dict[str, Rig]:
-        """  """
+        """ Инициализация оснастки для
+            перехода по умолчанию """
 
         DbRigDef.updCheck()
         self._rig = {}
@@ -3055,7 +3079,8 @@ class Sentence:
         return self._rig
 
     def initDocumentRig(self) -> dict[str, Rig]:
-        """  """
+        """ Инициализация оснастки для
+            перехода не по умолчанию """
 
         self._rig = {}
         DbRigDoc.updCheck()
@@ -3065,7 +3090,8 @@ class Sentence:
         return self._rig
 
     def createRig(self, db_rig: DbRig) -> Rig:
-        """  """
+        """ Добавление оснастки к словарю оснастки перехода
+            {Наименование оснастки: экземпляр Rig} """
 
         self.rig_builder.createRig(name=db_rig.name)
         rig = self.rig_builder.rig
@@ -3073,7 +3099,10 @@ class Sentence:
         return rig
 
     def initMat(self) -> None:
-        """  """
+        """ Инициализация материалов,
+            которые относятся к этому переходу в
+            зависимости от того, является ли
+            данный переход переходом по умолчанию """
 
         self.mat_builder = MatBuilder()
         if self._def_db_sentence is not None:
@@ -3084,7 +3113,8 @@ class Sentence:
             self._mat = {}
 
     def initDefaultMat(self) -> dict[str, Mat]:
-        """  """
+        """ Инициализация материалов для
+            перехода по умолчанию """
 
         DbMaterialDef.updCheck()
         self._mat = {}
@@ -3094,7 +3124,8 @@ class Sentence:
         return self._mat
 
     def initDocumentMat(self) -> dict[str, Mat]:
-        """  """
+        """ Инициализация материалов для
+            перехода не по умолчанию """
 
         self._mat = {}
         DbMaterialDoc.updCheck()
@@ -3104,7 +3135,8 @@ class Sentence:
         return self._mat
 
     def createMat(self, db_mat: DbMaterial) -> Mat:
-        """  """
+        """ Добавление материала к словарю материалов перехода
+            {Наименование материала: экземпляр Mat} """
 
         self.mat_builder.createMat(name=db_mat.name)
         mat = self.mat_builder.mat
@@ -3112,7 +3144,10 @@ class Sentence:
         return mat
 
     def initEquipment(self) -> None:
-        """  """
+        """ Инициализация оборудования,
+            которое относится к этому переходу в
+            зависимости от того, является ли
+            данный переход переходом по умолчанию """
 
         self.equipment_builder = EquipmentBuilder()
         if self._def_db_sentence is not None:
@@ -3123,7 +3158,8 @@ class Sentence:
             self._equipment = {}
 
     def initDefaultEquipment(self) -> dict[str, Equipment]:
-        """  """
+        """ Инициализация оборудования для
+            перехода по умолчанию """
 
         DbEquipmentDef.updCheck()
         self._equipment = {}
@@ -3133,7 +3169,8 @@ class Sentence:
         return self._equipment
 
     def initDocumentEquipment(self) -> dict[str, Equipment]:
-        """  """
+        """ Инициализация оборудования для
+            перехода не по умолчанию """
 
         self._equipment = {}
         DbEquipmentDoc.updCheck()
@@ -3143,9 +3180,9 @@ class Sentence:
         return self._equipment
 
     def getRelatedDocuments(self):
-        """  """
+        """ Инициализация документов, которые идут в связке """
 
-        if self.related_documents == {}:
+        if not self.related_documents:
             config = CONFIG
             config_type = 'excel_document'
             related_documents_str = config.data[config_type]['related_documents'].replace(" ", "")
@@ -3155,7 +3192,8 @@ class Sentence:
                 self.related_documents[string_list[0]] = string_list[1]
 
     def createEquipment(self, db_equipment: DbEquipment) -> Equipment:
-        """  """
+        """ Добавление оборудования к словарю оборудования перехода
+            {Наименование оборудования: экземпляр Equipment} """
 
         self.equipment_builder.createEquipment(name=db_equipment.name)
         equipment = self.equipment_builder.equipment
@@ -3163,7 +3201,9 @@ class Sentence:
         return equipment
 
     def convertToCustom(self, text: str | None = None):
-        """  """
+        """ Изменение свойства перехода
+            с перехода по умолчанию
+            на редактированный переход """
 
         if text is not None:
             self._custom_text = text
@@ -3174,20 +3214,22 @@ class Sentence:
         self.def_db_sentence = None
 
     def findDocInText(self, text: str):
-        """  """
+        """ Поиск документов в тексте перехода """
+
+        # pylint: disable=too-many-locals
 
         developer = r'[А-Я]{4}'
-        kd = r'[0-9]{6}\.[0-9]{3}'
+        k_doc = r'[0-9]{6}\.[0-9]{3}'
         variation = r'-[0-9]{2,3}'
         doc_type = r'[А-Я]{1,2}[0-9]{0,2}'
-        deno_kd = f'{kd}(?:{variation}|)(?:{doc_type}|)'
+        deno_kd = f'{k_doc}(?:{variation}|)(?:{doc_type}|)'
         deno_spo = r'[0-9]{5}-[0-9]{2}'
         deno_td = r'[0-9]{5}\.[0-9]{5}'
-        deno = f'{developer}\.(?:{deno_spo}|{deno_kd}|{deno_td})'
+        deno = rf'{developer}\.(?:{deno_spo}|{deno_kd}|{deno_td})'
         self._doc_from_text = set(re.findall(deno, text))
         temp_set = set()
         for deno in self._doc_from_text:
-            spec_deno = f'{developer}\.{kd}(?:{variation}|)'
+            spec_deno = rf'{developer}\.{k_doc}(?:{variation}|)'
             spec_list = re.findall(spec_deno, deno)
             if spec_list:
                 spec = spec_list[0]
@@ -3197,34 +3239,24 @@ class Sentence:
                 if related_document is not None:
                     temp_set.add(f"{spec}{related_document}")
         self._doc_from_text.update(temp_set)
-        # self.findDocInTextShort(text=text)
-
-    def findDocInTextShort(self, text: str):
-        """  """
-
-        doc_type = r'[А-Я]{1,2}[0-9]{0,2}'
-        symb = '[*]'
-        deno = f'{symb}{doc_type}'
-        temp_set = set(re.findall(deno, text))
-        self._doc_from_text.update(temp_set)
 
     @property
     def size_pixel_excel(self):
-        """  """
+        """ Длина текста перехода """
 
         font = QFont("Times", 10)
-        fm = QFontMetrics(font)
-        return fm.width(self.text)
+        font_metric = QFontMetrics(font)
+        return font_metric.width(self.text)
 
     @property
     def id_operation(self) -> int:
-        """  """
+        """ Id перехода """
 
         return self._operation.db_operation_doc.id_operation_doc
 
     @property
     def text(self) -> str:
-        """  """
+        """ Текст перехода """
 
         if self._custom_text is not None:
             return self._custom_text
@@ -3237,37 +3269,37 @@ class Sentence:
 
     @text.setter
     def text(self, value: str) -> None:
-        """  """
+        """ Текст перехода """
 
         self._text = value
 
     @property
     def custom_text(self) -> str:
-        """  """
+        """ Нестандартный текст перехода """
 
         return self._custom_text
 
     @custom_text.setter
     def custom_text(self, value: str) -> None:
-        """  """
+        """ Нестандартный текст перехода """
 
         self._custom_text = value
 
     @property
     def setting(self) -> Setting:
-        """  """
+        """ Свойство к которому относится переход """
 
         return self._setting
 
     @setting.setter
     def setting(self, value: Setting) -> None:
-        """  """
+        """ Свойство к которому относится переход """
 
         self._setting = value
 
     @property
     def source(self) -> str:
-        """  """
+        """ Источник перехода """
 
         if self._setting is None:
             return 'Определено пользователем'
@@ -3275,424 +3307,447 @@ class Sentence:
 
     @property
     def db_sentence_doc(self) -> DbSentenceDoc:
-        """  """
+        """ Отображение перехода в БД """
 
         return self._db_sentence_doc
 
     @db_sentence_doc.setter
     def db_sentence_doc(self, value: DbSentenceDoc) -> None:
-        """  """
+        """ Отображение перехода в БД """
 
         self._db_sentence_doc = value
 
     @property
-    def id_sentence_doc(self) -> int:
-        """  """
+    def id_sentence_doc(self) -> int | None:
+        """ Id перехода """
 
         if self._db_sentence_doc is not None:
             return self._db_sentence_doc.id_sentence_doc
+        return None
 
     @property
     def def_db_sentence(self) -> DbSentence:
-        """  """
+        """ Отображение данных по умолчанию для перехода """
 
         return self._def_db_sentence
 
     @def_db_sentence.setter
     def def_db_sentence(self, value: DbSentence) -> None:
-        """  """
+        """ Отображение данных по умолчанию для перехода """
 
         self._def_db_sentence = value
 
     @property
     def id_def_sentence(self) -> int | None:
-        """  """
+        """ Id данных по умолчанию для перехода """
 
         if self._def_db_sentence is not None:
             return self._def_db_sentence.id_sentence
+        return None
 
     @property
     def iot(self) -> dict[str, IOT]:
-        """  """
+        """ ИОТ, требуемые при выполнении перехода """
 
         return self._iot
 
     @iot.setter
     def iot(self, value: dict[str, IOT]) -> None:
-        """  """
+        """ ИОТ, требуемые при выполнении перехода """
 
         self._iot = value
 
     @property
     def doc(self) -> dict[str, Document]:
-        """  """
+        """ Документы, требуемые при выполнении перехода """
 
         return self._doc
 
     @doc.setter
     def doc(self, value: dict[str, Document]) -> None:
-        """  """
+        """ Документы, требуемые при выполнении перехода """
 
         self._doc = value
 
     @property
     def doc_ids(self) -> list[int]:
-        """  """
+        """ Список id документов, требуемых
+            при выполнении перехода """
 
         return [document.id_document_real for document in self._doc.values()]
 
     @property
     def doc_from_text(self) -> set[str]:
-        """  """
+        """ Список децимальных номеров документов,
+            упоминаемых в тексте перехода """
 
         self.findDocInText(text=self.text)
         return self._doc_from_text
 
     @property
     def rig(self) -> dict[str, Rig]:
-        """  """
+        """ Оснастка, требуемая при выполнении перехода """
 
         return self._rig
 
     @rig.setter
     def rig(self, value: dict[str, Rig]) -> None:
-        """  """
+        """ Оснастка, требуемая при выполнении перехода """
 
         self._rig = value
 
     @property
     def equipment(self) -> dict[str, Equipment]:
-        """  """
+        """ Оборудование, требуемое при выполнении перехода """
 
         return self._equipment
 
     @equipment.setter
     def equipment(self, value: dict[str, Equipment]) -> None:
-        """  """
+        """ Оборудование, требуемое при выполнении перехода """
 
         self._equipment = value
 
     @property
     def mat(self) -> dict[str, Mat]:
-        """  """
+        """ Материалы, требуемые при выполнении перехода """
 
         return self._mat
 
     @mat.setter
     def mat(self, value: dict[str, Mat]) -> None:
-        """  """
+        """ Материалы, требуемые при выполнении перехода """
 
         self._mat = value
 
     @property
     def product(self) -> Product:
-        """  """
+        """ Изделие, к которому относиться документ,
+            в который входит данный переход """
 
         return self._operation.document_main.product
 
 
 class IOT:
-    """  """
+    """ Инструкция по охране труда """
 
     def __init__(self) -> None:
         self._db_iot = None
 
     @property
     def db_iot(self) -> DbIOT:
-        """  """
+        """ Экземпляр DbIOT.
+            Данные об инструкции в БД """
 
         return self._db_iot
 
     @db_iot.setter
     def db_iot(self, value: DbIOT) -> None:
-        """  """
+        """ Экземпляр DbIOT.
+            Данные об инструкции в БД """
 
         self._db_iot = value
 
     @property
-    def deno(self) -> str:
-        """  """
+    def deno(self) -> str | None:
+        """ Номер инструкции """
 
         if self._db_iot is not None:
             return self._db_iot.deno
+        return None
 
     @property
-    def name(self) -> str:
-        """  """
+    def name(self) -> str | None:
+        """ Название """
 
         if self._db_iot is not None:
             return self._db_iot.name
+        return None
 
     @property
-    def name_short(self) -> str:
-        """  """
+    def name_short(self) -> str | None:
+        """ Сокращенно название """
 
         if self._db_iot is not None:
             return self._db_iot.name_short
+        return None
 
     @property
-    def type_short(self) -> str:
-        """  """
+    def type_short(self) -> str | None:
+        """ Тип инструкции """
 
         if self._db_iot is not None:
             return self._db_iot.type_short
+        return None
 
     @staticmethod
     def allIot() -> list[DbIOT]:
-        """  """
+        """ Список всех инструкций в виде
+            экземпляров DbIOT """
 
         return DbIOT.uniqueData()
 
     @staticmethod
     def allIotTypes() -> set[str]:
-        """  """
+        """ Список всех типов инструкций """
 
         return DbIOT.allTypeShort()
 
 
 class Rig:
-    """  """
+    """ Оснастка """
 
     def __init__(self) -> None:
         self._db_rig = None
 
     @property
     def db_rig(self) -> DbRig:
-        """  """
+        """ Экземпляр DbRig.
+            Данные об оснастке в БД """
 
         return self._db_rig
 
     @db_rig.setter
     def db_rig(self, value: DbRig) -> None:
-        """  """
+        """ Экземпляр DbRig.
+            Данные об оснастке в БД """
 
         self._db_rig = value
 
     @property
     def name(self) -> str | None:
-        """  """
+        """ Наименование """
 
         if self._db_rig is not None:
             return self._db_rig.name
+        return None
 
     @property
     def name_short(self) -> str | None:
-        """  """
+        """ Сокращенное наименование """
 
         if self._db_rig is not None:
             return self._db_rig.name_short
+        return None
 
     @property
     def rig_type(self) -> str | None:
-        """  """
+        """ Тип """
 
         if self._db_rig is not None:
             return self._db_rig.rig_type
+        return None
 
     @property
     def document(self) -> str | None:
-        """  """
+        """ Нормативный документ """
 
         if self._db_rig is not None:
             return self._db_rig.document
+        return None
 
     @property
     def kind(self) -> str | None:
-        """  """
+        """ Вид """
 
         if self._db_rig is not None:
             return self._db_rig.kind
+        return None
 
     @staticmethod
-    def allRig():
-        """  """
+    def allRig() -> list[DbRig]:
+        """ Список всей оснастки """
 
         return DbRig.uniqueData()
 
     @staticmethod
-    def allRigShortNames() -> list[DbRig]:
-        """  """
+    def allRigShortNames() -> set[str]:
+        """ Список сокращенных
+            наименований оснастки """
 
         DbRig.updCheck()
         return DbRig.all_name_short
 
     @staticmethod
     def allRigTypes() -> set[str]:
-        """  """
+        """ Список типов документов """
 
         return DbRig.allTypes()
 
 
 class Mat:
-    """  """
+    """ Материал """
 
     def __init__(self) -> None:
         self._db_mat = None
 
     @property
     def db_mat(self) -> DbMaterial:
-        """  """
+        """ Экземпляр DbMaterial.
+            Данные о материале в БД """
 
         return self._db_mat
 
     @db_mat.setter
     def db_mat(self, value: DbMaterial) -> None:
-        """  """
+        """ Экземпляр DbMaterial.
+            Данные о материале в БД """
 
         self._db_mat = value
 
     @property
-    def name(self):
-        """  """
+    def name(self) -> str | None:
+        """ Наименование материала """
 
         if self._db_mat is not None:
             return self._db_mat.name
+        return None
 
     @property
     def name_short(self) -> str | None:
-        """  """
+        """ Сокращенное наименование материала """
 
         if self._db_mat is not None:
             return self._db_mat.name_short
+        return None
 
     @property
     def mat_type(self) -> str | None:
-        """  """
+        """ Тип материала """
 
         if self._db_mat is not None:
             return self._db_mat.mat_type
+        return None
 
     @property
     def document(self) -> str | None:
-        """  """
+        """ Нормативный документ """
 
         if self._db_mat is not None:
             return self._db_mat.document
+        return None
 
     @property
     def kind(self) -> str | None:
-        """  """
+        """ Вид материала """
 
         if self._db_mat is not None:
             return self._db_mat.kind
+        return None
 
     @staticmethod
     def allMat() -> list[DbMaterial]:
-        """  """
+        """ Список всех материалов """
 
         return DbMaterial.uniqueData()
 
     @staticmethod
     def allMatTypes() -> set[str]:
-        """  """
+        """ Список названий типов материалов """
 
         return DbMaterial.allTypes()
 
     @staticmethod
     def allMatKinds() -> set[str]:
-        """  """
+        """ Список названий видов материалов """
 
         return DbMaterial.allKinds()
 
 
 class Equipment:
-    """  """
+    """ Оборудование """
 
     def __init__(self) -> None:
         self._db_equipment = None
 
     @property
     def db_equipment(self) -> DbEquipment:
-        """  """
+        """ Экземпляр DbEquipment.
+            Данные об оборудовании в БД """
 
         return self._db_equipment
 
     @db_equipment.setter
     def db_equipment(self, value: DbEquipment) -> None:
-        """  """
+        """ Экземпляр DbEquipment.
+            Данные об оборудовании в БД """
 
         self._db_equipment = value
 
     @property
     def name(self) -> str | None:
-        """  """
+        """ Наименование """
 
         if self._db_equipment is not None:
             return self._db_equipment.name
+        return None
 
     @property
     def name_short(self) -> str | None:
-        """  """
+        """ Сокращенное наименование """
 
         if self._db_equipment is not None:
             return self._db_equipment.name_short
+        return None
 
     @property
     def equipment_type(self) -> str | None:
-        """  """
+        """ Тип оборудования """
 
         if self._db_equipment is not None:
             return self._db_equipment.type
+        return None
 
     @staticmethod
     def allEquipment() -> list[DbEquipment]:
-        """  """
+        """ Список всего оборудования """
 
         return DbEquipment.uniqueData()
 
     @staticmethod
     def allEquipmentShortNames() -> set[str]:
-        """  """
+        """ Список сокращенных наименований оборудования """
 
         return DbEquipment.allShortNames()
 
 
 class Profession:
-    """  """
+    """ Должность исполнителя работ
+        для маршрутных карт """
 
     def __init__(self) -> None:
         self.db_profession = None
 
-    @staticmethod
-    def defaultProfessionCodes() -> list[str]:
-        """  """
-
-        return sorted(list(set([db_profession.code for db_profession in DbProfession.uniqueData()])))
-
-    @staticmethod
-    def defaultProfessionNames() -> list[str]:
-        """  """
-
-        return sorted(list(set([db_profession.profession for db_profession in DbProfession.uniqueData()])))
-
     @property
     def id(self) -> int:
-        """  """
+        """ id """
 
         return self.db_profession.id_profession
 
     @property
     def name(self) -> str:
-        """  """
+        """ Название """
 
         return self.db_profession.name
 
     @property
     def code(self) -> str:
-        """  """
+        """ Код по классификатору """
 
         return self.db_profession.code
 
 
 class User:
-    """  """
+    """ Пользователи """
 
     def __init__(self, user_name) -> None:
         self.db_user = None
         self.getDbUser(user_name)
 
-    def getDbUser(self, user_name):
-        """  """
+    def getDbUser(self, user_name) -> None:
+        """ Инициализирует атрибут db_user по ФИО пользователя
+            Если в БД нет пользователя с таким ФИО,
+            то вносит пользователя """
 
         self.db_user = DbUsers.getData(user_name)
         if self.db_user is None:
@@ -3700,64 +3755,66 @@ class User:
 
     @property
     def id_user(self) -> int:
-        """  """
+        """ id """
 
         return self.db_user.id_user
 
     @property
     def name(self) -> str:
-        """  """
+        """ Имя """
 
         return self.db_user.name
 
     @name.setter
     def name(self, value: str):
-        """  """
+        """ Имя """
 
         DbUsers.updUser(user_name=self.user_name, name=value)
 
     @property
     def surname(self) -> str:
-        """  """
+        """ Фамилия """
 
         return self.db_user.surname
 
     @property
     def patronymic(self) -> str:
-        """  """
+        """ Отчество """
 
         return self.db_user.patronymic
 
     @property
     def user_name(self) -> str:
-        """  """
+        """ Имя пользователя """
 
         return self.db_user.user_name
 
     @property
     def password(self) -> str:
-        """  """
+        """ Пароль
+            НЕ ИСПОЛЬЗУЕТСЯ """
 
         return self.db_user.password
 
     @property
     def id_product_last(self) -> int:
-        """  """
+        """ Id последнего открытого изделия """
 
         return self.db_user.id_product_last
 
     @property
     def product(self) -> Product | None:
-        """  """
+        """ Последнее открытое изделие """
 
         if self.db_user.id_product_last is not None:
             builder = ProductBuilder()
             builder.setDbProduct(db_product=self.db_user.product)
             return builder.product
+        return None
 
     @product.setter
     def product(self, value: Product):
-        """  """
+        """ Последнее открытое изделие """
 
         DbUsers.updUser(user_name=self.user_name,
                         id_product_last=value.id_product)
