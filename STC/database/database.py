@@ -634,17 +634,17 @@ class DbProduct(Base):
                 new = False
         else:
             new = True
+        if id_kind is not None:
+            self.id_kind = id_kind
+        if purchased or self.purchased is None:
+            self.purchased = purchased
         if new or self.date_check is None:
             if name and name != 'Неизвестно' and not generated_name:
                 self.name = name
-            if purchased or self.purchased is None:
-                self.purchased = purchased
             if date_check:
                 self.date_check = date_check
             if name_check:
                 self.name_check = name_check
-            if id_kind is not None:
-                self.id_kind = id_kind
 
     def getDbDocuments(self) -> list[DbDocument]:
         """ Возвращает список документов """
