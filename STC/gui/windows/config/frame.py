@@ -1687,14 +1687,17 @@ class FrameAdminTTPErr(FrameAdmin):
     def itemChanged(self, item):
         """ Реакция на изменения данных таблицы """
 
-        if item.text() and item.column() == 2:
+        if item.column() == 2:
             row = item.row()
             db_document_real = self.delegate_sentence.db_documents_real.get(item.text(), None)
             if db_document_real is not None:
-                deno = self.table.item(row, 1).text()
-                self.product_builder.getDbProductByDenotation(deno=deno)
-                product = self.product_builder.product
-                product.updKttp(documents=[db_document_real])
+                documents = [db_document_real]
+            else:
+                documents = []
+            deno = self.table.item(row, 1).text()
+            self.product_builder.getDbProductByDenotation(deno=deno)
+            product = self.product_builder.product
+            product.updKttp(documents=documents)
             self.newItem.emit()
 
 

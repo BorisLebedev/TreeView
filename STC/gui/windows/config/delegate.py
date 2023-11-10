@@ -276,7 +276,7 @@ class DelegateComboBoxTTP(DelegateComboBox):
     def items(self) -> list[str]:
         """ Данные для комбобокса """
 
-        return sorted(self.db_documents_real.keys())
+        return [""] + sorted(self.db_documents_real.keys())
 
 
 class DelegateComboBoxPKI(DelegateComboBox):
