@@ -152,6 +152,9 @@ class ToolBarOptions(ToolBar):
         # self.action_export.setShortcut(QKeySequence("Ctrl+E"))
         self.addAction(self.action_export)
 
+        self.action_export_full = self.actionExportToExcelFull('Excel (Технология) Полная')
+        self.action_export_full.setIcon(CONFIG.style.file_arrow_down_full)
+
         self.action_export_norm = self.actionExportToExcelNorm('Excel (Нормирование)')
         self.action_export_norm.setIcon(CONFIG.style.file_arrow_down_norm)
         # self.action_export_norm.setShortcut(QKeySequence("Ctrl+Shift+N"))
@@ -217,6 +220,16 @@ class ToolBarOptions(ToolBar):
         action = QAction(self.window_table.main_window)
         action.setText(name)
         action.triggered.connect(self.window_table.exportToExcel)
+        return action
+
+    def actionExportToExcelFull(self, name: str) -> QAction:
+        """ Экспорт данных в Excel (шаблон состава изделия)
+            Выгрузка всех данных, а не только изделий с
+            децимальным номером """
+
+        action = QAction(self.window_table.main_window)
+        action.setText(name)
+        action.triggered.connect(self.window_table.exportToExcelFull)
         return action
 
     def actionExportToExcelNorm(self, name: str) -> QAction:
