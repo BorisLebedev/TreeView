@@ -101,6 +101,10 @@ class StyleClass:
             path.join(self.icon_folder, 'file_arrow_down [#1717].png'))
         self.file_arrow_down_norm = QIcon(
             path.join(self.icon_folder, 'file_arrow_down_norm [#1717].png'))
+        self.file_arrow_down_serv = QIcon(
+            path.join(self.icon_folder, 'file_arrow_down_serv [#1717].png'))
+        self.file_arrow_down_full = QIcon(
+            path.join(self.icon_folder, 'file_arrow_down_full [#1717].png'))
         self.file_plus = QIcon(
             path.join(self.icon_folder, 'file_plus [#1682].png'))
         self.filter = QIcon(

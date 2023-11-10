@@ -713,7 +713,6 @@ class CfgXLMkDocTextLp:
     first_page_text_abbrlist: str
 
 
-
 @dataclass
 class CfgXLDocumentDetails:
     """ Хранит текст переходов для

@@ -158,7 +158,7 @@ class ToolBarOptions(ToolBar):
         self.addAction(self.action_export_norm)
 
         self.action_export_ntd = self.actionExportToExcelNTD('Excel (НТД)')
-        self.action_export_ntd.setIcon(CONFIG.style.file_arrow_down_norm)
+        self.action_export_ntd.setIcon(CONFIG.style.file_arrow_down_serv)
         # self.action_export_ntd.setShortcut(QKeySequence("Ctrl+Shift+N"))
         self.addAction(self.action_export_ntd)
 
