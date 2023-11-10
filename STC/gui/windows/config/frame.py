@@ -1587,6 +1587,8 @@ class FrameAdminTTPErr(FrameAdmin):
         self.header_settings = ({'col': 0, 'width': 400, 'name': 'Наименование'},
                                 {'col': 1, 'width': 200, 'name': 'Децимальный\nномер'},
                                 {'col': 2, 'width': 200, 'name': 'КТТП'},
+                                {'col': 3, 'width': 200, 'name': 'КГТП'},
+                                {'col': 3, 'width': 200, 'name': 'МК'},
                                 )
         self.start_rows = 0
         self.start_cols = len(self.header_settings)
@@ -1615,6 +1617,8 @@ class FrameAdminTTPErr(FrameAdmin):
         self.table.setItem(row, 0, QTableWidgetItem(''))
         self.table.setItem(row, 1, QTableWidgetItem(''))
         self.table.setItem(row, 2, QTableWidgetItem(''))
+        self.table.setItem(row, 3, QTableWidgetItem(''))
+        self.table.setItem(row, 4, QTableWidgetItem(''))
 
     def initDefaultData(self) -> None:
         """ Инициализация данных по умолчанию """
@@ -1624,9 +1628,11 @@ class FrameAdminTTPErr(FrameAdmin):
         self.product_builder = ProductBuilder()
         self.document_builder = DocumentBuilder()
         self.table.blockSignals(True)
+        table = []
         for num, (db_product, db_documents) in enumerate(data):
             self.product_builder.getDbProductByDenotation(deno=db_product.deno)
             product = self.product_builder.product
+            db_documents = product.db_product.getDbDocuments()
             for db_document in db_documents:
                 self.document_builder.setDbDocument(db_document)
                 document = self.document_builder.document
@@ -1637,10 +1643,32 @@ class FrameAdminTTPErr(FrameAdmin):
                 setting='deno',
                 org_code='2',
                 only_relevant=True)
+            tgp_doc = product.getDocumentByType(
+                class_name='ТД',
+                subtype_name='Карта типового (группового) технологического процесса',
+                setting='deno',
+                org_code='3',
+                only_relevant=True)
+            mk_doc = product.getDocumentByType(
+                class_name='ТД',
+                subtype_name='Маршрутная карта',
+                setting='deno',
+                only_relevant=True)
+            row = {'name': product.name,
+                   'deno': product.deno,
+                   'ttp_doc': ttp_doc,
+                   'tgp_doc': tgp_doc,
+                   'mk_doc': mk_doc}
+            table.append(row)
+
+        table = sorted(table, key=lambda x: x['deno'])
+        for num, row in enumerate(table):
             self.addNewRow()
-            self.table.item(num, 0).setText(product.name)
-            self.table.item(num, 1).setText(product.deno)
-            self.table.item(num, 2).setText(ttp_doc)
+            self.table.item(num, 0).setText(row['name'])
+            self.table.item(num, 1).setText(row['deno'])
+            self.table.item(num, 2).setText(row['ttp_doc'])
+            self.table.item(num, 3).setText(row['tgp_doc'])
+            self.table.item(num, 4).setText(row['mk_doc'])
         self.table.blockSignals(False)
         self.table.resizeRowsToContents()
 
