@@ -45,7 +45,6 @@ from STC.gui.splash_screen import show_dialog
 
 if TYPE_CHECKING:
     from STC.product.product import DocumentType
-    from STC.product.product import Setting
     from STC.product.product import Operation
     from STC.product.product import Sentence
 
@@ -67,7 +66,6 @@ class DbConnection:
         cls.file_path = file_path
         cls.file_name = file_name
         engine = cls.getEngine()
-        # engine.execution_options(stream_results=True)
         cls.createDatabaseIfNotExist(engine=engine)
         SplashScreen().newMessage(message='База данных найдена',
                                   log=True,
@@ -76,6 +74,7 @@ class DbConnection:
                                    autoflush=False,
                                    future=True,
                                    expire_on_commit=False)
+        # engine.execution_options(stream_results=True)
         with session_cls() as cls.session:
             cls.session = session_cls()
 
@@ -90,7 +89,7 @@ class DbConnection:
                                      connect_args={'timeout': CFG_DB.sqlite.timeout},
                                      echo=False)
             case 'PostgreSQL':
-                return create_engine('postgresql+psycopg2://postgres:159852@localhost:5432/STC_DB')
+                return create_engine('postgresql+psycopg2://postgres:stc123@localhost:5432/STC_DB')
 
     @classmethod
     def createDatabaseIfNotExist(cls, engine):
@@ -737,7 +736,7 @@ class DbPrimaryApplication(Base):
                     cls.data[primary_application.id_child] = primary_application
                 except (IntegrityError, OperationalError) as err:
                     show_dialog(f'Не удалось внести первичную применяемость. '
-                               f'Повторная попытка\n{err}')
+                                f'Повторная попытка\n{err}')
                     DbConnection.session.rollback()
                     cls.addDbPrimaryApplication(parent=parent,
                                                 child=child,
@@ -871,6 +870,7 @@ class DbHierarchy(Base):
     def addNew(cls, parent: DbProduct,
                children: list[dict[str, DbProduct, int]]) -> None:
         """ Вносит в БД новую запись parent-child """
+
         for child in children:
             hierarchy = cls(id_parent=parent.id_product,
                             id_child=child['product'].id_product,
@@ -1339,7 +1339,7 @@ class DbDocument(Base):
                 cls.data[(document.id_document_real, document.id_product)] = document
             except (IntegrityError, OperationalError) as err:
                 show_dialog(f'Не удалось внести {product.name} {document_deno}.'
-                           f'Повторная попытка\n{err}')
+                            f'Повторная попытка\n{err}')
                 DbConnection.session.rollback()
                 cls.addDbDocument(product=product,
                                   document_deno=document_deno,
@@ -1373,7 +1373,7 @@ class DbDocument(Base):
                 DbConnection.session.refresh(document.document_real)
             except (IntegrityError, OperationalError) as err:
                 show_dialog(f'Не удалось удалить {product.name} {document_real.deno}. '
-                           f'Повторная попытка\n{err}')
+                            f'Повторная попытка\n{err}')
                 DbConnection.session.rollback()
                 cls.delDbDocument(product=product, document_real=document_real)
 
@@ -1696,6 +1696,8 @@ class DbDocumentReal(Base):
         """ Проверяет наличие экземпляра класса по предоставленным аттрибутам.
             Создает новый или обновляет существующий экземпляр класса.
             Вносит изменения в БД если не сказано обратное (commit_later) """
+
+        document = None
         if document_deno and document_type.document_type:
             document = cls.getData(document_deno=document_deno,
                                    document_type=document_type,
@@ -1732,7 +1734,7 @@ class DbDocumentReal(Base):
                     DbDocumentReal.data[(document.deno, document.id_type)] = document
                 except (IntegrityError, OperationalError) as err:
                     show_dialog(f'Не удалось внести {document_name} {document_deno}. '
-                               f'Повторная попытка\n{err}')
+                                f'Повторная попытка\n{err}')
                     DbConnection.session.rollback()
                     DbDocumentReal.addDbDocument(document_type=document_type,
                                                  document_deno=document_deno,
@@ -1745,7 +1747,7 @@ class DbDocumentReal(Base):
                                                  date_changed=date_changed,
                                                  name_changed=name_changed,
                                                  commit_later=commit_later)
-            return document
+        return document
 
     @classmethod
     def addDbDocuments(cls, documents: dict[str, dict[str, str | datetime | DocumentType]],
@@ -2107,7 +2109,7 @@ class DbDocumentTdComplex(Base):
             cls.data = {}
         except (IntegrityError, OperationalError) as err:
             show_dialog(f'Не удалось очистить записи о составных документах. '
-                       f'Повторная попытка\n{err}')
+                        f'Повторная попытка\n{err}')
             cls.clearDocumentTdComplex()
 
     @ classmethod
@@ -2137,7 +2139,7 @@ class DbDocumentTdComplex(Base):
                         DbConnection.sessionCommit()
                     except (IntegrityError, OperationalError) as err:
                         show_dialog(f'Не удалось внести составные части документа. '
-                                   f'Повторная попытка\n{err}')
+                                    f'Повторная попытка\n{err}')
                         DbConnection.session.rollback()
                         cls.addDbDocumentTdComplex(document_real=document_real,
                                                    product=product,
@@ -3265,7 +3267,7 @@ class DbOperationDoc(Base):
                 DbConnection.sessionCommit()
             except (IntegrityError, OperationalError) as err:
                 show_dialog(f'Не удалось внести {operation.num} {operation.name}. '
-                           f'Повторная попытка\n{err}')
+                            f'Повторная попытка\n{err}')
                 DbConnection.session.rollback()
                 cls.addOperation(operation=operation,
                                  commit_later=False)

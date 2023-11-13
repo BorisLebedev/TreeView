@@ -284,6 +284,8 @@ class ComboBoxDocByName(ComboBoxByName):
 
     item_dict = {}
 
+    # pylint: disable=too-many-arguments
+
     def __init__(self, frame: FrameOperationText,
                  cb_frame: SentenceDoc,
                  cb_type: ComboBoxDocByType,

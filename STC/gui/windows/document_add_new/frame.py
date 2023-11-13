@@ -91,7 +91,7 @@ class NewDocumentMainFrame(FrameBasic):
         self._l_doc_deno = QLabel('Обозначение документа')
 
         self._l_product_papp = QLabel('Перв. применяемость')  # КД
-        self._l_doc_dev = QLabel('ФИО разаработчика')  # КД
+        self._l_doc_dev = QLabel('ФИО разработчика')  # КД
         self._l_doc_update = QLabel('Дата изменения')  # КД
 
         self._l_doc_pages = QLabel('Количество листов')
