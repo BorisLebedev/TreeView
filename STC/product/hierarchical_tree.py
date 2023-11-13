@@ -150,4 +150,4 @@ class HierarchicalTree:
             cls.kttp_deno_only = Document.getAllDocuments(
                 document_type=document_type, only_deno=True)
         if not cls.product_kinds:
-            cls.product_kinds = ProductKind.all_db_kinds()
+            cls.product_kinds = ProductKind.allDbKinds()

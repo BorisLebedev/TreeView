@@ -513,7 +513,7 @@ class HierarchicalView(QTreeView):
         """ Изменить вид изделия """
 
         product = self.selected_product
-        kind_dict = ProductKind.all_db_kinds()
+        kind_dict = ProductKind.allDbKinds()
         product.product_kind = kind_dict[kind_name]
         self.redrawAllColumns()
 
@@ -621,7 +621,7 @@ class DelegateProductKind(QStyledItemDelegate):
 
         editor = QComboBox(parent)
         current_text = str(index.model().itemData(index)[0])
-        editor.addItems(ProductKind.all_db_kinds().keys())
+        editor.addItems(ProductKind.allDbKinds().keys())
         editor.setCurrentText(current_text)
         return editor
 

@@ -190,7 +190,7 @@ class WindowCreateMK(WindowBasic):
 
     def delOperation(self) -> None:
         """ Вызывает метод удаления операции в случае,
-            если операция не единственная """
+            если операция не одна """
 
         if self.structure.operations_frame.table.rowCount() > 1:
             self.structure.operations_frame.delOperationButtonClicked()

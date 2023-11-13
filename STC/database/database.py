@@ -847,27 +847,26 @@ class DbHierarchy(Base):
                  'quantity': количество по СП (int)}
                         ]"""
 
-        if parent:
-            old_hierarchies = cls.getByParent(parent)
+        old_hierarchies = cls.getByParent(parent)
 
-            new_children, outdated_hierarchies, refresh_hierarchies = \
-                cls.updOld(old_hierarchies=old_hierarchies,
-                           children=products)
-            cls.addNew(parent=parent,
-                       children=new_children)
-            cls.delOutdated(outdated_hierarchies=outdated_hierarchies)
-            if not commit_later:
-                try:
-                    DbConnection.sessionCommit()
-                    for hierarchy in refresh_hierarchies:
-                        DbConnection.session.refresh(hierarchy)
-                except (IntegrityError, OperationalError) as err:
-                    show_dialog(f'Не удалось внести связи изделий. Повторная попытка\n{err}')
-                    DbConnection.session.rollback()
-                    cls.setChildren(parent=parent,
-                                    products=products,
-                                    commit_later=commit_later)
-            return refresh_hierarchies
+        new_children, outdated_hierarchies, refresh_hierarchies = \
+            cls.updOld(old_hierarchies=old_hierarchies,
+                       children=products)
+        cls.addNew(parent=parent,
+                   children=new_children)
+        cls.delOutdated(outdated_hierarchies=outdated_hierarchies)
+        if not commit_later:
+            try:
+                DbConnection.sessionCommit()
+                for hierarchy in refresh_hierarchies:
+                    DbConnection.session.refresh(hierarchy)
+            except (IntegrityError, OperationalError) as err:
+                show_dialog(f'Не удалось внести связи изделий. Повторная попытка\n{err}')
+                DbConnection.session.rollback()
+                cls.setChildren(parent=parent,
+                                products=products,
+                                commit_later=commit_later)
+        return refresh_hierarchies
 
     @classmethod
     def addNew(cls, parent: DbProduct,
@@ -2803,114 +2802,6 @@ class DbSetting(Base):
         return db_settings
 
 
-class DbSettingDoc(Base):
-    """ SqlAlchemy класс описания таблицы типов выполняемых
-        работ и их привязки к операциям в документам"""
-
-    __tablename__ = 'setting_doc'
-    id_setting_doc = Column('id_setting_doc', Integer, primary_key=True)
-    id_operation_doc = Column('id_operation_doc', ForeignKey("operation_doc.id_operation_doc"))
-    id_setting = Column('id_setting', ForeignKey("setting.id_setting"))
-
-    operation = relationship('DbOperationDoc', lazy='joined',
-                             foreign_keys=[id_operation_doc], backref='setting_doc')
-    setting = relationship('DbSetting', lazy='joined',
-                           foreign_keys=[id_setting], backref='setting_doc')
-
-    data = {}
-
-    @classmethod
-    def updData(cls) -> None:
-        """ Кэширование данных """
-        title = 'Загрузка типов выполняемых работ в документах'
-        cls.data = {}
-        BaseMethods.updData(cls, title)
-
-    @classmethod
-    def addData(cls, item: DbSettingDoc) -> None:
-        """ Кэширует данные. Добавляет экземпляр класса ORM модели
-            в словарь, хранящийся в классе, используя определенные
-            аттрибуты экземпляра в качестве ключей словаря """
-        cls.data[(item.id_setting,
-                  item.id_operation_doc)] = item
-
-    @classmethod
-    def uniqueData(cls) -> list[DbSettingDoc]:
-        """ Возвращает список уникальных экземпляров класса из
-            словаря кэшированных данных """
-        return BaseMethods.uniqueData(cls)
-
-    @classmethod
-    def updCheck(cls) -> None:
-        """ Проверяет кэшированы ли данные. Кэширует если нет """
-        BaseMethods.updCheck(cls)
-
-    @classmethod
-    def getData(cls, id_setting: int, id_operation_doc: int) -> DbSettingDoc | None:
-        """ Возвращает экземпляр ORM класса. Проверяет наличие в кэше,
-            и если отсутствует, то запрашивает в БД """
-        attr = (id_setting, id_operation_doc)
-        return BaseMethods.getData(cls, attr)
-
-    @classmethod
-    def getDataFromDb(cls, attr: tuple) -> DbSettingDoc | None:
-        """ Возвращает экземпляр ORM класса по совпадению одного из полей в БД """
-        statement = select(cls).where(and_(cls.id_setting == attr[0],
-                                           cls.id_operation_doc == attr[1]))
-        return BaseMethods.getDataFromDb(cls, statement)
-
-    @classmethod
-    def getDataFromDict(cls, attr: tuple) -> DbSettingDoc | None:
-        """ Возвращает экземпляр ORM класса из кэша """
-        return cls.data.get(attr, None)
-
-    @classmethod
-    def delOutdatedSettings(cls, settings: list) -> None:
-        """ Удаление данных из БД """
-        keys_for_del = set()
-        settings_ids = [setting.default_setting_id for setting in settings if setting.activated]
-        for setting in settings:
-            for key in cls.data:
-                if key[1] == setting.operation.db_operation_doc.id_operation_doc:
-                    if key[0] not in settings_ids:
-                        keys_for_del.add(key)
-        for key in keys_for_del:
-            DbConnection.session.delete(cls.data[key])
-            del cls.data[key]
-        try:
-            DbConnection.sessionCommit()
-        except (IntegrityError, OperationalError) as err:
-            show_dialog(f'Не удалось внести данные. Повторная попытка\n{err}')
-            DbConnection.session.rollback()
-            cls.delOutdatedSettings(settings)
-
-    @classmethod
-    def newSetting(cls, setting: Setting) -> None:
-        """ Создание нового экземпляра ORM класса """
-        id_setting = setting.default_setting_id
-        id_operation_doc = setting.operation.db_operation_doc.id_operation_doc
-        db_setting_doc = cls(id_operation_doc=id_operation_doc,
-                             id_setting=id_setting)
-        DbConnection.session.add(db_setting_doc)
-        key = (id_setting, id_operation_doc)
-        cls.data[key] = db_setting_doc
-
-    @classmethod
-    def addSetting(cls, setting: Setting, commit_later: bool = False) -> None:
-        """ Внесение данных в БД """
-        setting_doc = setting.db_setting_doc
-        if setting_doc is None and setting.activated:
-            cls.newSetting(setting=setting)
-        if not commit_later:
-            try:
-                DbConnection.sessionCommit()
-            except (IntegrityError, OperationalError) as err:
-                show_dialog(f'Не удалось внести данные. Повторная попытка\n{err}')
-                DbConnection.session.rollback()
-                cls.addSetting(setting=setting,
-                               commit_later=False)
-
-
 class DbSettingDef(Base):
     """SqlAlchemy класс описания таблицы переходов и их связь с типами выполняемых работ"""
 
@@ -3616,7 +3507,7 @@ class DbMaterialDef(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -3740,7 +3631,7 @@ class DbMaterialDoc(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -3981,7 +3872,7 @@ class DbRigDef(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4100,7 +3991,7 @@ class DbRigDoc(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4321,7 +4212,7 @@ class DbEquipmentDef(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4447,7 +4338,7 @@ class DbEquipmentDoc(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4688,7 +4579,7 @@ class DbIOTDef(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls):
@@ -4811,7 +4702,7 @@ class DbIOTDoc(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -4916,7 +4807,7 @@ class DbDocDef(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -5041,7 +4932,7 @@ class DbDocDoc(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -5249,7 +5140,7 @@ class DbOperationDef(Base):
             словаря кэшированных данных """
         # return BaseMethods.uniqueData(cls)
         cls.updCheck()
-        return cls.items.values()
+        return list(cls.items.values())
 
     @classmethod
     def updCheck(cls) -> None:
@@ -5302,32 +5193,30 @@ class DbOperationDef(Base):
                                    id_kind=id_kind)
         else:
             db_operation_def = cls.items[id_operation_def]
-            if db_operation_def.id_operation != id_operation \
-                    or db_operation_def.id_operation != id_operation \
-                    or db_operation_def.id_area != id_area \
-                    or db_operation_def.id_workplace != id_workplace \
-                    or db_operation_def.id_profession != id_profession \
-                    or db_operation_def.id_kind != id_kind:
-
+            if db_operation_def.id_operation != id_operation:
                 db_operation_def.id_operation = id_operation
+            if db_operation_def.id_area != id_area:
                 db_operation_def.id_area = id_area
+            if db_operation_def.id_workplace != id_workplace:
                 db_operation_def.id_workplace = id_workplace
+            if db_operation_def.id_profession != id_profession:
                 db_operation_def.id_profession = id_profession
+            if db_operation_def.id_kind != id_kind:
                 db_operation_def.id_kind = id_kind
-                if not commit_later:
-                    try:
-                        DbConnection.sessionCommit()
-                        DbConnection.session.refresh(db_operation_def)
-                        cls.addData(item=db_operation_def)
-                    except (IntegrityError, OperationalError) as err:
-                        show_dialog(f'Не удалось изменить данные\n{err}\nПовторная попытка')
-                        DbConnection.session.rollback()
-                        cls.updOperationDef(id_operation_def=id_operation_def,
-                                            id_operation=id_operation,
-                                            id_area=id_area,
-                                            id_workplace=id_workplace,
-                                            id_profession=id_profession,
-                                            id_kind=id_kind)
+            if not commit_later:
+                try:
+                    DbConnection.sessionCommit()
+                    DbConnection.session.refresh(db_operation_def)
+                    cls.addData(item=db_operation_def)
+                except (IntegrityError, OperationalError) as err:
+                    show_dialog(f'Не удалось изменить данные\n{err}\nПовторная попытка')
+                    DbConnection.session.rollback()
+                    cls.updOperationDef(id_operation_def=id_operation_def,
+                                        id_operation=id_operation,
+                                        id_area=id_area,
+                                        id_workplace=id_workplace,
+                                        id_profession=id_profession,
+                                        id_kind=id_kind)
 
     @classmethod
     # pylint: disable=too-many-arguments

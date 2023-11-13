@@ -44,7 +44,6 @@ def alter_table_sqlite(db_name: str, text: str) -> None:
     conn.commit()
 
 
-# Модификация БД
 def modify_database(file_path: str, name: str) -> None:
     """ Функция через которую можно исполнить SQL выражение"""
 
@@ -110,3 +109,14 @@ def modify_database(file_path: str, name: str) -> None:
 
     alter_table_sqlite(db_name=file_path + name,
                        text="""UPDATE hierarchy SET unit='шт' WHERE quantity <> ''""")
+
+
+def repair_floats(session, hierarchy) -> None:
+    hierarchy.updData()
+    for item in hierarchy.data.values():
+        try:
+            item.quantity = float(item.quantity)
+        except ValueError:
+            if "," in item.quantity:
+                item.quantity = float(str(item.quantity).replace(",", "."))
+    session.commit()

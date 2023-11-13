@@ -118,7 +118,6 @@ class SplashScreen(QSplashScreen):
         self.progress_bar_sub.setGeometry(50, self.height() - 30, self.width() - 100, 20)
         self.changeSubProgressBar(stage=0, stages=1)
 
-    #pylint: disable=too-many-arguments
     def newMessage(self, message: str,
                    stage: int | None = None,
                    stages: int | None = None,
@@ -129,6 +128,8 @@ class SplashScreen(QSplashScreen):
                    align: Qt.AlignmentFlag = Qt.AlignHCenter) -> None:
         """ Выводит прогресс бар с определенным текстом, добавляет текст в лог
             и изменяет состояние прогресс бара"""
+
+        # pylint: disable=too-many-arguments
 
         self.showMessage(message,  Qt.AlignTop | align, CONFIG.style.splash_screen_text_color)
         if log:

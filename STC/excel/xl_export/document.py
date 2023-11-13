@@ -163,7 +163,7 @@ class ExcelDocumentCreator:
                 children.append(child)
         return children
 
-    def updComplex(self, document: Document, sub_products: list[Product]):
+    def updComplex(self, document: Document, sub_products: list[tuple[Product, Document]]):
         """ Дополнение списка изделий, входящих в состав составных документов """
         for sub_product in sub_products:
             self.in_complex[sub_product] = document
@@ -689,7 +689,7 @@ class EText:
     # pylint: disable=too-few-public-methods
 
     def __init__(self, text: str, index: str, col_fst: int, col_end: int | None = None,
-                 alignment: str | None = None) -> None:
+                 alignment: Alignment | None = None) -> None:
         self.text = text
         self.index = index
         self.col_fst = col_fst

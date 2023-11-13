@@ -81,7 +81,7 @@ class StructureSideMenu:
         for frame in self.frames:
             frame.hide()
 
-    def updateContentsFrame(self, frame: NewDocumentMainFrame | FrameMkMain) -> None:
+    def updateContentsFrame(self, frame) -> None:
         """ Добавляет определенную рамку в рамку self.data_frame,
             создавая кнопку в боковом меню и помещая ее в рамку self.menu_frame"""
 

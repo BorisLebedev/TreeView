@@ -147,7 +147,8 @@ class Excel(ExcelExport):
     """ Выгрузка иерархических составов для
         разработки технологических документов """
 
-    def __init__(self, tree_model: HierarchicalView) -> None:
+    def __init__(self, tree_model: HierarchicalView, full: bool = False) -> None:
+        self.full = full
         super().__init__(tree_model=tree_model, config=CFG_HR.xl_h_doc)
 
     def initCustomConfigData(self):
@@ -200,19 +201,25 @@ class Excel(ExcelExport):
                                                 stages=self._tree_row_count)
             self._current_row += 1
 
-            if product.has_real_deno:
-                creator = product.getDocumentByType(class_name='КД',
-                                                    subtype_name='Спецификация',
-                                                    setting='name_created',
-                                                    first=True)
-                if creator is None:
-                    creator = ''
-                temp_creator = creator.replace(' ', '')
-                creator_dep = 'Илгач' if temp_creator in self.ilgach_dep else ''
+            if product.has_real_deno or self.full:
+                # creator = product.getDocumentByType(class_name='КД',
+                #                                     subtype_name='Спецификация',
+                #                                     setting='name_created',
+                #                                     first=True)
+                # if creator is None:
+                #     creator = ''
+                # temp_creator = creator.replace(' ', '')
+                # creator_dep = 'Илгач' if temp_creator in self.ilgach_dep else ''
+                creator = ''
+                creator_dep = ''
                 self.columns.list_lvl.append([level])
                 self.columns.list_index.append([index])
                 self.columns.list_name.append([item.child(row, 2).text()])
-                self.columns.list_dnkd.append([item.child(row, 3).text()])
+
+                if product.has_real_deno:
+                    self.columns.list_dnkd.append([item.child(row, 3).text()])
+                else:
+                    self.columns.list_dnkd.append([item.child(row, 2).text()])
 
                 if product.product_kind.name in self.product_type_exceptions:
                     self.columns.list_purchased.append([product.product_kind.name])

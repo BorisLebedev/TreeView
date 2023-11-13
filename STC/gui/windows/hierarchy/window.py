@@ -136,6 +136,7 @@ class WindowTable(WindowBasic):
     # showWindowAdminColorTheme = pyqtSignal()
 
     exportToExcel = pyqtSignal()
+    exportToExcelFull = pyqtSignal()
     exportToExcelNorm = pyqtSignal()
     exportToExcelNTD = pyqtSignal()
     assignKindSignal = pyqtSignal()
@@ -214,6 +215,7 @@ class WindowTable(WindowBasic):
         self.excel_menu.addAction(self.toolbar_for_options.action_export)
         self.excel_menu.addAction(self.toolbar_for_options.action_export_norm)
         self.excel_menu.addAction(self.toolbar_for_options.action_export_ntd)
+        self.excel_menu.addAction(self.toolbar_for_options.action_export_full)
 
     def adminMenu(self) -> None:
         """ Меню администрирования """
