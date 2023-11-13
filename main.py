@@ -1,3 +1,4 @@
+"""  """
 import logging
 import os
 import sys
@@ -37,6 +38,11 @@ from STC.database.test_data_generator import generate_test_data
 
 
 class Controller:
+    """  """
+
+    # pylint: disable=too-instance-attributes
+    # pylint: disable=too-many-public-methods
+
     connection = None
     controllers = []
 
@@ -63,19 +69,21 @@ class Controller:
         else:
             self.showProductSelector()
 
-    # Удаляет из списка окон
     def deleteFromWindows(self, windows_for_del: list) -> None:
+        """ Удаляет из списка окон """
+
         for window in windows_for_del:
             self.windows.remove(window)
         if not self.windows:
             self.__class__.controllers.remove(self)
 
-    # Окно выбора изделия
     def showProductSelector(self) -> None:
+        """ Окно выбора изделия """
+
         product_data = Product.getAllProductsInDict()
         if not product_data:
-            msg_box = show_dialog(text=f'Нет данных об изделиях.\n'
-                                      f'Сгенерировать тестовые данные?',
+            msg_box = show_dialog(text='Нет данных об изделиях.\n'
+                                       'Сгенерировать тестовые данные?',
                                   m_type='continue_project')
             if msg_box.standardButton(msg_box.clickedButton()) == QMessageBox.Yes:
                 generate_test_data()
@@ -93,25 +101,29 @@ class Controller:
         self.product_selector_window.activateWindow()
         self.product_selector_window.raise_()
 
-    # Закрытие окна выбора изделия
     def closeProductSelector(self) -> None:
+        """ Закрытие окна выбора изделия """
+
         self.deleteFromWindows(windows_for_del=[self.product_selector_window])
         self.product_selector_window = None
 
-    # Обновить комбобоксы в окне выбора изделия после ввода новых изделий
     def updProductSelector(self) -> None:
+        """ Обновить комбобоксы в окне выбора изделия после ввода новых изделий """
+
         self.product_selector_window.product_data = Product.getAllProductsInDict(upd=True)
         self.product_selector_window.initDefaultValues()
 
-    # Окно отображения таблицы иерархии состава изделия
     def showMainTable(self, product_name=None, product_denotation=None) -> None:
+        """ Окно отображения таблицы иерархии состава изделия """
+
         reverse = False
         if product_name is None and product_denotation is None:
             product_name = self.product_selector_window.cb_name.currentText()
             product_denotation = self.product_selector_window.cb_deno.currentText()
             reverse = self.product_selector_window.reverse
         if product_denotation != '' and product_name != '':
-            SplashScreen().newMessage(message=f'Открытие таблицы {product_name} {product_denotation}',
+            SplashScreen().newMessage(message=f'Открытие таблицы '
+                                              f'{product_name} {product_denotation}',
                                       stage=0,
                                       stages=12,
                                       log=True,
@@ -120,11 +132,12 @@ class Controller:
             self.windows.append(self.table)
             self.table.showWindowSearch.connect(self.showWindowSearch)
             self.table.showWindowFilter.connect(self.showWindowFilter)
-            self.table.showWindowProductSelector.connect(lambda: Controller())
+            self.table.showWindowProductSelector.connect(Controller)
             self.table.showWindowNewDocument.connect(self.showNewDocumentWindow)
             self.table.showWindowCreateMk.connect(self.showSelectMkWindow)
             self.table.showWindowDocumentSettings.connect(self.showWindowDocumentSettings)
             self.table.exportToExcel.connect(lambda: Excel(self.table.tree_view))
+            self.table.exportToExcelFull.connect(lambda: Excel(self.table.tree_view, full=True))
             self.table.exportToExcelNorm.connect(lambda: ExcelNorm(self.table.tree_view))
             self.table.exportToExcelNTD.connect(lambda: ExcelNTD(self.table.tree_view))
             self.table.updTreeView.connect(lambda: self.updTreeView(load_from_db=False))
@@ -138,7 +151,8 @@ class Controller:
             self.table.showWindowAdminMk.connect(self.showWindowAdminMk)
             self.table.showWindowAdminProduct.connect(self.showWindowAdminProduct)
             # self.table.showWindowAdminColorTheme.connect(self.showWindowAdminColorTheme)
-            SplashScreen().newMessage(message=f'Открыта иерархия изделия {product_name} {product_denotation}',
+            SplashScreen().newMessage(message=f'Открыта иерархия изделия '
+                                              f'{product_name} {product_denotation}',
                                       stage=8,
                                       stages=8,
                                       log=True,
@@ -152,8 +166,9 @@ class Controller:
         else:
             show_dialog(text='Не указаны децимальный номер и наименование')
 
-    # Окно реквизитов документа
     def showNewDocumentWindow(self) -> None:
+        """ Окно реквизитов документа """
+
         try:
             product = self.table.tree_view.selected_product
         except AttributeError:
@@ -165,15 +180,17 @@ class Controller:
         self.window_new_document.closeWindow.connect(self.deleteFromWindows)
         self.window_new_document.show()
 
-    # Окно выбора свойств документа
     def showWindowDocumentSettings(self) -> None:
+        """ Окно выбора свойств документа """
+
         self.window_document_settings = WindowDocumentSettings(tree_model=self.table.tree_view)
         self.windows.append(self.window_document_settings)
         self.window_document_settings.closeWindow.connect(self.deleteFromWindows)
         self.window_document_settings.show()
 
-    # Окно поиска
     def showWindowSearch(self) -> None:
+        """ Окно поиска """
+
         self.window_search = WindowSearchTreeView()
         self.window_search_list.append(self.window_search)
         self.windows.append(self.window_search)
@@ -181,8 +198,9 @@ class Controller:
         self.window_search.closeWindow.connect(self.deleteFromSearchList)
         self.window_search.show()
 
-    # Окно фильтра
     def showWindowFilter(self) -> None:
+        """ Окно фильтра """
+
         model = StandartModelFilter(tree_view=self.table.tree_view)
         proxy = model.createProxy()
         self.window_filter = WindowFilter(model=proxy)
@@ -191,32 +209,37 @@ class Controller:
         self.window_filter.closeWindow.connect(self.deleteFromFilterList)
         self.window_filter.show()
 
-    # Окно редактирования параметров по умолчанию для маршрутных карт
     def showWindowAdminMk(self) -> None:
+        """ Окно редактирования параметров по умолчанию для маршрутных карт """
+
         self.window_mk_config = WindowMkConfig()
         self.windows.append(self.window_mk_config)
         self.window_mk_config.closeWindow.connect(self.deleteFromWindows)
         self.window_mk_config.show()
 
-    # Окно редактирования параметров по умолчанию для изделий
     def showWindowAdminProduct(self) -> None:
+        """ Окно редактирования параметров по умолчанию для изделий """
+
         self.window_product_config = WindowProductConfig()
         self.windows.append(self.window_product_config)
         self.window_product_config.closeWindow.connect(self.deleteFromWindows)
         self.window_product_config.show()
 
-    # Удаляет окно из списка фильров
     def deleteFromFilterList(self, windows):
+        """ Удаляет окно из списка фильров """
+
         self.window_filter_list.remove(windows[0])
         self.windows.remove(windows[0])
 
-    # Удаляет окно из списка окон поиска
     def deleteFromSearchList(self, windows):
+        """ Удаляет окно из списка окон поиска """
+
         self.window_search_list.remove(windows[0])
         self.windows.remove(windows[0])
 
-    # Окно выбора маршрутной карты
     def showSelectMkWindow(self) -> None:
+        """ Окно выбора маршрутной карты """
+
         try:
             product = self.table.tree_view.selected_product
         except AttributeError:
@@ -234,9 +257,9 @@ class Controller:
                     self.selector_window.closeWindow.connect(self.deleteFromWindows)
                     self.selector_window.documentChanged.connect(self.showCreateMkWindow)
 
-
-    # Окно создания маршрутной карты
     def showCreateMkWindow(self) -> None:
+        """ Окно создания маршрутной карты """
+
         document_name = self.selector_window.selector.currentText()
         document = self.selector_window.documents[document_name]
         self.selector_window.close()
@@ -246,15 +269,16 @@ class Controller:
         window_create_mk.exportToExcel.connect(ExcelDocumentCreator)
         window_create_mk.show()
 
-    # Определяет вид изделия
     def assignKind(self) -> None:
+        """ Определяет вид изделия """
+
         if self.table.current_context_menu_kind is not None:
             product = self.table.tree_view.selected_product
             product.product_kind = self.table.current_context_menu_kind
-            pass
 
-    # Обновление иерархической таблицы
     def updTreeView(self, load_from_db: bool = True) -> None:
+        """ Обновление иерархической таблицы """
+
         if load_from_db:
             self.__class__.connection.update()
         self.table.updTreeModel(product_denotation=self.table.main_product.deno)
@@ -265,15 +289,16 @@ class Controller:
             proxy = model.createProxy()
             window.base_model = proxy
             window.table.setModel(proxy)
-        SplashScreen().newMessage(message=f'Обновление завершено',
+        SplashScreen().newMessage(message='Обновление завершено',
                                   stage=1,
                                   stages=1,
                                   log=True,
                                   logging_level='INFO')
         SplashScreen().closeWithWindow()
 
-    # Импорт данных из иерархических таблиц Excel
     def syncWithExcel(self) -> None:
+        """ Импорт данных из иерархических таблиц Excel """
+
         msg_box = show_dialog(text='Сохранить структуру изделия?',
                               m_type='continue_project')
         upd = False
@@ -283,22 +308,25 @@ class Controller:
         self.updProductSelector()
         show_dialog(text='Импорт данных из иерархических таблиц Excel завершен', m_type='info')
 
-    # Импорт данных из таблицы технологических документов
     def syncWithExcelTdDb(self) -> None:
+        """ Импорт данных из таблицы технологических документов """
+
         ExcelDataFromTdDb()
         if self.product_selector_window is not None:
             self.updProductSelector()
         if self.table in self.windows:
             self.updTreeView(load_from_db=False)
 
-    # Импорт данных из системы PLM
     def syncWithPLM(self) -> None:
+        """ Импорт данных из системы PLM """
+
         PLMSync()
         if self.product_selector_window is not None:
             self.updProductSelector()
 
-    # Добавление нового документа
     def addNewDocument(self) -> None:
+        """ Добавление нового документа """
+
         DocumentFromForm(self.window_new_document)
         self.window_new_document.close()
         if self.table in self.windows:
@@ -306,64 +334,64 @@ class Controller:
         if self.product_selector_window in self.windows:
             self.updProductSelector()
 
-    # Поиск информации по таблице
     def findData(self, window: WindowSearchTreeView) -> None:
+        """ Поиск информации по таблице """
+
         text = window.line.text()
         model = StandartModelSearch(source_model=self.table.tree_view,
                                     search_text=text)
         window.showSearchResults(model)
 
-    # Закрытие дочерних окон
     def closeAllWindows(self) -> None:
+        """ Закрытие дочерних окон """
+
         windows = self.windows.copy()
         for window in windows:
             window.close()
         self.deleteFromWindows(windows_for_del=self.windows)
 
-    # Обновить настройки пользователя после закрытия состава
     def updUserSettings(self):
+        """ Обновить настройки пользователя после закрытия состава """
+
         self.user.product = self.table.main_product
 
 
 if __name__ == '__main__':
     global connection
 
-    config_type = 'log'
-    filename = CONFIG.data[config_type]['filename']
-    logging_level = CONFIG.data[config_type]['logging_level']
-    if logging_level == 'INFO':
-        logging_level = logging.INFO
-    elif logging_level == 'DEBUG':
-        logging_level = logging.DEBUG
-    elif logging_level == 'ERROR':
-        logging_level = logging.ERROR
+    CFG_TYPE = 'log'
+    filename = CONFIG.data[CFG_TYPE]['filename']
+    LOGGING_LVL = CONFIG.data[CFG_TYPE]['logging_level']
+    if LOGGING_LVL == 'INFO':
+        LOGGING_LVL = logging.INFO
+    elif LOGGING_LVL == 'DEBUG':
+        LOGGING_LVL = logging.DEBUG
+    elif LOGGING_LVL == 'ERROR':
+        LOGGING_LVL = logging.ERROR
     else:
-        logging_level = logging.INFO
+        LOGGING_LVL = logging.INFO
 
     if filename:
-        logging.basicConfig(level=logging_level,
+        logging.basicConfig(level=LOGGING_LVL,
                             format='%(asctime)s - %(levelname)s - %(message)s',
                             filename=filename)
     else:
-        logging.basicConfig(level=logging_level,
+        logging.basicConfig(level=LOGGING_LVL,
                             format='%(asctime)s - %(levelname)s - %(message)s')
 
-    # logger = logging.getLogger()
-    # sys.stderr = StreamToLogger(logger, logging.ERROR)
     app = QApplication(sys.argv)
     app.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     SplashScreen.app = app
-    # style(app)
     StyleFactory(app=app)
 
-    SplashScreen().newMessage(message=f'Инициализация списка изделий',
+    SplashScreen().newMessage(message='Инициализация списка изделий',
                               stage=0,
                               stages=26,
                               log=True,
                               logging_level='INFO')
     connection = Connection()
 
-    SplashScreen().newMessage(message=f'Завершено',
+    SplashScreen().newMessage(message='Завершено',
                               stage=26,
                               stages=26,
                               log=True,
