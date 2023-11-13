@@ -37,6 +37,7 @@ from sqlalchemy.sql import or_
 from sqlalchemy.sql.expression import literal
 from sqlalchemy_utils import database_exists
 
+import STC.database.maintenance
 from STC.config.config import CFG_DB
 from STC.database.create import add_default_data
 from STC.functions.func import null_cleaner, add_missing_keys, upd_attrs
@@ -129,6 +130,8 @@ class DbConnection:
         DbDocumentStage.updData()
         DbDocumentType.updData()
         # DbProduct.updAllProductKinds()
+        # STC.database.maintenance.repair_floats(session=DbConnection.session,
+        #                                        hierarchy=DbHierarchy)
 
     @classmethod
     def resetData(cls) -> None:
@@ -875,9 +878,20 @@ class DbHierarchy(Base):
             hierarchy = cls(id_parent=parent.id_product,
                             id_child=child['product'].id_product,
                             id_type=child['id_type'],
-                            quantity=child.get('quantity', 0),
+                            quantity=cls.quantity_repair(
+                                quantity=child.get('quantity', 0)),
                             unit=child.get('unit', 'шт'))
             DbConnection.session.add(hierarchy)
+
+    @classmethod
+    def quantity_repair(cls, quantity) -> float | int:
+        try:
+            return float(quantity)
+        except ValueError:
+            if "," in str(quantity):
+                return float(str(quantity).replace(",", "."))
+            else:
+                return 0
 
     @classmethod
     def delOutdated(cls, outdated_hierarchies: list[DbHierarchy]) -> None:
@@ -1107,8 +1121,8 @@ class DbHierarchy(Base):
         except InvalidRequestError as err:
             DbConnection.reconnection(error=err)
 
-    @staticmethod
-    def updOld(old_hierarchies: list[DbHierarchy],
+    @classmethod
+    def updOld(cls, old_hierarchies: list[DbHierarchy],
                children: list[dict[str, DbProduct, int]]) -> \
             tuple[list[dict[str, DbProduct, int]], list[DbHierarchy], list[DbHierarchy]]:
         """ Сравнивает имеющиеся иерархические данные для родителя
@@ -1125,7 +1139,8 @@ class DbHierarchy(Base):
             for child in children:
                 if hierarchy.id_child == child['product'].id_product:
                     hierarchy.id_type = child['id_type']
-                    hierarchy.quantity = child.get('quantity', 0)
+                    hierarchy.quantity = cls.quantity_repair(
+                                quantity=child.get('quantity', 0))
                     hierarchy.unit = child.get('unit', 'шт')
                     new_children.remove(child)
                     outdated_hierarchies.remove(hierarchy)

@@ -74,15 +74,18 @@ def is_complex(deno: str) -> bool:
     return False
 
 
-def product_quantity(str_num: str) -> int | float:
+def product_quantity(str_num: str | int | float) -> int | float:
     """ Представление количества в иерархической таблице """
-    try:
-        return int(str_num)
-    except ValueError:
+    # if isinstance(str_num, int):
+    #     return str_num
+    # if isinstance(str_num, float):
+    #     return  str_num
+    if isinstance(str_num, str):
         try:
             return float(str_num.replace(",", "."))
         except ValueError:
             return 0
+    return str_num
 
 
 def sort_un(list_of_items: list) -> list:

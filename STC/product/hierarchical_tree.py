@@ -18,7 +18,7 @@ class HTreeChild:
 
     child_type: str | None
     child_unit: str | None
-    child_quantity: int | None
+    child_quantity: int | float | None
 
 
 @dataclass
