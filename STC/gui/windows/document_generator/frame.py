@@ -1,4 +1,5 @@
-"""  """
+""" Виджеты рамки редактирования
+    операции маршрутной карты """
 
 from __future__ import annotations
 
@@ -43,14 +44,14 @@ from STC.gui.windows.document_generator.sentence_frame import SentenceRig
 from STC.gui.splash_screen import show_dialog
 from STC.product.product import OperationBuilder
 from STC.product.product import Operation
+from STC.product.product import Sentence
 
 if TYPE_CHECKING:
     from STC.product.product import Document
-    from STC.product.product import Sentence
 
 
-def inScroll(widget: QWidget) -> QScrollArea:
-    """  """
+def in_scroll(widget: QWidget) -> QScrollArea:
+    """ Добавляет виджет в область промотки """
 
     scroll = QScrollArea()
     scroll.setWidgetResizable(True)
@@ -60,6 +61,8 @@ def inScroll(widget: QWidget) -> QScrollArea:
 
 class FrameMkMain(FrameBasic):
     """ Рамка основных данных генерируемой МК """
+
+    # pylint: disable=too-many-instance-attributes
 
     changeLitera = pyqtSignal()
     changeStage = pyqtSignal()
@@ -72,7 +75,8 @@ class FrameMkMain(FrameBasic):
 
     def __init__(self) -> None:
         super().__init__(frame_name='Основные данные')
-        self.stage_letters = sorted(CONFIG.data['document_settings']['litera'].replace(' ', '').split(','))
+        self.stage_letters = sorted(
+            CONFIG.data['document_settings']['litera'].replace(' ', '').split(','))
         self.stages = CONFIG.data['document_settings']['stages'].replace("", "").split(',')
         self.initWidgetLabel()
         self.initWidgetLineedit()
@@ -352,10 +356,14 @@ class FrameMkOperations(FrameWithTable):
         self.table.setCellWidget(row, 0, self.addOperationButton())
         self.table.setCellWidget(row, 1, self.delOperationButton())
         self.table.setCellWidget(row, 2, QPushButton())
-        self.table.setCellWidget(row, 3, self.operation(operation=self.document_main.operations[row]))
-        self.table.setCellWidget(row, 4, self.area(operation=self.document_main.operations[row]))
-        self.table.setCellWidget(row, 5, self.workplace(operation=self.document_main.operations[row]))
-        self.table.setCellWidget(row, 6, self.profession(operation=self.document_main.operations[row]))
+        self.table.setCellWidget(
+            row, 3, self.operation(operation=self.document_main.operations[row]))
+        self.table.setCellWidget(
+            row, 4, self.area(operation=self.document_main.operations[row]))
+        self.table.setCellWidget(
+            row, 5, self.workplace(operation=self.document_main.operations[row]))
+        self.table.setCellWidget(
+            row, 6, self.profession(operation=self.document_main.operations[row]))
         self.blockSignals(False)
         self.operationNumsUpdate()
 
@@ -364,7 +372,8 @@ class FrameMkOperations(FrameWithTable):
 
         logging.debug('Пересчет номеров операций')
         operations = {}
-        for row, operation in sorted(self.document_main.operations.items(), key=lambda x: x[0], reverse=True):
+        for row, operation in sorted(self.document_main.operations.items(),
+                                     key=lambda x: x[0], reverse=True):
             if row >= order:
                 row += 1
             operations[row] = operation
@@ -485,7 +494,9 @@ class FrameMkOperations(FrameWithTable):
         return btn_del_op
 
     def delOperationButtonClicked(self, order: int | None = None) -> None:
-        """  """
+        """ Удаляет операцию из таблицы операций.
+            Перерисовывает таблицу в соответствии
+            с новыми данными об операциях"""
 
         if not order:
             row = self.table.indexAt(self.sender().pos()).row()
@@ -496,87 +507,95 @@ class FrameMkOperations(FrameWithTable):
             self.operationNumsUpdate()
 
     def moveOperation(self) -> None:
-        """  """
+        """ Изменение порядкового номера операций """
 
-        logging.debug(f'Изменение положения операций')
         self.operationNumsUpdate()
         self.updateButtons.emit()
 
     def operation(self, operation: Operation) -> QComboBox:
-        """  """
+        """ Возвращает комбобокс с названиями операций и
+            определенной операцией как выбранной """
 
-        cb = QComboBox()
+        combobox = QComboBox()
         default_operations = Operation.defaultOperationsName(operation.document_main.product)
         if operation.name not in default_operations:
             default_operations.append(operation.name)
-        cb.addItems(sorted(default_operations))
-        cb.setCurrentText(operation.name)
-        cb.currentTextChanged.connect(self.changeOperation)
-        return cb
+        combobox.addItems(sorted(default_operations))
+        combobox.setCurrentText(operation.name)
+        combobox.currentTextChanged.connect(self.changeOperation)
+        return combobox
 
     def operationNumsUpdate(self) -> None:
-        """  """
+        """ Обновление номеров операций при смене их порядка """
 
-        logging.debug(f'Обновление номеров операций при смене их порядка')
         for row in range(self.table.rowCount()):
             new_order = self.table.visualRow(row)
             operation = self.document_main.operations[row]
-            logging.debug(f'Операция {operation.num} {operation.name} {operation.order} -> {new_order}')
+            msg = f'Операция {operation.num} {operation.name} ' \
+                  f'{operation.order} -> {new_order}'
+            logging.debug(msg)
             operation.order = new_order
             self.table.cellWidget(row, 2).setText(operation.num)
 
     def area(self, operation: Operation) -> QComboBox:
-        """  """
+        """ Возвращает комбобокс с наименованиями участков и
+            определенным участком в качестве активного """
 
-        cb = QComboBox()
-        cb.addItems(operation.possible_areas_names)
+        combobox = QComboBox()
+        combobox.addItems(operation.possible_areas_names)
         if operation.area.name not in operation.possible_areas_names:
-            cb.addItems([operation.area.name])
-        cb.setCurrentText(operation.area.name)
-        cb.currentTextChanged.connect(self.changeArea)
-        return cb
+            combobox.addItems([operation.area.name])
+        combobox.setCurrentText(operation.area.name)
+        combobox.currentTextChanged.connect(self.changeArea)
+        return combobox
 
     def workplace(self, operation: Operation) -> QComboBox:
-        """  """
+        """ Возвращает комбобокс с наименованиями
+            рабочих мест и определенным рабочим местом
+            в качестве выбранного """
 
-        cb = QComboBox()
-        cb.addItems(operation.possible_workplaces_names)
+        combobox = QComboBox()
+        combobox.addItems(operation.possible_workplaces_names)
         if operation.workplace.name not in operation.possible_workplaces_names:
-            cb.addItems([operation.workplace.name])
-        cb.setCurrentText(operation.workplace.name)
-        cb.currentTextChanged.connect(self.changeWorkplace)
-        return cb
+            combobox.addItems([operation.workplace.name])
+        combobox.setCurrentText(operation.workplace.name)
+        combobox.currentTextChanged.connect(self.changeWorkplace)
+        return combobox
 
     def profession(self, operation: Operation) -> QComboBox:
-        """  """
+        """ Возвращает комбобокс с наименованиями
+            должностей и определенной должностью
+            в качестве выбранной """
 
-        cb = QComboBox()
-        cb.addItems(operation.possible_professions_names)
+        combobox = QComboBox()
+        combobox.addItems(operation.possible_professions_names)
         if operation.profession.name not in operation.possible_professions_names:
-            cb.addItems([operation.profession.name])
-        cb.setCurrentText(operation.profession.name)
-        cb.currentTextChanged.connect(self.changeProfession)
-        return cb
+            combobox.addItems([operation.profession.name])
+        combobox.setCurrentText(operation.profession.name)
+        combobox.currentTextChanged.connect(self.changeProfession)
+        return combobox
 
     @property
     def document_main(self) -> Document:
-        """  """
+        """ Основной документ к которому относиться рамка """
 
         return self._document_main
 
     @document_main.setter
     def document_main(self, document: Document) -> None:
-        """  """
+        """ Основной документ к которому относиться рамка """
 
         self._document_main = document
 
 
-# Рамка для отображения главных свойств операции генерируемой МК
 class FrameMkOperationMain(FrameBasic):
-    """  """
+    """ Рамка для отображения главных свойств операции генерируемой МК """
+
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, document: Document, operation: Operation) -> None:
-        logging.debug(f'Инициализация рамки для отображения главных свойств операции генерируемой МК')
+        logging.debug('Инициализация рамки для отображения '
+                      'главных свойств операции генерируемой МК')
         self._operation_num_font = QFont(CONFIG.style.font,
                                          CONFIG.style.font_size_big, 1)
         self.document = document
@@ -593,7 +612,7 @@ class FrameMkOperationMain(FrameBasic):
         self.layout().setColumnStretch(1, 1)
 
     def initWidgetLabel(self) -> None:
-        """  """
+        """ Инициализация QLabel """
 
         self._l_operation_num = QLabel(self.operation.num)
         self._l_operation = QLabel(self.operation.name)
@@ -608,7 +627,7 @@ class FrameMkOperationMain(FrameBasic):
         self._l_sentences = QLabel('Переходы')
 
     def initWidgetButton(self) -> QPushButton:
-        """  """
+        """ Кнопка скрыть/показать элементы рамки """
 
         btn = QPushButton()
         btn.setIcon(self.icon_open)
@@ -616,7 +635,8 @@ class FrameMkOperationMain(FrameBasic):
         return btn
 
     def changeButtonIcon(self) -> None:
-        """  """
+        """ Изменение иконки рамки в зависимости от того
+            скрыт или показан соседний виджет """
 
         btn = self.sender()
         index = self.layout().indexOf(btn)
@@ -632,7 +652,7 @@ class FrameMkOperationMain(FrameBasic):
             self.layout().itemAt(index + 1).widget().setVisible(False)
 
     def initFrame(self) -> None:
-        """  """
+        """ Инициализация рамок для виджетов """
 
         self._f_iots = IotText(operation=self.operation)
         self._f_documents = DocText(operation=self.operation)
@@ -643,7 +663,9 @@ class FrameMkOperationMain(FrameBasic):
         self._f_settings = FrameOperationSettings(self.operation)
 
     def initFrameData(self) -> None:
-        """  """
+        """ Инициализация виджетов, которые хранят
+            консолидированные данные по переходам.
+            Например: список используемого оборудования """
 
         self._f_iots.upd()
         self._f_documents.upd()
@@ -652,7 +674,7 @@ class FrameMkOperationMain(FrameBasic):
         self._f_materials.upd()
 
     def initFrameConnection(self) -> None:
-        """  """
+        """ Связи для обновлений данных виджетов в рамке """
 
         self._f_sentences.updRig.connect(self._f_rigs.upd)
         self._f_sentences.updEquipment.connect(self._f_equipments.upd)
@@ -662,17 +684,17 @@ class FrameMkOperationMain(FrameBasic):
         self._f_settings.updSentenceTable.connect(self._f_sentences.updTable)
 
     def initWidgetPosition(self) -> None:
-        """  """
+        """ Расположение виджетов """
 
         self.layout().addWidget(self._l_operation_num, 0, 0)
         self.layout().addWidget(self._l_operation, 0, 1)
-        self.widgets = {self._l_settings: inScroll(widget=self._f_settings),
+        self.widgets = {self._l_settings: in_scroll(widget=self._f_settings),
                         self._l_iot: self._f_iots,
                         self._l_documents: self._f_documents,
                         self._l_equipments: self._f_equipments,
                         self._l_materials: self._f_materials,
                         self._l_rigs: self._f_rigs,
-                        self._l_sentences: inScroll(widget=self._f_sentences),
+                        self._l_sentences: in_scroll(widget=self._f_sentences),
                         }
         for num, label in enumerate(self.widgets.keys()):
             row = 2 + num * 2
@@ -686,76 +708,76 @@ class FrameMkOperationMain(FrameBasic):
         self.layout().setRowStretch(self.layout().rowCount() - 1, 1)
 
     def updFrame(self) -> None:
-        """  """
+        """ Обновление данных виджетов в рамке """
 
         self.name = f'{self.operation.num} {self.operation.name}'
         self._l_operation_num.setText(self.operation.num)
         self._l_operation.setText(self.operation.name)
-        logging.debug(f'Обновляется рамка {self.name}')
 
 
-# Рамка с кнопками для переключения между операциями генерируемой МК
 class FrameOperationButtons(QFrame):
-    """  """
+    """ Рамка с кнопками для переключения между операциями генерируемой МК """
 
     showFrame = pyqtSignal()
 
     def __init__(self) -> None:
-        logging.debug(f'Инициализация рамки кнопок переключения между операциями')
+        logging.debug('Инициализация рамки кнопок переключения между операциями')
+        self.current_frame = None
         super().__init__()
         self.setLayout(QGridLayout())
         self.layout().setRowStretch(1000, 1)
         self.setMinimumWidth(35)
 
-    def updButtons(self, frames: list[FrameMkMain, FrameMkOperations, FrameMkOperationMain]) -> None:
-        """  """
+    def updButtons(self, frames: list[FrameMkMain,
+                                      FrameMkOperations,
+                                      FrameMkOperationMain]) -> None:
+        """ Обновление кнопок """
 
         self.delButtons()
         self.addButtons(frames)
 
-    def addButtons(self, frames: list[FrameMkMain, FrameMkOperations, FrameMkOperationMain]) -> None:
-        """  """
+    def addButtons(self, frames: list[FrameMkMain,
+                                      FrameMkOperations,
+                                      FrameMkOperationMain]) -> None:
+        """ Добавление кнопок по рамкам операций """
 
-        logging.debug(f'Создание кнопок переключения между операциями')
-        operation_frames = [frame for frame in frames[2:]]
+        logging.debug('Создание кнопок переключения между операциями')
+        operation_frames = list(frames[2:])
         operation_frames = sorted(operation_frames, key=lambda frame: frame.operation.num)
         for frame in operation_frames:
             frame.updFrame()
             btn_text = '\n'.join(text_slicer(text=frame.name[4:], max_len=120))
             btn = QPushButton(f'{frame.name[:3]}\n{btn_text}')
             btn.setObjectName(frame.name)
-            logging.debug(f'Создана кнопка {btn.text()}')
             btn.setStyleSheet("Text-align:left")
             self.layout().addWidget(btn, self.layout().count(), 0)
-            btn.clicked.connect(lambda: self.currentFrame())
+            btn.clicked.connect(self.currentFrame)
 
     def currentFrame(self) -> None:
-        """  """
+        """ Установить активную операцию """
 
         self.current_frame = self.sender().objectName()
         logging.debug(self.current_frame)
         self.showFrame.emit()
 
     def delButtons(self) -> None:
-        """  """
+        """ Удалить кнопки из рамки """
 
-        logging.debug(f'Удаление кнопок переключения между операциями')
+        logging.debug('Удаление кнопок переключения между операциями')
         for row in reversed(range(self.layout().count())):
             button = self.layout().itemAtPosition(row, 0).widget()
-            logging.debug(f'Удалена кнопка {button.text()}')
             self.layout().removeWidget(button)
             button.deleteLater()
             button = None
 
 
-# Рамка с особенностями генерируемой МК
 class FrameOperationSettings(QFrame):
-    """  """
+    """ Рамка с особенностями генерируемой МК """
 
     updSentenceTable = pyqtSignal()
 
     def __init__(self, operation: Operation) -> None:
-        logging.debug(f'Инициализация рамки с особенностями генерируемой МК')
+        logging.debug('Инициализация рамки с особенностями генерируемой МК')
         super().__init__()
 
         self.operation = operation
@@ -766,15 +788,17 @@ class FrameOperationSettings(QFrame):
         self.initCheckboxPosition()
 
     def initCheckbox(self) -> None:
-        """  """
+        """ Создает чекбокс по свойствам операции """
 
-        for setting in sorted(self.operation.settings.values(), key=lambda _setting: _setting.name):
+        for setting in sorted(self.operation.settings.values(),
+                              key=lambda _setting: _setting.name):
             checkbox = QCheckBox(setting.name)
             checkbox.stateChanged.connect(self.checkboxStateChanged)
             self.settings[checkbox] = setting
 
     def initCheckboxState(self) -> None:
-        """  """
+        """ Активирует/деактивирует чекбокс в зависимости
+            от использования переходов свойства """
 
         for checkbox, setting in self.settings.items():
             checkbox.blockSignals(True)
@@ -782,13 +806,14 @@ class FrameOperationSettings(QFrame):
             checkbox.blockSignals(False)
 
     def initCheckboxPosition(self) -> None:
-        """  """
+        """ Размещает чекбоксы в рамке """
 
-        for cb in self.settings.keys():
-            self.layout().addWidget(cb)
+        for checkbox in self.settings:
+            self.layout().addWidget(checkbox)
 
     def checkboxStateChanged(self) -> None:
-        """  """
+        """ Добавление/Удаление переходов при
+            изменении состояния чекбокса """
 
         checkbox = self.sender()
         setting = self.settings[checkbox]
@@ -800,51 +825,11 @@ class FrameOperationSettings(QFrame):
         self.updSentenceTable.emit()
 
 
-# Рамка для документов операции генерируемой МК (НЕ ИСПОЛЬЗУЕТСЯ)
-class FrameOperationDocuments(QFrame):
-    """  """
-
-    def __init__(self, operation) -> None:
-        logging.debug(f'Инициализация рамки видов документов')
-        super().__init__()
-        self.operation = operation
-        self.documents = {}
-        self.initCheckbox()
-        self.initCheckboxState()
-        self.setLayout(QVBoxLayout())
-        self.initCheckboxPosition()
-
-    def initCheckbox(self) -> None:
-        """  """
-
-        for document_in_operation in self.operation.documents:
-            checkbox = QCheckBox(f'{document_in_operation.document.deno} {document_in_operation.document.subtype_name}')
-            checkbox.stateChanged.connect(self.checkboxStateChanged)
-            self.documents[checkbox] = document_in_operation
-
-    def initCheckboxPosition(self) -> None:
-        """  """
-
-        for checkbox in self.documents.keys():
-            self.layout().addWidget(checkbox)
-
-    def initCheckboxState(self) -> None:
-        """  """
-
-        for checkbox, document in self.documents.items():
-            checkbox.setChecked(document.activated)
-
-    def checkboxStateChanged(self) -> None:
-        """  """
-
-        checkbox = self.sender()
-        document_in_operation = self.documents[checkbox]
-        document_in_operation.activated = checkbox.isChecked()
-
-
-# Рамка для текста переходов генерируемой МК
 class FrameOperationText(FrameWithTable):
-    """  """
+    """ Рамка для текста переходов генерируемой МК """
+
+    # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes
 
     updIot = pyqtSignal()
     updRig = pyqtSignal()
@@ -853,6 +838,13 @@ class FrameOperationText(FrameWithTable):
     updEquipment = pyqtSignal()
 
     def __init__(self, operation) -> None:
+        self.context_menu = None
+        self.col_txt = None
+        self.col_doc = None
+        self.col_mat = None
+        self.col_rig = None
+        self.col_iot = None
+        self.col_equipment = None
         super().__init__()
         self.operation = operation
         self.initSettings()
@@ -861,7 +853,7 @@ class FrameOperationText(FrameWithTable):
         self.initHeaderIcons()
 
     def initSettings(self) -> None:
-        """  """
+        """ Настройки параметров рамки """
 
         self.table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -873,7 +865,7 @@ class FrameOperationText(FrameWithTable):
         self.table.verticalHeader().sectionMoved.connect(self.moveSentence)
 
     def initTableSettings(self) -> None:
-        """  """
+        """ Параметры таблицы """
 
         self.col_txt = 0
         self.col_doc = 1
@@ -881,12 +873,13 @@ class FrameOperationText(FrameWithTable):
         self.col_rig = 3
         self.col_iot = 4
         self.col_equipment = 5
-        self.header_settings = ({'col': self.col_txt, 'width': 600, 'name': 'Текст перехода'},
-                                {'col': self.col_doc, 'width': 400, 'name': 'Документы', 'state': 'full'},
-                                {'col': self.col_mat, 'width': 400, 'name': 'Материалы', 'state': 'full'},
-                                {'col': self.col_rig, 'width': 400, 'name': 'Оснастка', 'state': 'full'},
-                                {'col': self.col_iot, 'width': 400, 'name': 'ИОТ', 'state': 'full'},
-                                # {'col': self.col_equipment, 'width': 400, 'name': 'Оборудование', 'state': 'full'},
+        self.header_settings = (
+            {'col': self.col_txt, 'width': 600, 'name': 'Текст перехода'},
+            {'col': self.col_doc, 'width': 400, 'name': 'Документы', 'state': 'full'},
+            {'col': self.col_mat, 'width': 400, 'name': 'Материалы', 'state': 'full'},
+            {'col': self.col_rig, 'width': 400, 'name': 'Оснастка', 'state': 'full'},
+            {'col': self.col_iot, 'width': 400, 'name': 'ИОТ', 'state': 'full'},
+            # {'col': self.col_equipment, 'width': 400, 'name': 'Оборудование', 'state': 'full'},
                                 )
         self.start_rows = 0
         self.start_cols = len(self.header_settings)
@@ -894,7 +887,7 @@ class FrameOperationText(FrameWithTable):
         self.table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
     def initSentences(self) -> None:
-        """  """
+        """ Вставка переходов в таблицу """
 
         for order in range(len(self.operation.sentences.keys())):
             try:
@@ -913,38 +906,36 @@ class FrameOperationText(FrameWithTable):
         self.colResized()
 
     def initHeaderIcons(self) -> None:
-        """  """
+        """ Иконки показать/скрыть столбец """
 
-        self.headerState = {}
+        self.header_state = {}
         for num, setting in enumerate(self.header_settings):
             if 'state' in setting:
-                self.headerState[num] = setting['state']
+                self.header_state[num] = setting['state']
                 self.table.horizontalHeader().model().setHeaderData(num,
                                                                     Qt.Horizontal,
                                                                     CONFIG.style.arrow_left,
                                                                     Qt.DecorationRole)
 
     def cellChanged(self) -> None:
-        """  """
-
-        pass
+        """ Переопределение метода при изменении ячейки """
 
     def showContextMenu(self, point: QPoint) -> None:
-        """  """
+        """ Контекстное меню """
 
         self.context_menu = ContextMenuForSentenceTable(self)
-        qp = self.sender().mapToGlobal(point)
-        self.context_menu.exec_(qp)
+        qpoint = self.sender().mapToGlobal(point)
+        self.context_menu.exec_(qpoint)
 
     def addSentence(self, row: int) -> None:
-        """  """
+        """ Добавить переход """
 
         sentence = Sentence(operation=self.operation)
         self.operation.addSentence(order=row + 1, sentence=sentence)
         self.updTable()
 
     def delSentence(self) -> None:
-        """  """
+        """ Удалить переход """
 
         row = self.table.currentRow()
         self.operation.delSentence(order=row)
@@ -952,7 +943,7 @@ class FrameOperationText(FrameWithTable):
         self.updTable()
 
     def sentenceResized(self, row: int) -> None:
-        """  """
+        """ Изменение размера области текста перехода """
 
         sentence_widget = self.sentenceByRow(row=row)
         if sentence_widget is not None:
@@ -962,20 +953,20 @@ class FrameOperationText(FrameWithTable):
                 sentence_widget.current_height = self.table.rowHeight(row)
 
     def colResized(self) -> None:
-        """  """
+        """ Изменение размера столбца """
 
         for row in range(self.table.rowCount()):
             self.sentenceResized(row=row)
 
-    def rowResized(self, logicalIndex: int) -> None:
-        """  """
+    def rowResized(self, logical_index: int) -> None:
+        """ Изменение размера строки таблицы """
 
-        sentence_widget = self.sentenceByRow(row=logicalIndex)
+        sentence_widget = self.sentenceByRow(row=logical_index)
         if sentence_widget is not None:
-            sentence_widget.setFixedHeight(self.table.rowHeight(logicalIndex))
+            sentence_widget.setFixedHeight(self.table.rowHeight(logical_index))
 
     def addText(self, sentence: Sentence) -> None:
-        """  """
+        """ Вставка текста перехода """
 
         row = self.table.rowCount() - 1
         self.widgetSentence(sentence=sentence, row=row)
@@ -986,44 +977,44 @@ class FrameOperationText(FrameWithTable):
         self.widgetMat(sentence=sentence, row=row)
 
     def widgetDoc(self, sentence: Sentence, row: int) -> None:
-        """  """
+        """ Заполнение рамки с документами """
 
         widget = SentenceDoc(sentence=sentence, frame=self)
         self.table.setCellWidget(row, self.col_doc, widget)
 
     def widgetIot(self, sentence: Sentence, row: int) -> None:
-        """  """
+        """ Заполнение рамки с инструкциями по охране труда """
 
         widget = SentenceIot(sentence=sentence, frame=self)
         self.table.setCellWidget(row, self.col_iot, widget)
 
     def widgetMat(self, sentence: Sentence, row: int) -> None:
-        """  """
+        """ Заполнение рамки с материалами """
 
         widget = SentenceMat(sentence=sentence, frame=self)
         self.table.setCellWidget(row, self.col_mat, widget)
 
     def widgetRig(self, sentence: Sentence, row: int) -> None:
-        """  """
+        """ Заполнение рамки с оснасткой """
 
         widget = SentenceRig(sentence=sentence, frame=self)
         self.table.setCellWidget(row, self.col_rig, widget)
 
     def widgetEquipment(self, sentence: Sentence, row: int) -> None:
-        """  """
+        """ Заполнение рамки с оборудованием """
 
         widget = SentenceEquipment(sentence=sentence, frame=self)
         self.table.setCellWidget(row, self.col_equipment, widget)
 
     def widgetSentence(self, sentence: Sentence, row: int) -> None:
-        """  """
+        """ Заполнение рамки с текстом перехода """
 
         widget_sentence = SentenceTextEdit(sentence=sentence, frame=self)
         widget_sentence.sentenceTextChanged.connect(self.sentenceChanged)
         self.table.setCellWidget(row, self.col_txt, widget_sentence)
 
     def sentenceChanged(self) -> None:
-        """  """
+        """ Реакция на изменение текста перехода """
 
         sentence_widget = self.sender()
         text = sentence_widget.toPlainText()
@@ -1033,25 +1024,26 @@ class FrameOperationText(FrameWithTable):
         self.sentenceResized(row=row)
 
     def changeOrder(self, sentence: Sentence) -> None:
-        """  """
+        """ Изменение порядка следования переходов
+            (строк таблицы)"""
 
         sentence.order = self.table.rowCount()
 
     def updTable(self) -> None:
-        """  """
+        """ Обновить данные таблицы """
 
         self.deleteAllRows()
         self.initSentences()
         self.applyWidgetVisibility()
 
     def deleteAllRows(self) -> None:
-        """  """
+        """ Удалить все строки """
 
         for row in reversed(range(self.table.rowCount())):
             self.table.removeRow(row)
 
     def moveSentence(self) -> None:
-        """  """
+        """ Перемещение перехода """
 
         temp_sentence = {}
         for row in range(self.table.rowCount()):
@@ -1061,51 +1053,55 @@ class FrameOperationText(FrameWithTable):
         self.updTable()
 
     def sentenceByRow(self, row: int) -> SentenceTextEdit | None:
-        """  """
+        """ Возвращает экземпляр класса текста перехода для
+            определенного ряда таблицы """
 
         return self.table.cellWidget(row, self.col_txt)
 
-    def headerClicked(self, logicalIndex: int) -> None:
-        """  """
+    def headerClicked(self, logical_index: int) -> None:
+        """ Переключение режимов видимости столбцов таблицы """
 
-        if logicalIndex in self.headerState:
-            if self.headerState[logicalIndex] == 'full':
-                self.headerState[logicalIndex] = 'half'
-                self.table.horizontalHeader().model().setHeaderData(logicalIndex,
+        if logical_index in self.header_state:
+            if self.header_state[logical_index] == 'full':
+                self.header_state[logical_index] = 'half'
+                self.table.horizontalHeader().model().setHeaderData(logical_index,
                                                                     Qt.Horizontal,
                                                                     CONFIG.style.arrow_left_2,
                                                                     Qt.DecorationRole)
-                self.hideWidget(column=logicalIndex, state=self.headerState[logicalIndex])
-            elif self.headerState[logicalIndex] == 'half':
-                self.headerState[logicalIndex] = 'hide'
-                self.table.horizontalHeader().model().setHeaderData(logicalIndex,
+                self.hideWidget(column=logical_index, state=self.header_state[logical_index])
+            elif self.header_state[logical_index] == 'half':
+                self.header_state[logical_index] = 'hide'
+                self.table.horizontalHeader().model().setHeaderData(logical_index,
                                                                     Qt.Horizontal,
                                                                     CONFIG.style.arrow_right,
                                                                     Qt.DecorationRole)
-                self.table.horizontalHeaderItem(logicalIndex).setText('')
-                self.table.horizontalHeader().resizeSection(logicalIndex, 10)
-                self.hideWidget(column=logicalIndex, state=self.headerState[logicalIndex])
-            elif self.headerState[logicalIndex] == 'hide':
-                self.headerState[logicalIndex] = 'full'
-                self.table.horizontalHeader().model().setHeaderData(logicalIndex,
-                                                                    Qt.Horizontal,
-                                                                    CONFIG.style.arrow_left,
-                                                                    Qt.DecorationRole)
-                self.hideWidget(column=logicalIndex, state=self.headerState[logicalIndex])
-                self.table.horizontalHeaderItem(logicalIndex).setText(self.header_settings[logicalIndex]['name'])
-                self.table.horizontalHeader().resizeSection(logicalIndex,
-                                                            self.header_settings[logicalIndex]['width'])
+                self.table.horizontalHeaderItem(logical_index).setText('')
+                self.table.horizontalHeader().resizeSection(logical_index, 10)
+                self.hideWidget(column=logical_index, state=self.header_state[logical_index])
+            elif self.header_state[logical_index] == 'hide':
+                self.header_state[logical_index] = 'full'
+                self.table.horizontalHeader().model().setHeaderData(
+                    logical_index,
+                    Qt.Horizontal,
+                    CONFIG.style.arrow_left,
+                    Qt.DecorationRole)
+                self.hideWidget(column=logical_index,
+                                state=self.header_state[logical_index])
+                self.table.horizontalHeaderItem(logical_index).setText(
+                    self.header_settings[logical_index]['name'])
+                self.table.horizontalHeader().resizeSection(
+                    logical_index, self.header_settings[logical_index]['width'])
 
     def hideWidget(self, column: int, state: str) -> None:
-        """  """
+        """ Скрыть/показать виджеты консолидированных
+            данных и свойств операции """
 
         for row in range(self.table.rowCount()):
             frame = self.table.cellWidget(row, column)
             frame.itemVisibility(state)
 
     def applyWidgetVisibility(self) -> None:
-        """  """
+        """ Переключение видимости столбцов при обновлении таблицы"""
 
-        for logicalIndex in self.headerState.keys():
-            self.hideWidget(logicalIndex, self.headerState[logicalIndex])
-
+        for logical_index, header_state in self.header_state.items():
+            self.hideWidget(logical_index, header_state)
