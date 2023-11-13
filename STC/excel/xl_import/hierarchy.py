@@ -200,7 +200,10 @@ class ExcelProduct:
 
     @deno.setter
     def deno(self, value: str) -> None:
-        self._deno = str(value).replace(' ', '')
+        if self._name == value:
+            self._deno = self._name
+        else:
+            self._deno = str(value).replace(' ', '')
 
     @property
     def index(self) -> str:
@@ -231,7 +234,7 @@ class ExcelProduct:
                 upd_date = db_product.date_check
                 if isnull(upd_date) or not isinstance(upd_date, datetime):
                     upd_date = datetime.min
-                if upd_date >= self.upd_date:
+                if upd_date > self.upd_date:
                     self._is_new = False
                 else:
                     self._is_new = True
@@ -329,7 +332,8 @@ class ExcelSubProduct:
 
     @ name.setter
     def name(self, value: str) -> None:
-        self._name = str(value).replace('"', '')
+        self._name = value
+        # self._name = str(value).replace('"', '')
 
     @ property
     def deno(self) -> str:
@@ -338,7 +342,10 @@ class ExcelSubProduct:
 
     @ deno.setter
     def deno(self, value: str) -> None:
-        self._deno = str(value).replace(' ', '')
+        if self._name == value:
+            self._deno = self._name
+        else:
+            self._deno = str(value).replace(' ', '')
 
     @ property
     def quantity(self) -> int:
@@ -351,7 +358,7 @@ class ExcelSubProduct:
             value = 0
         else:
             value = str(value).replace(' ', '')
-            value = int(value)
+            # value = int(value)
         self._quantity = value
 
     @ property
