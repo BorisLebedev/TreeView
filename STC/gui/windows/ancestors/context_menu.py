@@ -76,7 +76,8 @@ class ContextMenuForSpecProductsTable(ContextMenuForBasicTable):
 
         self.addAction(self.actionAddRow())
         self.addAction(self.actionCopyRow())
-        self.addAction(self.actionDelRow())
+        self.addAction(self.actionDelRows())
+        # self.addAction(self.actionDelRow())
         self.addAction(self.actionMark())
         self.addAction(self.actionDelMark())
 
@@ -88,6 +89,7 @@ class ContextMenuForSpecProductsTable(ContextMenuForBasicTable):
         self.copy_action_text = 'Скопировать строку'
         self.mark_action_text = 'Выделить цветом'
         self.del_mark_action_text = 'Убрать выделение'
+        self.del_all_action_text = 'Удалить строки'
 
     def actionCopyRow(self) -> QAction:
         """ Действие копирования выбранной строки """
@@ -111,4 +113,12 @@ class ContextMenuForSpecProductsTable(ContextMenuForBasicTable):
         action = QAction(self.object)
         action.setText(self.del_mark_action_text)
         action.triggered.connect(self.object.markRowsDel)
+        return action
+
+    def actionDelRows(self) -> QAction:
+        """ Действие убрать выделение цветом выбранной строки """
+
+        action = QAction(self.object)
+        action.setText(self.del_all_action_text)
+        action.triggered.connect(self.object.deleteRows)
         return action
