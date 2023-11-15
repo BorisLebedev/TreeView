@@ -1,6 +1,11 @@
 """ Родительские классы для контекстных меню """
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QMenu
+from PyQt5.Qt import QColor
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QKeySequence
+from PyQt5 import Qt
 
 
 # Базовое контекстное меню
@@ -63,12 +68,17 @@ class ContextMenuForSpecProductsTable(ContextMenuForBasicTable):
         3. Скопировать строку
     """
 
+    def __init__(self, obj):
+        super().__init__(obj)
+
     def initBasicActions(self):
         """ Вызов методов создания элементов для меню """
 
         self.addAction(self.actionAddRow())
         self.addAction(self.actionCopyRow())
         self.addAction(self.actionDelRow())
+        self.addAction(self.actionMark())
+        self.addAction(self.actionDelMark())
 
     def initActionText(self) -> None:
         """ Текст элементов контекстного меню """
@@ -76,6 +86,8 @@ class ContextMenuForSpecProductsTable(ContextMenuForBasicTable):
         self.del_action_text = 'Удалить строку'
         self.add_action_text = 'Добавить строку'
         self.copy_action_text = 'Скопировать строку'
+        self.mark_action_text = 'Выделить цветом'
+        self.del_mark_action_text = 'Убрать выделение'
 
     def actionCopyRow(self) -> QAction:
         """ Действие копирования выбранной строки """
@@ -83,4 +95,20 @@ class ContextMenuForSpecProductsTable(ContextMenuForBasicTable):
         action = QAction(self.object)
         action.setText(self.copy_action_text)
         action.triggered.connect(self.object.copyRow)
+        return action
+
+    def actionMark(self) -> QAction:
+        """ Действие выделение цветом выбранной строки """
+
+        action = QAction(self.object)
+        action.setText(self.mark_action_text)
+        action.triggered.connect(self.object.markRows)
+        return action
+
+    def actionDelMark(self) -> QAction:
+        """ Действие убрать выделение цветом выбранной строки """
+
+        action = QAction(self.object)
+        action.setText(self.del_mark_action_text)
+        action.triggered.connect(self.object.markRowsDel)
         return action

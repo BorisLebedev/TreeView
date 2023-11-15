@@ -7,8 +7,9 @@ import logging
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QPoint
 from PyQt5.QtWidgets import QComboBox
+from PyQt5.Qt import QColor
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel
-from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QTableWidgetItem
 from STC.config.config import CONFIG
@@ -601,6 +602,14 @@ class NewDocumentSpecProducts(FrameWithTable):
         combobox.setEditable(True)
         return combobox
 
+    # @staticmethod
+    # def checkbox() -> QComboBox:
+    #     """ Чекбокс для отметки просмотренных изделий """
+    #
+    #     checkbox = QCheckBox()
+    #     # checkbox.addItems(CONFIG.data['product_settings']['units'].replace(' ', '').split(','))
+    #     return checkbox
+
     def addNewRow(self, row: int = 0) -> None:
         """ Добавление новой строки таблицы"""
 
@@ -637,6 +646,20 @@ class NewDocumentSpecProducts(FrameWithTable):
                 self.table.cellWidget(row, col).\
                     setCurrentText(self.table.cellWidget(row-1, col).currentText())
 
+    def markRows(self) -> None:
+        """ Выделить цветом несколько строк таблицы """
+
+        items = self.table.selectedItems()
+        for item in items:
+            item.setData(Qt.BackgroundColorRole, QColor(0, 200, 0, 200))
+
+    def markRowsDel(self) -> None:
+        """ Выделить цветом несколько строк таблицы """
+
+        items = self.table.selectedItems()
+        for item in items:
+            item.setData(Qt.BackgroundColorRole, QColor(0, 0, 0, 0))
+
     def defaultValues(self, default_values: list[dict[str, str | int]]) -> None:
         """ Внесение значений по умолчанию """
 
@@ -660,9 +683,11 @@ class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
                                 {'col': 4, 'width': 180, 'name': 'Наименование'},
                                 {'col': 5, 'width': 60, 'name': 'Кол-во'},
                                 {'col': 6, 'width': 60, 'name': 'Ед.\nизм.'},
-                                {'col': 7, 'width': 90, 'name': 'Тип'})
+                                {'col': 7, 'width': 90, 'name': 'Тип'},
+                                # {'col': 8, 'width': 90, 'name': ''},
+                                )
         self.start_rows = 0
-        self.start_cols = 8
+        self.start_cols = len(self.header_settings)
 
     def addNewRow(self, row: int = 0) -> None:
         """ Добавление новой строки таблицы """
@@ -671,6 +696,7 @@ class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
         self.table.setCellWidget(row, 0, self.comboboxCode())
         self.table.setCellWidget(row, 6, self.comboboxUnit())
         self.table.setCellWidget(row, 7, self.comboboxType())
+        # self.table.setCellWidget(row, 8, self.checkbox())
         self.table.setItem(row, 1, QTableWidgetItem())
         self.table.setItem(row, 2, QTableWidgetItem())
         self.table.setItem(row, 3, QTableWidgetItem())
