@@ -376,11 +376,11 @@ class ExcelNTD(ExcelExport):
     def initColumns(self):
         """ Номера столбцов """
         self.columns = ExcelDataNTD(
-            list_name=[],
             list_lvl=[],
-            list_num=[],
             list_index=[],
-            list_kinds=[]
+            list_name=[],
+            list_deno=[],
+            list_num=[],
         )
 
     def treeModelToList(self, item: QStandardItem, level: int, main_index: str):
@@ -392,23 +392,20 @@ class ExcelNTD(ExcelExport):
             product = item.child(row).data()
             self.columns.list_lvl.append([level])
             self.columns.list_index.append([index])
-            self.columns.list_name.append([f'{product.name} {product.deno}'])
+            self.columns.list_name.append([f'{product.name}'])
+            self.columns.list_deno.append([f'{product.deno}'])
             self.columns.list_num.append([item.child(row, 5).text()])
-            kind_name = ''
-            if product.db_product.kind.name != 'неизвестно':
-                kind_name = product.db_product.kind.name
-            self.columns.list_kinds.append([kind_name])
             self.treeModelToList(item=child,
                                  level=level + 1,
                                  main_index=main_index + str(row + 1) + '.')
 
     def addDataToExcel(self) -> None:
         """ Добавление данных в Excel """
-        self.worksheet.range('A2').value = self.columns.list_lvl
-        self.worksheet.range('B2').value = self.columns.list_index
-        self.worksheet.range('C2').value = self.columns.list_name
-        self.worksheet.range('E2').value = self.columns.list_num
-        self.worksheet.range('U2').value = self.columns.list_kinds
+        self.worksheet.range('A4').value = self.columns.list_lvl
+        self.worksheet.range('B4').value = self.columns.list_index
+        self.worksheet.range('C4').value = self.columns.list_name
+        self.worksheet.range('D4').value = self.columns.list_deno
+        self.worksheet.range('E4').value = self.columns.list_num
 
     @property
     def wb_name(self):
@@ -458,9 +455,9 @@ class ExcelDataNTD:
     """ Данные для выгрузки оценки трудоемкости
         сервисного обслуживания"""
 
-    list_name: list
     list_lvl: list
-    list_num: list
     list_index: list
-    list_kinds: list
+    list_name: list
+    list_deno: list
+    list_num: list
     max_row: int = 0
