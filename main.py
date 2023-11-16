@@ -1,4 +1,4 @@
-"""  """
+""" Управление окнами приложения """
 import logging
 import os
 import sys
@@ -38,7 +38,7 @@ from STC.database.test_data_generator import generate_test_data
 
 
 class Controller:
-    """  """
+    """ Управляет окнами приложения """
 
     # pylint: disable=too-instance-attributes
     # pylint: disable=too-many-public-methods
@@ -399,7 +399,3 @@ if __name__ == '__main__':
 
     controller = Controller(proj_start=True)
     sys.exit(app.exec())
-
-
-# TODO Медленная отрисовка формы ввода документа
-# TODO Методы getData и getDocumentByType класса Product упростить

@@ -1,14 +1,8 @@
 """ Родительские классы для контекстных меню """
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QMenu
-from PyQt5.Qt import QColor
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtGui import QIcon
-from PyQt5.QtGui import QKeySequence
-from PyQt5 import Qt
 
 
-# Базовое контекстное меню
 class ContextMenu(QMenu):
     """ Родительский класс для всех контекстных меню """
 
@@ -17,7 +11,6 @@ class ContextMenu(QMenu):
         self.object = obj
 
 
-# Контекстное меню для базовой таблицы
 class ContextMenuForBasicTable(ContextMenu):
     """ Родительский класс для контекстных меню в таблицах
         Функции:
@@ -59,7 +52,6 @@ class ContextMenuForBasicTable(ContextMenu):
         return action
 
 
-# Контекстное меню для базовой таблицы
 class ContextMenuForSpecProductsTable(ContextMenuForBasicTable):
     """ Родительское меню для таблицы с копированием строки
         Функции:
@@ -77,7 +69,6 @@ class ContextMenuForSpecProductsTable(ContextMenuForBasicTable):
         self.addAction(self.actionAddRow())
         self.addAction(self.actionCopyRow())
         self.addAction(self.actionDelRows())
-        # self.addAction(self.actionDelRow())
         self.addAction(self.actionMark())
         self.addAction(self.actionDelMark())
 
