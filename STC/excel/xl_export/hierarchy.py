@@ -202,6 +202,8 @@ class Excel(ExcelExport):
             self._current_row += 1
 
             if product.has_real_deno or self.full:
+                if product.deno == 'УИЕС.464512.378':
+                    pass
                 # creator = product.getDocumentByType(class_name='КД',
                 #                                     subtype_name='Спецификация',
                 #                                     setting='name_created',
@@ -212,6 +214,7 @@ class Excel(ExcelExport):
                 # creator_dep = 'Илгач' if temp_creator in self.ilgach_dep else ''
                 creator = ''
                 creator_dep = ''
+                kttp = ''
                 self.columns.list_lvl.append([level])
                 self.columns.list_index.append([index])
                 self.columns.list_name.append([item.child(row, 2).text()])
@@ -228,7 +231,8 @@ class Excel(ExcelExport):
 
                 self.columns.list_type.append([item.child(row, 4).text().capitalize()])
                 self.columns.list_num.append([item.child(row, 5).text()])
-                self.columns.list_kttp.append([self.chooseKttp(product=product)])
+                kttp = self.chooseKttp(product=product)
+                self.columns.list_kttp.append([kttp])
                 self.columns.list_kd_date.append([product.upd_date])
                 self.columns.list_need_upd.append([str(product.hierarchy_relevance)])
                 self.columns.list_primary_appearance.append([product.primary_product])
@@ -236,7 +240,8 @@ class Excel(ExcelExport):
                 self.columns.list_dep.append([creator_dep])
                 sign_row, signs = self.generateDocumentListByType(product)
                 self.columns.list_kd.append(sign_row)
-                self.columns.list_mk.append(self.generateMkData(product))
+                self.columns.list_mk.append(self.generateMkData(product=product,
+                                                                kttp=kttp))
                 self.columns.list_kd_code.append(['.'.join(list(signs)) + '.'])
                 self.treeModelToList(item=child,
                                      level=level + 1,
@@ -272,22 +277,24 @@ class Excel(ExcelExport):
         return doc_types_excel_current, signs
 
     @staticmethod
-    def generateMkData(product: Product) -> list[str | None]:
+    def generateMkData(product: Product, kttp: bool = '') -> list[str | None]:
         """ Генерация строки с данными технологии изготовления """
         data = [None] * 49
-        for document in product.documents:
-            if document.stage != 'Аннулирован':
-                db_mk_excel = DbMkExcel.getMkExcel(id_document_real=document.id_document_real)
-                if db_mk_excel is not None:
-                    data[0] = db_mk_excel.kind
-                    data[1] = db_mk_excel.area
-                    data[2] = db_mk_excel.code
-                    sentences = db_mk_excel.mk_excel_sentences
-                    i = 1
-                    for sentence in sentences:
-                        data[2 + i] = sentence.code
-                        data[3 + i] = sentence.text
-                        i += 2
+        if kttp == '':
+            for document in product.documents:
+                if document.subtype_name == 'Маршрутная карта' \
+                        and document.stage != 'Аннулирован':
+                    db_mk_excel = DbMkExcel.getMkExcel(id_document_real=document.id_document_real)
+                    if db_mk_excel is not None:
+                        data[0] = db_mk_excel.kind
+                        data[1] = db_mk_excel.area
+                        data[2] = db_mk_excel.code
+                        sentences = db_mk_excel.mk_excel_sentences
+                        i = 1
+                        for sentence in sentences:
+                            data[2 + i] = sentence.code
+                            data[3 + i] = sentence.text
+                            i += 2
         return data
 
     def addDataToExcel(self) -> None:
