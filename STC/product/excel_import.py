@@ -201,9 +201,12 @@ class ExcelSync:
         for excel_product in self.excel_data.products.values():
             for document_td in excel_product.documents_td.values():
                 if document_td.mk_code:
-                    db_document = excel_product.db_documents[document_td.td_deno]
-                    key = document_td.td_deno
-                    mk_excel_data[key] = {
+                    self.document_type_builder.getDocumentType(deno=document_td.td_deno)
+                    document_type = self.document_type_builder.document_type
+                    if document_type.subtype_name == 'Маршрутная карта':
+                        db_document = excel_product.db_documents[document_td.td_deno]
+                        key = document_td.td_deno
+                        mk_excel_data[key] = {
                         'code': document_td.mk_code,
                         'kind': document_td.td_type,
                         'area': document_td.mk_place,
