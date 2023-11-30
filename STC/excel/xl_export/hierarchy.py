@@ -388,6 +388,7 @@ class ExcelNTD(ExcelExport):
             list_name=[],
             list_deno=[],
             list_num=[],
+            list_msr=[],
         )
 
     def treeModelToList(self, item: QStandardItem, level: int, main_index: str):
@@ -402,6 +403,7 @@ class ExcelNTD(ExcelExport):
             self.columns.list_name.append([f'{product.name}'])
             self.columns.list_deno.append([f'{product.deno}'])
             self.columns.list_num.append([item.child(row, 5).text()])
+            self.columns.list_msr.append([item.child(row, 6).text()])
             self.treeModelToList(item=child,
                                  level=level + 1,
                                  main_index=main_index + str(row + 1) + '.')
@@ -413,6 +415,7 @@ class ExcelNTD(ExcelExport):
         self.worksheet.range('C4').value = self.columns.list_name
         self.worksheet.range('D4').value = self.columns.list_deno
         self.worksheet.range('E4').value = self.columns.list_num
+        self.worksheet.range('F4').value = self.columns.list_msr
 
     @property
     def wb_name(self):
@@ -467,4 +470,5 @@ class ExcelDataNTD:
     list_name: list
     list_deno: list
     list_num: list
+    list_msr: list
     max_row: int = 0
