@@ -1719,7 +1719,6 @@ class DbDocumentReal(Base):
             db_document_stage = DbDocumentStage.addDbDocumentStage(document_stage)
             date_created = null_cleaner(date_created)
             date_changed = null_cleaner(date_changed)
-
             if document:
                 document.updDocumentReal(db_document_stage=db_document_stage,
                                          document_name=document_name,
@@ -1803,6 +1802,7 @@ class DbDocumentReal(Base):
                 already_added[key] = db_document
             document['document_real'] = db_document
         try:
+            SplashScreen().basicMsg('Запись реквизитов документов')
             DbConnection.sessionCommit()
         except (IntegrityError, OperationalError) as err:
             show_dialog(f'Не удалось внести документы. Повторная попытка\n{err}')

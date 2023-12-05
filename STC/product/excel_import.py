@@ -46,6 +46,14 @@ class ExcelSync:
         SplashScreen().newMessage(message='Импорт данных Excel...', stage=0, stages=stages)
         self.excel_data = ExcelData()
 
+        DbPrimaryApplication.updData()
+        DbHierarchy.updData()
+        DbExcelProject.updData()
+        DbDocument.updData()
+        DbDocumentReal.updData()
+        DbMkExcel.updData()
+        DbMkExcelSentences.updData()
+
         SplashScreen().newMessage(message='Внесение первичных применяемостей как изделий...')
         self.addProductsPrimaryApplication()
 
