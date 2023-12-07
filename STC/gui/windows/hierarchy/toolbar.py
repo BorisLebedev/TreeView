@@ -284,6 +284,9 @@ class ToolBarProductOptions(ToolBar):
                    ('Первичный\nпроект', {'type': 'product',
                                           'header': 'Первичный\nпроект',
                                           'setting': 'primary_project'}),
+                   ('Название\nпроекта', {'type': 'product',
+                                          'header': 'Название\nпроекта',
+                                          'setting': 'project_name'}),
                    ]
         for name, data in actions:
             action = self.actionNewColumn(name)
