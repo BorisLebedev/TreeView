@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import logging
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QPoint
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.Qt import QColor
@@ -385,7 +386,6 @@ class NewDocumentMainFrame(FrameBasic):
     @product_name.setter
     def product_name(self, text: str) -> None:
         """ Наименование изделия """
-
         self._product_name.setText(text)
 
     @property
@@ -562,6 +562,7 @@ class NewDocumentSpecProducts(FrameWithTable):
 
     def __init__(self, frame_name) -> None:
         super().__init__(frame_name=frame_name)
+        self.table.itemChanged.connect(self.itemChanged)
         self.addNewRow()
 
     def initTableSettings(self) -> None:
@@ -604,17 +605,16 @@ class NewDocumentSpecProducts(FrameWithTable):
         combobox.setEditable(True)
         return combobox
 
-    # @staticmethod
-    # def checkbox() -> QComboBox:
-    #     """ Чекбокс для отметки просмотренных изделий """
-    #
-    #     checkbox = QCheckBox()
-    #     # checkbox.addItems(CONFIG.data['product_settings']['units'].replace(' ', '').split(','))
-    #     return checkbox
+    @staticmethod
+    def itemChanged(item):
+        if isinstance(item, QTableWidgetItem):
+            text = item.text()[0].upper() + item.text()[1:] if item.text() else item.text()
+            item.setText(text)
 
     def addNewRow(self, row: int = 0) -> None:
         """ Добавление новой строки таблицы"""
 
+        self.table.blockSignals(True)
         row = self.addRow(row)
         self.table.setCellWidget(row, 0, self.comboboxCode())
         self.table.setCellWidget(row, 6, self.comboboxUnit())
@@ -624,6 +624,7 @@ class NewDocumentSpecProducts(FrameWithTable):
         self.table.setItem(row, 3, QTableWidgetItem())
         self.table.setItem(row, 4, QTableWidgetItem())
         self.table.setItem(row, 5, QTableWidgetItem())
+        self.table.blockSignals(False)
 
     def addRow(self, row):
         """ Добавление нового ряда таблицы
@@ -705,15 +706,17 @@ class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
     def addNewRow(self, row: int = 0) -> None:
         """ Добавление новой строки таблицы """
 
+        self.table.blockSignals(True)
         row = self.addRow(row)
         self.table.setCellWidget(row, 0, self.comboboxCode())
         self.table.setCellWidget(row, 6, self.comboboxUnit())
         self.table.setCellWidget(row, 7, self.comboboxType())
-        self.table.setItem(row, 1, QTableWidgetItem())
-        self.table.setItem(row, 2, QTableWidgetItem())
-        self.table.setItem(row, 3, QTableWidgetItem())
-        self.table.setItem(row, 4, QTableWidgetItem())
-        self.table.setItem(row, 5, QTableWidgetItem())
+        self.table.setItem(row, 1, TableWidgetItem())
+        self.table.setItem(row, 2, TableWidgetItem())
+        self.table.setItem(row, 3, TableWidgetItem())
+        self.table.setItem(row, 4, TableWidgetItem())
+        self.table.setItem(row, 5, TableWidgetItem())
+        self.table.blockSignals(False)
 
     def defaultValues(self, default_values: list[dict[str, str | int]]) -> None:
         """ Внесение значений по умолчанию """
@@ -723,10 +726,12 @@ class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
             if row_data['Код'] is not None:
                 for setting in self.header_settings:
                     text = str(row_data[setting['name']])
+                    self.table.blockSignals(True)
                     if setting['name'] in ('Тип', 'Код', 'Ед.\nизм.'):
                         self.table.cellWidget(row, setting['col']).setCurrentText(text)
                     else:
                         self.table.item(row, setting['col']).setText(text)
+                    self.table.blockSignals(False)
                 self.addNewRow()
 
     def getData(self) -> list[dict[str, str | int]]:
@@ -784,10 +789,12 @@ class NewDocumentSpecProductsNoDeno(NewDocumentSpecProducts):
             if row_data['Код'] is None:
                 for setting in self.header_settings:
                     text = str(row_data[setting['name']])
+                    self.table.blockSignals(True)
                     if setting['name'] in ('Тип', 'Код', 'Ед.\nизм.'):
                         self.table.cellWidget(row, setting['col']).setCurrentText(text)
                     else:
                         self.table.item(row, setting['col']).setText(text)
+                    self.table.blockSignals(False)
                 self.addNewRow()
 
     def getData(self) -> list[dict[str, str | int]]:
@@ -948,3 +955,13 @@ class FrameComplexDocument(FrameWithTable):
             if child_data['Обозначение']:
                 children_data.append(child_data)
         return children_data
+
+
+class TableWidgetItem(QTableWidgetItem):
+    """ QTableWidgetItem с текстом с заглавной буквы """
+
+    def setText(self, atext: str):
+        if atext:
+            atext = atext[0].upper() + atext[1:]
+        super().setText(atext)
+
