@@ -75,7 +75,6 @@ class DbConnection:
                                    autoflush=False,
                                    future=True,
                                    expire_on_commit=False)
-        # engine.execution_options(stream_results=True)
         with session_cls() as cls.session:
             cls.session = session_cls()
 
@@ -800,11 +799,11 @@ class DbHierarchy(Base):
     quantity = Column('quantity', Integer)
     unit = Column('unit', String)
     product_type = relationship("DbProductType", lazy='joined',
-                                foreign_keys=[id_type], back_populates="hierarchy")
+                                foreign_keys=[id_type], back_populates="hierarchy", passive_deletes=True)
     parent = relationship('DbProduct', lazy='joined',
-                          foreign_keys=[id_parent], backref='children')
+                          foreign_keys=[id_parent], backref='children', passive_deletes=True)
     child = relationship('DbProduct', lazy='joined',
-                         foreign_keys=[id_child], backref='parents')
+                         foreign_keys=[id_child], backref='parents', passive_deletes=True)
     data = {}
 
     @classmethod
@@ -848,7 +847,6 @@ class DbHierarchy(Base):
                         ]"""
 
         old_hierarchies = cls.getByParent(parent)
-
         new_children, outdated_hierarchies, refresh_hierarchies = \
             cls.updOld(old_hierarchies=old_hierarchies,
                        children=products)
@@ -895,9 +893,9 @@ class DbHierarchy(Base):
     @classmethod
     def delOutdated(cls, outdated_hierarchies: list[DbHierarchy]) -> None:
         """ Удаляет записи из таблицы иерархий """
-        for hierarchy in outdated_hierarchies:
-            statement = delete(cls).where(and_(cls.id_parent == hierarchy.id_parent,
-                                               cls.id_child == hierarchy.id_child))
+        pks = [hierarchy.pk_hierarchy for hierarchy in outdated_hierarchies]
+        if pks:
+            statement = delete(cls).where(cls.pk_hierarchy.in_(pks))
             DbConnection.executeStatement(statement)
 
     @classmethod
@@ -1093,6 +1091,7 @@ class DbHierarchy(Base):
             for key in hierarchies.keys():
                 hierarchy = add_missing_keys(dictionary=hierarchies[key],
                                              keys=all_keys)
+
                 refresh_hierarchies = cls.setChildren(parent=hierarchy['parent'],
                                                       products=hierarchy['products'],
                                                       commit_later=True)
