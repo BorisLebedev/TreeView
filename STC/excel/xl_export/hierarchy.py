@@ -36,6 +36,16 @@ def add_to_excel(product: DbProduct, only_deno: bool) -> bool:
     return True
 
 
+def index_ntd(main_index: str, row: int, full: bool = True) -> str:
+    index = f'{main_index}.{str(row + 1)}'
+    return index if full else index[3:]
+
+
+def index_mk(main_index: str, row: int, full: bool = True) -> str:
+    index = f'{main_index}{str(row + 1)}.'
+    return index if full else index[2:]
+
+
 class ExcelExport:
     """ Родительский класс для выгрузок иерархических составов """
     # pylint: disable=too-many-instance-attributes
@@ -192,7 +202,7 @@ class Excel(ExcelExport):
         """ Перевод данных модели в списки для выгрузки в Excel  """
         for row in range(item.rowCount()):
             child = item.child(row)
-            sub_index = main_index + str(row + 1) + '.'
+            sub_index = index_mk(main_index, row)
             index = sub_index[2:]
             product = item.child(row).data()
 
@@ -245,7 +255,7 @@ class Excel(ExcelExport):
                 self.columns.list_kd_code.append(['.'.join(list(signs)) + '.'])
                 self.treeModelToList(item=child,
                                      level=level + 1,
-                                     main_index=main_index + str(row + 1) + '.')
+                                     main_index=index_mk(main_index, row))
 
     @staticmethod
     def chooseKttp(product: Product) -> str:
@@ -277,7 +287,7 @@ class Excel(ExcelExport):
         return doc_types_excel_current, signs
 
     @staticmethod
-    def generateMkData(product: Product, kttp: bool = '') -> list[str | None]:
+    def generateMkData(product: Product, kttp: str = '') -> list[str | None]:
         """ Генерация строки с данными технологии изготовления """
         data = [None] * 49
         if kttp == '':
@@ -345,8 +355,7 @@ class ExcelNorm(ExcelExport):
         """ Перевод данных модели в списки для выгрузки в Excel  """
         for row in range(item.rowCount()):
             child = item.child(row)
-            index = main_index + str(row + 1) + '.'
-            index = index[2:]
+            index = index_ntd(main_index, row, False)
             product = item.child(row).data()
             self.columns.list_lvl.append([level])
             self.columns.list_index.append([index])
@@ -355,7 +364,7 @@ class ExcelNorm(ExcelExport):
             self.columns.list_num.append([item.child(row, 5).text()])
             self.treeModelToList(item=child,
                                  level=level + 1,
-                                 main_index=main_index + str(row + 1) + '.')
+                                 main_index=index_ntd(main_index, row))
 
     def addDataToExcel(self) -> None:
         """ Добавление данных в Excel """
@@ -395,8 +404,7 @@ class ExcelNTD(ExcelExport):
         """ Перевод данных модели в списки для выгрузки в Excel  """
         for row in range(item.rowCount()):
             child = item.child(row)
-            index = main_index + str(row + 1) + '.'
-            index = index[2:]
+            index = index_ntd(main_index, row, False)
             product = item.child(row).data()
             self.columns.list_lvl.append([level])
             self.columns.list_index.append([index])
@@ -406,7 +414,7 @@ class ExcelNTD(ExcelExport):
             self.columns.list_msr.append([item.child(row, 6).text()])
             self.treeModelToList(item=child,
                                  level=level + 1,
-                                 main_index=main_index + str(row + 1) + '.')
+                                 main_index=index_ntd(main_index, row))
 
     def addDataToExcel(self) -> None:
         """ Добавление данных в Excel """
