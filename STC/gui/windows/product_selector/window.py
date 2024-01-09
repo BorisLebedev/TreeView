@@ -68,7 +68,7 @@ class WindowProductSelector(WindowBasic):
         completer_list = []
         self.cb_deno.clear()
         for product in self.product_data:
-            if self.cb_name.currentText() in product['name']:
+            if self.cb_name.currentText().lower() in product['name'].lower():
                 completer_list.append(product['denotation'])
         self.cb_deno.addItems(completer_list)
         if self.cb_name.currentText() == '':
@@ -87,7 +87,7 @@ class WindowProductSelector(WindowBasic):
         completer_list = []
         self.cb_name.clear()
         for product in self.product_data:
-            if self.cb_deno.currentText() in product['denotation']:
+            if self.cb_deno.currentText().lower() in product['denotation'].lower():
                 completer_list.append(product['name'])
         self.cb_name.addItems(sorted(completer_list))
         if self.cb_deno.currentText() == '':
