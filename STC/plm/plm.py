@@ -211,7 +211,7 @@ class DataFromPLM:
                          'Дата блокировки',
                          'Дата создания',
                          'Дата актуализации']:
-            dataframe[col_name] = dataframe[col_name].astype('datetime64')
+            dataframe[col_name] = dataframe[col_name].astype('datetime64[ns]')
         return dataframe
 
 
