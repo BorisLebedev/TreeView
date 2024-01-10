@@ -153,7 +153,9 @@ class WindowTable(WindowBasic):
         self.mark_index = {}
         self.main_menu = None
         self.file_menu = None
-        self.excel_menu = None
+        # self.excel_menu = None
+        self.export_menu = None
+        self.import_menu = None
         self.action_import_db = None
         self.action_menu_product = None
         self.action_menu_mk = None
@@ -192,7 +194,8 @@ class WindowTable(WindowBasic):
 
         self.main_menu = self.main_window.menuBar()
         self.fileMenu()
-        self.excelMenu()
+        self.importMenu()
+        self.exportMenu()
         self.adminMenu()
 
     def fileMenu(self) -> None:
@@ -206,16 +209,21 @@ class WindowTable(WindowBasic):
         self.file_menu.addAction(self.toolbar_for_options.action_newdoc)
         self.file_menu.addAction(self.toolbar_for_options.action_search)
 
-    def excelMenu(self) -> None:
-        """ Меню взаимодействия с файлами Excel """
+    def importMenu(self) -> None:
+        """ Меню импорта данных из сторонних источников """
 
-        self.excel_menu = self.main_menu.addMenu('Excel')
-        self.action_import_db = self.actionImportExcelDb('Импорт из "База ТД"')
-        self.excel_menu.addAction(self.action_import_db)
-        self.excel_menu.addAction(self.toolbar_for_options.action_export)
-        self.excel_menu.addAction(self.toolbar_for_options.action_export_norm)
-        self.excel_menu.addAction(self.toolbar_for_options.action_export_ntd)
-        self.excel_menu.addAction(self.toolbar_for_options.action_export_full)
+        self.import_menu = self.main_menu.addMenu('Импорт')
+        self.action_import_db = self.actionImportExcelDb('Импорт данных ТД')
+        self.import_menu.addAction(self.action_import_db)
+
+    def exportMenu(self) -> None:
+        """ Меню экспорта данных в другие форматы """
+
+        self.export_menu = self.main_menu.addMenu('Экспорт')
+        self.export_menu.addAction(self.toolbar_for_options.action_export)
+        self.export_menu.addAction(self.toolbar_for_options.action_export_norm)
+        self.export_menu.addAction(self.toolbar_for_options.action_export_ntd)
+        self.export_menu.addAction(self.toolbar_for_options.action_export_full)
 
     def adminMenu(self) -> None:
         """ Меню администрирования """
