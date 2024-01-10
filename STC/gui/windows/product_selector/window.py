@@ -134,7 +134,7 @@ class WindowProductSelector(WindowBasic):
         button_excel.clicked.connect(self.syncWithExcel)
 
         button_excel_td_db = QPushButton()
-        button_excel_td_db.setText('Загрузить Базу ТД')
+        button_excel_td_db.setText('Загрузить данные ТД')
         button_excel_td_db.clicked.connect(self.syncWithExcelTdDb)
 
         button_excel_plm_db = QPushButton()
