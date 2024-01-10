@@ -16,7 +16,7 @@ class PLMSync:
     def __init__(self) -> None:
         self.plm_data = DataFromPLM()
         self.plm_products = self.plm_data.products
-        self.plm_stages = self.plm_data.doc_stages
+        # self.plm_stages = self.plm_data.doc_stages
         DbProduct.updData()
         DbDocument.updData()
         DbDocumentReal.updData()

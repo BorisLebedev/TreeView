@@ -36,7 +36,7 @@ class DataFromPLM:
                 if ext == '.xml':
                     self.readXlm(self.getXlmTable(file))
                     dataframe = self.analyze(document_type=document_type)
-                    self.doc_stages = list(dataframe['Состояние ЖЦ'].cat.categories)
+                    # self.doc_stages = list(dataframe['Состояние ЖЦ'].cat.categories)
                     self.products = self.getProducts(dataframe=dataframe,
                                                      document_type=document_type)
 
