@@ -145,7 +145,7 @@ class DataFromPLM:
                 index = row.Index
                 deno = re.findall(self.regex.regex_td,
                                   dataframe.loc[index, 'Имя'])
-                if not deno:
+                if not deno and dataframe.loc[index, 'Файл']:
                     deno = re.findall(self.regex.regex_td,
                                       dataframe.loc[index, 'Файл'])
                 dataframe.loc[index, 'deno'] = deno[0] if deno else None
