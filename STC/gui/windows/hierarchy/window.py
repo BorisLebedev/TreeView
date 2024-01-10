@@ -143,7 +143,9 @@ class WindowTable(WindowBasic):
     updTreeView = pyqtSignal()
     syncTreeView = pyqtSignal()
     copyText = pyqtSignal()
-    importExcelDb = pyqtSignal()
+    importTd = pyqtSignal()
+    importXl = pyqtSignal()
+    importPLM = pyqtSignal()
 
     def __init__(self, product_denotation: str, reverse: bool = False) -> None:
         super().__init__()
@@ -213,8 +215,12 @@ class WindowTable(WindowBasic):
         """ Меню импорта данных из сторонних источников """
 
         self.import_menu = self.main_menu.addMenu('Импорт')
-        self.action_import_db = self.actionImportExcelDb('Импорт данных ТД')
-        self.import_menu.addAction(self.action_import_db)
+        self.action_import_td = self.actionImportTd('Импорт данных ТД')
+        self.action_import_xl = self.actionImportXl('Импорт составов Excel')
+        self.action_import_plm = self.actionImportPLM('Импорт данных PLM')
+        self.import_menu.addAction(self.action_import_td)
+        self.import_menu.addAction(self.action_import_xl)
+        self.import_menu.addAction(self.action_import_plm)
 
     def exportMenu(self) -> None:
         """ Меню экспорта данных в другие форматы """
@@ -305,11 +311,25 @@ class WindowTable(WindowBasic):
         action.triggered.connect(self.showWindowAdminProduct)
         return action
 
-    def actionImportExcelDb(self, name: str) -> QAction:
-        """ Импорт данных о технологических документах """
+    def actionImportTd(self, name: str) -> QAction:
+        """ Функция импорта данных о технологической документации из таблицы Excel """
 
         action = self.newAction(name)
-        action.triggered.connect(self.importExcelDb.emit)
+        action.triggered.connect(self.importTd.emit)
+        return action
+
+    def actionImportXl(self, name: str) -> QAction:
+        """ Функция импорта данных об иерархических составах из таблицы Excel """
+
+        action = self.newAction(name)
+        action.triggered.connect(self.importXl.emit)
+        return action
+
+    def actionImportPLM(self, name: str) -> QAction:
+        """ Функция импорта данных из PLM системы разработки конструкторской документации """
+
+        action = self.newAction(name)
+        action.triggered.connect(self.importPLM.emit)
         return action
 
     def updTreeModel(self, product_denotation: str) -> None:

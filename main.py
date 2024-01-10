@@ -144,7 +144,9 @@ class Controller:
             self.table.syncTreeView.connect(lambda: self.updTreeView(load_from_db=True))
             self.table.copyText.connect(lambda: app.clipboard().setText(
                 self.table.tree_view.model.data(self.table.tree_view.currentIndex())))
-            self.table.importExcelDb.connect(self.syncWithExcelTdDb)
+            self.table.importTd.connect(self.syncWithExcelTdDb)
+            self.table.importXl.connect(self.syncWithExcel)
+            self.table.importPLM.connect(self.syncWithPLM)
             self.table.assignKindSignal.connect(self.assignKind)
             self.table.closeWindow.connect(self.updUserSettings)
             self.table.closeWindow.connect(self.closeAllWindows)
@@ -305,7 +307,10 @@ class Controller:
         if msg_box.standardButton(msg_box.clickedButton()) == QMessageBox.No:
             upd = True
         ExcelSync(upd=upd)
-        self.updProductSelector()
+        if self.product_selector_window is not None:
+            self.updProductSelector()
+        if self.table in self.windows:
+            self.updTreeView(load_from_db=False)
         show_dialog(text='Импорт данных из иерархических таблиц Excel завершен', m_type='info')
 
     def syncWithExcelTdDb(self) -> None:
@@ -323,6 +328,8 @@ class Controller:
         PLMSync()
         if self.product_selector_window is not None:
             self.updProductSelector()
+        if self.table in self.windows:
+            self.updTreeView(load_from_db=False)
 
     def addNewDocument(self) -> None:
         """ Добавление нового документа """
