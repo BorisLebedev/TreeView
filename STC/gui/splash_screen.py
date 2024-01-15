@@ -17,6 +17,7 @@ def show_dialog(text: str, m_type: str | None = None) -> MessageBox:
     """ Возвращает диалоговое окно """
 
     msg_box = MessageBox(text, m_type)
+    QSplashScreen().close()
     msg_box.exec()
     msg_box.raise_()
     return msg_box
