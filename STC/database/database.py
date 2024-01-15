@@ -1267,7 +1267,6 @@ class DbDocument(Base):
     def getDbDocumentsByProductIds(cls, product_ids: list[int]) -> list[DbDocument]:
         """ Возвращает список документов для списка изделий """
         statement = select(cls).options(joinedload(cls.product))\
-                               .options(joinedload(cls.document_type))\
                                .filter(cls.id_product.in_(product_ids))
         documents = DbConnection.executeStatement(statement)
         documents = [document[0] for document in documents]
