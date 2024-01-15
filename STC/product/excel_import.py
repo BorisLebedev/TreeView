@@ -273,7 +273,7 @@ class ExcelDataFromTdDb:
                        'name': excel_document.product.name}
             products[excel_document.product.deno] = product
         SplashScreen().close()
-        products = DbProduct.addDbProducts(products=products)
+        products = DbProduct.addDbProducts(products=products, in_cache=True)
         for excel_document in self.excel_data.documents:
             excel_document.db_product = products[excel_document.product.deno]['db_product']
 
@@ -325,7 +325,7 @@ class ExcelDataFromTdDb:
             if not excel_document.document.complex and not excel_document.deno_error:
                 document = {'product': excel_document.db_product,
                             'document_real': excel_document.db_document_real}
-                self.documents[excel_document.document.deno] = document
+                self.documents[excel_document.db_product.deno] = document
         SplashScreen().close()
         DbDocument.addDbDocuments(documents=self.documents)
 
