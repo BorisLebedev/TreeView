@@ -519,11 +519,7 @@ class HierarchicalView(QTreeView):
 
     def updDateCheck(self) -> None:
         self.selected_product.updDateCheck()
-        header = 'Дата последнего\nизменения'
-        if header in self.header_horizontal:
-            self.redrawColumn(data={'type': 'product',
-                                    'header': header,
-                                    'setting': 'upd_date'})
+        self.redrawAllColumns()
 
     @property
     def selected_product(self) -> Product:
