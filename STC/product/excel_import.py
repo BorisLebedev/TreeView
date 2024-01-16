@@ -327,7 +327,22 @@ class ExcelDataFromTdDb:
                             'document_real': excel_document.db_document_real}
                 self.documents[excel_document.db_product.deno] = document
         SplashScreen().close()
-        DbDocument.addDbDocuments(documents=self.documents)
+        db_documents = DbDocument.addDbDocuments(documents=self.documents)
+        # self.delDocumentKTTPDuplicates(valid_documents=db_documents)
+
+    def delDocumentKTTPDuplicates(self, valid_documents: dict):
+        """ Удаление связей изделие-документ для КТТП при импорте новых КТТП """
+
+        for document_dict in valid_documents.values():
+            product = document_dict['product']
+            valid_document = document_dict['db_document']
+            documents = DbDocument.getDbDocumentsByProductIds(product_ids=[product.id_product])
+            for document in documents:
+                if document != valid_document:
+                    if document.document_real.id_type == 341:
+                        DbDocument.delDbDocument(product=product,
+                                                 document_real=document.document_real)
+
 
     def addDocumentComplex(self) -> None:
         """ Внесение связанных изделий в составном документе """
