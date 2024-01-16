@@ -117,15 +117,15 @@ class ToolBarOptions(ToolBar):
     def initActions(self):
         """ Добавление действий в тулбар """
 
-        self.action_dbsync = self.actionSyncTreeView('Синхронизация с БД')
-        self.action_dbsync.setIcon(CONFIG.style.arrow_repeat_red)
-        self.action_dbsync.setShortcut(QKeySequence("Ctrl+F5"))
+        self.action_dbsync = self.actionSyncTreeView('Обновить')
+        self.action_dbsync.setIcon(CONFIG.style.arrow_repeat)
+        self.action_dbsync.setShortcut(QKeySequence("F5"))
         self.addAction(self.action_dbsync)
 
-        self.action_update = self.actionUpdTreeView('Обновить')
-        self.action_update.setIcon(CONFIG.style.arrow_repeat)
-        self.action_update.setShortcut(QKeySequence("F5"))
-        self.addAction(self.action_update)
+        # self.action_update = self.actionUpdTreeView('Обновить')
+        # self.action_update.setIcon(CONFIG.style.arrow_repeat)
+        # self.action_update.setShortcut(QKeySequence("F5"))
+        # self.addAction(self.action_update)
 
         self.action_filter = self.actionShowWindowFilter('Фильтр')
         self.action_filter.setIcon(CONFIG.style.filter)

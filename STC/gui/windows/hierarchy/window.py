@@ -205,7 +205,7 @@ class WindowTable(WindowBasic):
 
         self.file_menu = self.main_menu.addMenu('Файл')
         self.file_menu.addAction(self.toolbar_for_options.action_dbsync)
-        self.file_menu.addAction(self.toolbar_for_options.action_update)
+        # self.file_menu.addAction(self.toolbar_for_options.action_update)
         self.file_menu.addAction(self.toolbar_for_options.action_filter)
         self.file_menu.addAction(self.toolbar_for_options.action_newtab)
         self.file_menu.addAction(self.toolbar_for_options.action_newdoc)

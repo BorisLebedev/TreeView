@@ -1374,7 +1374,7 @@ class Product:
     def upd_date_user(self) -> str:
         """ Пользователь, который последний изменил изделие """
 
-        if self.db_product.name_check != None:
+        if self.db_product.name_check is not None:
             return self.db_product.name_check
         return ''
 
