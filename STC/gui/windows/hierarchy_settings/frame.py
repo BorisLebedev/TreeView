@@ -322,6 +322,7 @@ class FrameMainSettingsProduct(FrameCheckboxSettings):
                          'Проекты': 'all_projects',
                          'Документы\nв проектах': 'all_projects_with_doc',
                          'Дата последнего\nизменения': 'upd_date_f',
+                         'Пользователь, внесший\n последнее изменение': 'upd_date_user',
                          'Актуальность\nиерархии': 'hierarchy_relevance',
                          'Дней с\nпоследнего\nобновления': 'hierarchy_relevance_days',
                          'Вид': 'product_kind_name',

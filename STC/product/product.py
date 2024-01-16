@@ -1236,6 +1236,7 @@ class Product:
                 self.documents.add(builder.document)
 
     def updDateCheck(self):
+        """ Обновление последней даты изменения изделия """
         self.db_product.updDateCheck(name_check=User.current_user.user_name)
 
     @staticmethod
@@ -1368,6 +1369,14 @@ class Product:
         if self.db_product.date_check != datetime.min:
             return self.db_product.date_check
         return None
+
+    @property
+    def upd_date_user(self) -> str:
+        """ Пользователь, который последний изменил изделие """
+
+        if self.db_product.name_check != None:
+            return self.db_product.name_check
+        return ''
 
     @property
     def upd_date_f(self) -> str:
