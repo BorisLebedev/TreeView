@@ -13,12 +13,22 @@ class ContextMenuForTree(ContextMenu):
 
     def __init__(self, obj, kttp_list: list[str], kind_list: list[str]) -> None:
         super().__init__(obj)
+        self.addAction(self.actionUpdateDate())
         self.addAction(self.actionCopy())
         self.addAction(self.actionUpdTree())
         self.addAction(self.actionCreateMk())
         self.addMenuKttp(kttp_list=kttp_list)
         self.addMenuKind(kind_list=kind_list)
         self.addMenuColor()
+
+    def actionUpdateDate(self) -> QAction:
+        """ Изменяет дату последнего обновления
+            спецификации на текущую """
+
+        action = QAction(self.object)
+        action.setText('Обновить дату последнего изменения')
+        action.triggered.connect(self.object.tree_view.updDateCheck)
+        return action
 
     def actionCopy(self) -> QAction:
         """ Копирует значение ячейки

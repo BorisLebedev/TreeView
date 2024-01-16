@@ -1235,6 +1235,9 @@ class Product:
                 builder.setDbDocument(item['db_document'])
                 self.documents.add(builder.document)
 
+    def updDateCheck(self):
+        self.db_product.updDateCheck(name_check=User.current_user.user_name)
+
     @staticmethod
     def newTdDocumentNum(code: str) -> str:
         """ Возвращает первый незанятый номер технологического документа """
@@ -3739,6 +3742,7 @@ class Profession:
 
 class User:
     """ Пользователи """
+    current_user = None
 
     def __init__(self, user_name) -> None:
         self.db_user = None

@@ -517,6 +517,14 @@ class HierarchicalView(QTreeView):
         product.product_kind = kind_dict[kind_name]
         self.redrawAllColumns()
 
+    def updDateCheck(self) -> None:
+        self.selected_product.updDateCheck()
+        header = 'Дата последнего\nизменения'
+        if header in self.header_horizontal:
+            self.redrawColumn(data={'type': 'product',
+                                    'header': header,
+                                    'setting': 'upd_date'})
+
     @property
     def selected_product(self) -> Product:
         """ Определить изделие, которое относиться к выбранной строке """

@@ -656,6 +656,15 @@ class DbProduct(Base):
             self.__class__.updData()
             return self.getDbDocuments()
 
+    def updDateCheck(self, name_check) -> None:
+        self.date_check = datetime.now()
+        self.name_check = name_check
+        try:
+            DbConnection.sessionCommit()
+        except (IntegrityError, OperationalError, NameError) as err:
+            show_dialog(f'Не удалось обновить дату последнего изменения изделия. Повторная попытка\n{err}')
+            DbConnection.session.rollback()
+            self.updDateCheck()
 
 class DbPrimaryApplication(Base):
     """SqlAlchemy класс описания таблицы первичных применяемостей в БД"""
