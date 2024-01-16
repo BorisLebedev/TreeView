@@ -17,6 +17,7 @@ from STC.product.product import DocumentBuilder
 from STC.product.product import ProductType
 from STC.product.product import Product
 from STC.product.product import DocumentType
+from STC.product.product import User
 from STC.product.product import return_document_type
 
 
@@ -92,6 +93,7 @@ class DocumentFromForm:
         product_main = {'deno': self.window.structure.main_data.product_deno,
                         'name': self.window.structure.main_data.product_name,
                         'date_check': datetime.now(),
+                        'name_check': User.current_user.user_name,
                         'upd': True}
         self.products['main_deno'] = product_main
 

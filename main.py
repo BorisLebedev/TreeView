@@ -58,6 +58,7 @@ class Controller:
             self.__class__.connection = Connection()
         SplashScreen().closeWithWindow(window=self.product_selector_window)
         self.user = User(user_name=os.getlogin())
+        User.current_user = self.user
         if self.user.product is not None and proj_start:
             msg_box = show_dialog(text=f'Продолжить работу с {self.user.product.name}?',
                                   m_type='continue_project')
