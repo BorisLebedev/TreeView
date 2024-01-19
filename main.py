@@ -289,10 +289,21 @@ class Controller:
         for window in self.window_search_list:
             self.findData(window)
         for window in self.window_filter_list:
+            filters = window.table.model().filters
             model = StandartModelFilter(tree_view=self.table.tree_view)
             proxy = model.createProxy()
             window.base_model = proxy
             window.table.setModel(proxy)
+            window.table.model().filters = filters
+            window.table.model().invalidateFilter()
+            for index in filters.keys():
+                window.table.model().setHeaderData(
+                    index,
+                    Qt.Horizontal,
+                    CONFIG.style.filter,
+                    Qt.DecorationRole)
+            window.table.resizeRowsToContents()
+            window.updStatusBar()
         SplashScreen().newMessage(message='Обновление завершено',
                                   stage=1,
                                   stages=1,
