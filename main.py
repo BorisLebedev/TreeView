@@ -141,6 +141,7 @@ class Controller:
             self.table.exportToExcelFull.connect(lambda: Excel(self.table.tree_view, full=True))
             self.table.exportToExcelNorm.connect(lambda: ExcelNorm(self.table.tree_view))
             self.table.exportToExcelNTD.connect(lambda: ExcelNTD(self.table.tree_view))
+            self.table.redrawTreeView.connect(self.redrawTreeView)
             self.table.updTreeView.connect(lambda: self.updTreeView(load_from_db=False))
             self.table.syncTreeView.connect(lambda: self.updTreeView(load_from_db=True))
             self.table.copyText.connect(lambda: app.clipboard().setText(
@@ -298,6 +299,28 @@ class Controller:
                                   log=True,
                                   logging_level='INFO')
         SplashScreen().closeWithWindow()
+
+    def redrawTreeView(self):
+        for window in self.window_search_list:
+            self.findData(window)
+        for window in self.window_filter_list:
+            filters = window.table.model().filters
+            model = StandartModelFilter(tree_view=self.table.tree_view)
+            proxy = model.createProxy()
+            window.base_model = proxy
+            window.table.setModel(proxy)
+            window.table.model().filters = filters
+            window.table.model().invalidateFilter()
+            for index in filters.keys():
+                window.table.model().setHeaderData(
+                    index,
+                    Qt.Horizontal,
+                    CONFIG.style.filter,
+                    Qt.DecorationRole)
+            window.table.resizeRowsToContents()
+            window.updStatusBar()
+            # proxy.invalidateFilter()
+            # window.base_model.invalidateFilter()
 
     def syncWithExcel(self) -> None:
         """ Импорт данных из иерархических таблиц Excel """

@@ -142,6 +142,7 @@ class WindowTable(WindowBasic):
     assignKindSignal = pyqtSignal()
     updTreeView = pyqtSignal()
     syncTreeView = pyqtSignal()
+    redrawTreeView = pyqtSignal()
     copyText = pyqtSignal()
     importTd = pyqtSignal()
     importXl = pyqtSignal()

@@ -28,6 +28,7 @@ class ContextMenuForTree(ContextMenu):
         action = QAction(self.object)
         action.setText('Обновить дату последнего изменения')
         action.triggered.connect(self.object.tree_view.updDateCheck)
+        action.triggered.connect(self.object.redrawTreeView)
         return action
 
     def actionCopy(self) -> QAction:
