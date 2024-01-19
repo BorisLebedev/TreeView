@@ -290,6 +290,8 @@ class Controller:
             self.findData(window)
         for window in self.window_filter_list:
             filters = window.table.model().filters
+            sort_section = window.table.horizontalHeader().sortIndicatorSection()
+            sort_order = window.table.horizontalHeader().sortIndicatorOrder()
             model = StandartModelFilter(tree_view=self.table.tree_view)
             proxy = model.createProxy()
             window.base_model = proxy
@@ -302,6 +304,9 @@ class Controller:
                     Qt.Horizontal,
                     CONFIG.style.filter,
                     Qt.DecorationRole)
+            window.table.model().sort(sort_section, sort_order)
+            window.table.horizontalHeader().setSortIndicator(sort_section,
+                                                             sort_order)
             window.table.resizeRowsToContents()
             window.updStatusBar()
         SplashScreen().newMessage(message='Обновление завершено',
@@ -316,6 +321,8 @@ class Controller:
             self.findData(window)
         for window in self.window_filter_list:
             filters = window.table.model().filters
+            sort_section = window.table.horizontalHeader().sortIndicatorSection()
+            sort_order = window.table.horizontalHeader().sortIndicatorOrder()
             model = StandartModelFilter(tree_view=self.table.tree_view)
             proxy = model.createProxy()
             window.base_model = proxy
@@ -328,6 +335,9 @@ class Controller:
                     Qt.Horizontal,
                     CONFIG.style.filter,
                     Qt.DecorationRole)
+            window.table.model().sort(sort_section, sort_order)
+            window.table.horizontalHeader().setSortIndicator(sort_section,
+                                                             sort_order)
             window.table.resizeRowsToContents()
             window.updStatusBar()
             # proxy.invalidateFilter()
