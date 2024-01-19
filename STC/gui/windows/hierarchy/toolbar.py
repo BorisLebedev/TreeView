@@ -132,7 +132,7 @@ class ToolBarOptions(ToolBar):
         self.action_filter.setShortcut(QKeySequence("Ctrl+Shift+F"))
         self.addAction(self.action_filter)
 
-        self.action_newtab = self.actionShowProductSelector('Новое изделие')
+        self.action_newtab = self.actionShowProductSelector('Новый состав')
         self.action_newtab.setIcon(CONFIG.style.network_3_round)
         self.action_newtab.setShortcut(QKeySequence("Ctrl+N"))
         self.addAction(self.action_newtab)

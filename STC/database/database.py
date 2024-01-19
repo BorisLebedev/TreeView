@@ -1,4 +1,5 @@
 """ Классы ORM модели и функции для работы с БД """
+
 from __future__ import annotations
 
 import logging

@@ -518,6 +518,8 @@ class HierarchicalView(QTreeView):
         self.redrawAllColumns()
 
     def updDateCheck(self) -> None:
+        """ Обновление даты последнего изменения изделия """
+
         self.selected_product.updDateCheck()
         self.redrawAllColumns()
 
