@@ -212,8 +212,8 @@ class Excel(ExcelExport):
             self._current_row += 1
 
             if product.has_real_deno or self.full:
-                if product.deno == 'УИЕС.464512.378':
-                    pass
+                # if product.deno == 'УИЕС.464512.378':
+                #     pass
                 # creator = product.getDocumentByType(class_name='КД',
                 #                                     subtype_name='Спецификация',
                 #                                     setting='name_created',
