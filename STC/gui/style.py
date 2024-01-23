@@ -21,13 +21,13 @@ class StyleFactory:
         """ Возвращает экземпляр класса определенного стиля """
         style = CONFIG.color_style.color_style_current
         match style:
-            case 'QDarkGrayStyle':
+            case 'DarkGray':
                 return StyleQDarkGrayStyle(app=app)
             case 'Fusion':
                 return StyleFusion(app=app)
             case 'Windows':
                 return StyleWindows(app=app)
-            case 'Standart':
+            case 'Standard':
                 return StyleStandart(app=app)
 
 
