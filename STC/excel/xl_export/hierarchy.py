@@ -200,28 +200,21 @@ class Excel(ExcelExport):
 
     def treeModelToList(self, item: QStandardItem, level: int, main_index: str):
         """ Перевод данных модели в списки для выгрузки в Excel  """
+        counter = 0
         for row in range(item.rowCount()):
             child = item.child(row)
-            sub_index = index_mk(main_index, row)
-            index = sub_index[2:]
             product = item.child(row).data()
 
-            SplashScreen().newMessage(message=f'Считывание данных...\n{sub_index}', upd_bar=False)
-            SplashScreen().changeSubProgressBar(stage=self._current_row,
-                                                stages=self._tree_row_count)
-            self._current_row += 1
-
             if product.has_real_deno or self.full:
-                # if product.deno == 'УИЕС.464512.378':
-                #     pass
-                # creator = product.getDocumentByType(class_name='КД',
-                #                                     subtype_name='Спецификация',
-                #                                     setting='name_created',
-                #                                     first=True)
-                # if creator is None:
-                #     creator = ''
-                # temp_creator = creator.replace(' ', '')
-                # creator_dep = 'Илгач' if temp_creator in self.ilgach_dep else ''
+                sub_index = index_mk(main_index, counter)
+                index = sub_index[2:]
+                counter += 1
+                SplashScreen().newMessage(message=f'Считывание данных...\n{sub_index}', upd_bar=False)
+                SplashScreen().changeSubProgressBar(stage=self._current_row,
+                                                    stages=self._tree_row_count)
+                self._current_row += 1
+
+
                 creator = ''
                 creator_dep = ''
                 kttp = ''
