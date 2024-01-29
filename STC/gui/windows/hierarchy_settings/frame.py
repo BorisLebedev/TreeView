@@ -319,8 +319,8 @@ class FrameMainSettingsProduct(FrameCheckboxSettings):
 
         self.settings = {'Первичная\nприменяемость': 'primary_product',
                          'Первичный\nпроект': 'primary_project',
-                         'Проекты': 'all_projects',
-                         'Документы\nв проектах': 'all_projects_with_doc',
+                         # 'Проекты': 'all_projects',
+                         # 'Документы\nв проектах': 'all_projects_with_doc',
                          'Дата последнего\nизменения': 'upd_date_f',
                          'Пользователь, внесший\n последнее изменение': 'upd_date_user',
                          'Актуальность\nиерархии': 'hierarchy_relevance',
