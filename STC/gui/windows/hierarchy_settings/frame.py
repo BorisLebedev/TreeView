@@ -324,6 +324,6 @@ class FrameMainSettingsProduct(FrameCheckboxSettings):
                          'Дата последнего\nизменения': 'upd_date_f',
                          'Пользователь, внесший\n последнее изменение': 'upd_date_user',
                          'Актуальность\nиерархии': 'hierarchy_relevance',
-                         'Дней с\nпоследнего\nобновления': 'hierarchy_relevance_days',
+                         'На сколько\nустарело': 'hierarchy_relevance_days',
                          'Вид': 'product_kind_name',
                          'Название\nпроекта': 'project_name'}
