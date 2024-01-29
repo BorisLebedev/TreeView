@@ -317,8 +317,8 @@ class FrameMainSettingsProduct(FrameCheckboxSettings):
         """ Создание словаря {наименование свойства: наименование аттрибута}
             по которому создаются элементы рамки и запрашиваются данные """
 
-        self.settings = {'Первичный\nпроект': 'primary_product',
-                         'Первичное\nизделие': 'primary_project',
+        self.settings = {'Первичная\nприменяемость': 'primary_product',
+                         'Первичный\nпроект': 'primary_project',
                          'Проекты': 'all_projects',
                          'Документы\nв проектах': 'all_projects_with_doc',
                          'Дата последнего\nизменения': 'upd_date_f',

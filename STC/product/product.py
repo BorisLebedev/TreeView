@@ -1411,8 +1411,7 @@ class Product:
 
     @property
     def hierarchy_relevance_days(self) -> int | None:
-        """ Актуальность данных родитель - дети с отсчетом дней
-            *НЕ ИСПОЛЬЗУЕТСЯ"""
+        """ Актуальность данных родитель - дети с отсчетом дней """
 
         upd_date = self.db_product.date_check
         plm_date = None
