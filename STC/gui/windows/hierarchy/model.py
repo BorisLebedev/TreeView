@@ -87,6 +87,7 @@ class HierarchicalView(QTreeView):
         отображается в главном окне """
 
     # pylint: disable=too-many-public-methods
+    updTreeView = pyqtSignal()
 
     def __init__(self, product_denotation: str,
                  reverse: bool = False,
@@ -251,6 +252,7 @@ class HierarchicalView(QTreeView):
         self.model.setHorizontalHeaderItem(column, QStandardItem(header))
         if modify_settings:
             self.modifyModelSettingsOnUpdate()
+        self.updTreeView.emit()
 
     def getDataFromProduct(self, data: dict[str, str | bool | None | dict[Product, str]],
                            item: QStandardItem, column: int, new_column: bool) -> None:
