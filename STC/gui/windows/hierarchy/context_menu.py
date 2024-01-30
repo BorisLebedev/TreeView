@@ -73,6 +73,7 @@ class ContextMenuForTree(ContextMenu):
             action = QAction(self.object)
             action.setText(f'{kttp_name}')
             action.triggered.connect(self.object.tree_view.model.addKttp)
+            action.triggered.connect(self.object.redrawTreeView)
             kttp_menu_add.addAction(action)
 
     def addMenuKttpDel(self) -> None:
@@ -90,6 +91,7 @@ class ContextMenuForTree(ContextMenu):
             action = QAction(self.object)
             action.setText(f'{document.deno} {document.name}')
             action.triggered.connect(self.object.tree_view.model.delKttp)
+            action.triggered.connect(self.object.redrawTreeView)
             kttp_menu_del.addAction(action)
 
     def addMenuKind(self, kind_list: list[str]) -> None:
@@ -100,6 +102,7 @@ class ContextMenuForTree(ContextMenu):
             action = QAction(self.object)
             action.setText(f'{kind_name}')
             action.triggered.connect(self.object.setKind)
+            action.triggered.connect(self.object.redrawTreeView)
             kind_menu.addAction(action)
 
     def addMenuColor(self) -> None:

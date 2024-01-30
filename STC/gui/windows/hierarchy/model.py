@@ -39,6 +39,7 @@ class HierarchicalModel(QStandardItemModel):
     addKttpSignal = pyqtSignal(list)
     delKttpSignal = pyqtSignal(list)
     updProductKindSignal = pyqtSignal(str)
+    updTreeView = pyqtSignal()
 
     def __init__(self, product_denotation: str, reverse: bool = False) -> None:
         super().__init__()
@@ -87,7 +88,6 @@ class HierarchicalView(QTreeView):
         отображается в главном окне """
 
     # pylint: disable=too-many-public-methods
-    updTreeView = pyqtSignal()
 
     def __init__(self, product_denotation: str,
                  reverse: bool = False,
@@ -252,7 +252,7 @@ class HierarchicalView(QTreeView):
         self.model.setHorizontalHeaderItem(column, QStandardItem(header))
         if modify_settings:
             self.modifyModelSettingsOnUpdate()
-        self.updTreeView.emit()
+        self.model.updTreeView.emit()
 
     def getDataFromProduct(self, data: dict[str, str | bool | None | dict[Product, str]],
                            item: QStandardItem, column: int, new_column: bool) -> None:
@@ -614,6 +614,7 @@ class DelegateKTTP(QStyledItemDelegate):
 
         model.updKttp(names=editor.checkItems())
         model.setData(index, '\n'.join(editor.checkItems()), Qt.EditRole)
+        model.updTreeView.emit()
 
 
 class DelegateProductKind(QStyledItemDelegate):
@@ -638,6 +639,7 @@ class DelegateProductKind(QStyledItemDelegate):
 
         model.updProductKind(kind_name=editor.currentText())
         model.setData(index, editor.currentText(), Qt.EditRole)
+        model.updTreeView.emit()
 
 
 class ComboboxWithCheckBox(QComboBox):

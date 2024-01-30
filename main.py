@@ -142,7 +142,7 @@ class Controller:
             self.table.exportToExcelNorm.connect(lambda: ExcelNorm(self.table.tree_view))
             self.table.exportToExcelNTD.connect(lambda: ExcelNTD(self.table.tree_view))
             self.table.redrawTreeView.connect(self.redrawTreeView)
-            self.table.tree_view.updTreeView.connect(self.redrawTreeView)
+            self.table.tree_view.model.updTreeView.connect(self.redrawTreeView)
             self.table.updTreeView.connect(lambda: self.updTreeView(load_from_db=False))
             self.table.syncTreeView.connect(lambda: self.updTreeView(load_from_db=True))
             self.table.copyText.connect(lambda: app.clipboard().setText(
