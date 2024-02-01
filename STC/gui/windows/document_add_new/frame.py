@@ -887,13 +887,15 @@ class FrameComplexDocument(FrameWithTable):
         super().__init__(frame_name='Изготавливается\nсовместно')
         self.table.itemChanged.connect(self.checkProduct)
         self.icon_ok = CONFIG.style.done_mini
+        self.found = 'Найдено'
+        self.not_found = 'Не найдено'
         self.icon_cross = CONFIG.style.close
         self.addNewRow()
 
     def initTableSettings(self) -> None:
         """ Параметры таблицы """
 
-        self.header_settings = ({'col': 0, 'width': 30, 'name': ' '},
+        self.header_settings = ({'col': 0, 'width': 100, 'name': 'В составе'},
                                 {'col': 1, 'width': 200, 'name': 'Обозначение'},
                                 {'col': 2, 'width': 300, 'name': 'Наименование'})
         self.start_rows = 0
@@ -936,8 +938,10 @@ class FrameComplexDocument(FrameWithTable):
             product = builder.product
             if product.db_product is not None:
                 self.table.item(self.table.currentRow(), 0).setIcon(self.icon_ok)
+                self.table.item(self.table.currentRow(), 0).setText(self.found)
                 self.table.item(self.table.currentRow(), 2).setText(product.name)
             else:
+                self.table.item(self.table.currentRow(), 0).setText(self.not_found)
                 self.table.item(self.table.currentRow(), 0).setIcon(self.icon_cross)
 
     def getData(self) -> list[dict[str, str | int]]:
@@ -946,14 +950,18 @@ class FrameComplexDocument(FrameWithTable):
         children_data = []
         for row in range(self.table.rowCount()):
             child_data = {}
-            for col in range(self.table.columnCount()):
-                column_name = self.table.horizontalHeaderItem(col).text()
-                try:
-                    child_data[column_name] = self.table.item(row, col).text()
-                except AttributeError:
-                    child_data[column_name] = self.table.cellWidget(row, col).currentText()
-            if child_data['Обозначение']:
+            if self.table.item(row, 0).text() == self.found:
+                child_data['Обозначение'] = self.table.item(row, 1).text()
+                child_data['Наименование'] = self.table.item(row, 2).text()
                 children_data.append(child_data)
+            # for col in range(self.table.columnCount()):
+            #     column_name = self.table.horizontalHeaderItem(col).text()
+            #     try:
+            #         child_data[column_name] = self.table.item(row, col).text()
+            #     except AttributeError:
+            #         child_data[column_name] = self.table.cellWidget(row, col).currentText()
+            # if child_data['Обозначение']:
+            #     children_data.append(child_data)
         return children_data
 
 

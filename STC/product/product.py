@@ -177,7 +177,8 @@ class ProductBuilder:
             без привязки к определенному изделию из БД """
 
         product = self._product
-        self.__class__.products.update({product.db_product.id_product: product})
+        if product.db_product is not None:
+            self.__class__.products.update({product.db_product.id_product: product})
         self.reset()
         return product
 
@@ -190,6 +191,8 @@ class ProductBuilder:
             self._product = self.__class__.products[db_product.id_product]
         except KeyError:
             self._product.db_product = db_product
+        except AttributeError:
+            pass
 
     def getDbProductByDenotation(self, deno: str) -> None:
         """ Ищет ORM класс с определенным децимальным номером.
