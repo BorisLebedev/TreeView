@@ -895,7 +895,7 @@ class FrameComplexDocument(FrameWithTable):
     def initTableSettings(self) -> None:
         """ Параметры таблицы """
 
-        self.header_settings = ({'col': 0, 'width': 100, 'name': 'В составе'},
+        self.header_settings = ({'col': 0, 'width': 120, 'name': 'Найдено'},
                                 {'col': 1, 'width': 200, 'name': 'Обозначение'},
                                 {'col': 2, 'width': 300, 'name': 'Наименование'})
         self.start_rows = 0
@@ -917,6 +917,7 @@ class FrameComplexDocument(FrameWithTable):
         for row_data in default_values:
             row = self.table.rowCount() - 1
             self.table.item(row, 0).setIcon(self.icon_ok)
+            self.table.item(row, 0).setText(self.found)
             self.table.item(row, 1).setText(row_data['Обозначение'])
             self.table.item(row, 2).setText(row_data['Наименование'])
             self.addNewRow()
