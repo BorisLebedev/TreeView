@@ -115,6 +115,10 @@ class FrameMkMain(FrameBasic):
         self._product_kind = QLineEdit()
         self._doc_m_contr = QLineEdit()
 
+        self._product_name.setReadOnly(True)
+        self._product_deno.setReadOnly(True)
+        self._doc_deno.setReadOnly(True)
+
     def initWidgetCombobox(self) -> None:
         """ Инициализация всех QComboBox """
 
