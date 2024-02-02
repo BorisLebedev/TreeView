@@ -1883,6 +1883,13 @@ class Document:
             return self.db_document.document_real.name
         return self.product.name
 
+    @ name.setter
+    def name(self, value) -> None:
+        """ Наименование документа """
+
+        if value:
+            self.db_document.document_real.updDocumentReal(document_name=value)
+
     @property
     def deno(self) -> str:
         """ Децимальный номер изделия """

@@ -72,6 +72,7 @@ class FrameMkMain(FrameBasic):
     changeNContr = pyqtSignal()
     changeMContr = pyqtSignal()
     changeKind = pyqtSignal()
+    changeDocName = pyqtSignal()
 
     def __init__(self) -> None:
         super().__init__(frame_name='Основные данные')
@@ -142,6 +143,7 @@ class FrameMkMain(FrameBasic):
         self._doc_approver.editingFinished.connect(self.changeApprover)
         self._doc_n_contr.editingFinished.connect(self.changeNContr)
         self._doc_m_contr.editingFinished.connect(self.changeMContr)
+        self._doc_name.editingFinished.connect(self.changeDocName)
 
     def initWidgetPosition(self) -> None:
         """ Расположение виджетов в рамке """

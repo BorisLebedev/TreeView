@@ -74,6 +74,7 @@ class WindowCreateMK(WindowBasic):
         self.structure.main_data_frame.changeApprover.connect(self.changeApprover)
         self.structure.main_data_frame.changeNContr.connect(self.changeNContr)
         self.structure.main_data_frame.changeMContr.connect(self.changeMContr)
+        self.structure.main_data_frame.changeDocName.connect(self.changeDocName)
         self.structure.operations_frame.createNewOperation.connect(self.newOperation)
         self.structure.operations_frame.changeOperation.connect(self.updOperation)
         self.structure.operations_frame.deleleOperation.connect(self.delOperation)
@@ -244,6 +245,11 @@ class WindowCreateMK(WindowBasic):
 
         if self.document is not None:
             self.document.name_m_contr = self.structure.main_data_frame.document_m_contr
+
+    def changeDocName(self) -> None:
+        """ Изменить наименование документа """
+        if self.document is not None:
+            self.document.name = self.structure.main_data_frame.document_name
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """ Событие закрытия окна """

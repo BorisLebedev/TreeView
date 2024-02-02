@@ -1821,7 +1821,7 @@ class DbDocumentReal(Base):
         return documents
 
     # pylint: disable=too-many-arguments
-    def updDocumentReal(self, db_document_stage: DbDocumentStage,
+    def updDocumentReal(self, db_document_stage: DbDocumentStage | None = None,
                         document_name: str | None = None,
                         file_name: str | None = None,
                         link: str | None = None,
