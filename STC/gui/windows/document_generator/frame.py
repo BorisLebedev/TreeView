@@ -45,6 +45,7 @@ from STC.gui.splash_screen import show_dialog
 from STC.product.product import OperationBuilder
 from STC.product.product import Operation
 from STC.product.product import Sentence
+from STC.product.product import ProductKind
 
 if TYPE_CHECKING:
     from STC.product.product import Document
@@ -73,12 +74,14 @@ class FrameMkMain(FrameBasic):
     changeMContr = pyqtSignal()
     changeKind = pyqtSignal()
     changeDocName = pyqtSignal()
+    changeProductKind = pyqtSignal()
 
     def __init__(self) -> None:
         super().__init__(frame_name='Основные данные')
         self.stage_letters = sorted(
             CONFIG.data['document_settings']['litera'].replace(' ', '').split(','))
         self.stages = CONFIG.data['document_settings']['stages'].replace("", "").split(',')
+        self.product_kinds = [db_kind for db_kind in ProductKind.allDbKinds()]
         self.initWidgetLabel()
         self.initWidgetLineedit()
         self.initWidgetCombobox()
@@ -113,7 +116,7 @@ class FrameMkMain(FrameBasic):
         self._doc_checker = QLineEdit()
         self._doc_approver = QLineEdit()
         self._doc_n_contr = QLineEdit()
-        self._product_kind = QLineEdit()
+        # self._product_kind = QLineEdit()
         self._doc_m_contr = QLineEdit()
 
         self._product_name.setReadOnly(True)
@@ -125,12 +128,14 @@ class FrameMkMain(FrameBasic):
 
         self._doc_litera = QComboBox()
         self._doc_stage = QComboBox()
+        self._product_kind = QComboBox()
 
     def initWidgetComboboxDefault(self) -> None:
         """ Начальные данные комбобоксов """
 
         self._doc_litera.addItems(self.stage_letters)
         self._doc_stage.addItems(self.stages)
+        self._product_kind.addItems(self.product_kinds)
 
     def initWidgetComboboxActions(self) -> None:
         """ Инициализация действий при изменении
@@ -138,6 +143,7 @@ class FrameMkMain(FrameBasic):
 
         self._doc_litera.currentTextChanged.connect(self.changeLitera)
         self._doc_stage.currentTextChanged.connect(self.changeStage)
+        self._product_kind.currentTextChanged.connect(self.changeProductKind)
         self._doc_developer.editingFinished.connect(self.changeDeveloper)
         self._doc_checker.editingFinished.connect(self.changeChecker)
         self._doc_approver.editingFinished.connect(self.changeApprover)
@@ -195,13 +201,13 @@ class FrameMkMain(FrameBasic):
     def product_kind(self) -> str:
         """ Возвращает вид изделия """
 
-        return self._product_kind.text()
+        return self._product_kind.currentText()
 
     @product_kind.setter
     def product_kind(self, kind: str) -> None:
         """ Устанавливает вид изделия """
 
-        self._product_kind.setText(kind)
+        self._product_kind.setCurrentText(kind)
 
     @property
     def document_name(self) -> str:

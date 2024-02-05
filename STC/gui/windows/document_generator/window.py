@@ -14,6 +14,7 @@ from STC.gui.windows.document_generator.structure import StructureCreateMK
 from STC.gui.splash_screen import show_dialog
 from STC.gui.splash_screen import SplashScreen
 from STC.product.product import OperationBuilder
+from STC.product.product import ProductKind
 
 if TYPE_CHECKING:
     from STC.product.product import Document
@@ -75,6 +76,7 @@ class WindowCreateMK(WindowBasic):
         self.structure.main_data_frame.changeNContr.connect(self.changeNContr)
         self.structure.main_data_frame.changeMContr.connect(self.changeMContr)
         self.structure.main_data_frame.changeDocName.connect(self.changeDocName)
+        self.structure.main_data_frame.changeProductKind.connect(self.changeProductKind)
         self.structure.operations_frame.createNewOperation.connect(self.newOperation)
         self.structure.operations_frame.changeOperation.connect(self.updOperation)
         self.structure.operations_frame.deleleOperation.connect(self.delOperation)
@@ -250,6 +252,12 @@ class WindowCreateMK(WindowBasic):
         """ Изменить наименование документа """
         if self.document is not None:
             self.document.name = self.structure.main_data_frame.document_name
+
+    def changeProductKind(self) -> None:
+        """ Изменить вид изделия """
+        kind_dict = ProductKind.allDbKinds()
+        new_kind = self.structure.main_data_frame.product_kind
+        self.product.product_kind = kind_dict[new_kind]
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """ Событие закрытия окна """
