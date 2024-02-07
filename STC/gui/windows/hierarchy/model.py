@@ -321,7 +321,7 @@ class HierarchicalView(QTreeView):
         if documents_data is not None:
             for document_data in documents_data:
                 for sub_product, document in document_data:
-                    data['sub_products'][product] = \
+                    data['sub_products'][sub_product] = \
                         self.addComplexDocumentText(
                             product=sub_product,
                             data=data,
