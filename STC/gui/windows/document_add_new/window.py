@@ -45,7 +45,7 @@ class WindowNewDocument(WindowBasic):
         logging.info('Установка параметров окна внесения документа')
         self.basic_layout.itemAt(0).widget().layout.itemAt(0).widget().setText(self.title)
         self.size = 1000
-        self.ratio = 0.75
+        self.ratio = 0.5
         self.setGeometry(150, 150, self.size, int(self.size * self.ratio))
         self.structure = StructureNewDocument(self.main_layout)
         self.structure.main_data.findDocument.connect(self.addDataToFrames)

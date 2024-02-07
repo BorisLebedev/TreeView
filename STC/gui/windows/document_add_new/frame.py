@@ -59,17 +59,7 @@ class NewDocumentMainFrame(FrameBasic):
         self.initWidgetLabel()
         self.initWidgetLineEdit()
         self.initWidgetCombobox()
-        visibility_settings_td = {'КД': False,
-                                  'ТД': True,
-                                  'PLM': False}
-        self.visibility = {self._l_doc_org: visibility_settings_td,
-                           self._l_doc_method: visibility_settings_td,
-                           self._l_doc_dep: visibility_settings_td,
-                           self._doc_org: visibility_settings_td,
-                           self._doc_method: visibility_settings_td,
-                           self._doc_dep: visibility_settings_td,
-                           self._l_doc_complex: visibility_settings_td,
-                           self._doc_complex: visibility_settings_td}
+        self.widgetVisibilitySettings()
         self.initWidgetComboboxDefault()
         self.initWidgetComboboxConnection()
 
@@ -192,8 +182,35 @@ class NewDocumentMainFrame(FrameBasic):
         self._doc_dep.currentIndexChanged.connect(
             lambda: self.modifyComboboxValues(attr='document'))
 
-    def widgetVisibility(self) -> None:
+    def widgetVisibilitySettings(self) -> None:
         """ Определяет видимость виджета в форме ввода
+            в зависимости от типа документа """
+
+        visibility_settings_td = {'КД': False,
+                                  'ТД': True,
+                                  'PLM': False}
+        visibility_settings_kd = {'КД': True,
+                                  'ТД': False,
+                                  'PLM': False}
+
+        self.visibility = {self._l_doc_org: visibility_settings_td,
+                           self._l_doc_method: visibility_settings_td,
+                           self._l_doc_dep: visibility_settings_td,
+                           self._doc_org: visibility_settings_td,
+                           self._doc_method: visibility_settings_td,
+                           self._doc_dep: visibility_settings_td,
+                           self._l_doc_complex: visibility_settings_td,
+                           self._doc_complex: visibility_settings_td,
+                           self._l_product_papp: visibility_settings_kd,
+                           self._l_doc_dev: visibility_settings_kd,
+                           self._l_doc_update: visibility_settings_kd,
+                           self._product_papp: visibility_settings_kd,
+                           self._doc_dev: visibility_settings_kd,
+                           self._doc_update: visibility_settings_kd,
+                           }
+
+    def widgetVisibility(self) -> None:
+        """ Устанавливает видимость виджета в форме ввода
             в зависимости от типа документа """
 
         try:
