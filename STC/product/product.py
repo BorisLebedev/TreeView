@@ -2972,7 +2972,7 @@ class Sentence:
         self.initIot()
         self.initDoc()
         self.initRig()
-        self.initEquipment()
+        # self.initEquipment()
         self.initMat()
 
     def initIot(self) -> None:

@@ -667,6 +667,7 @@ class DbProduct(Base):
             DbConnection.session.rollback()
             self.updDateCheck()
 
+
 class DbPrimaryApplication(Base):
     """SqlAlchemy класс описания таблицы первичных применяемостей в БД"""
 
