@@ -354,6 +354,7 @@ class Product:
 
     def getName(self):
         """ Выбор наименования изделия в зависимости от вида """
+
         return choice(self.__class__.templates[self.kind.name_short])
 
     def updProducts(self):
@@ -540,7 +541,9 @@ class ProductChild:
     @staticmethod
     def createProduct():
         """ Создает изделие случайного вида """
-        kind = random.choice(list(ProductDeno.templates.keys()))
+        kinds = list(ProductDeno.templates.keys())
+        kinds.remove('неизвестно')
+        kind = random.choice(kinds)
         return Product(name=None,
                        deno='generate',
                        kind=kind)
