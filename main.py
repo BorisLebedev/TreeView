@@ -62,6 +62,7 @@ class Controller:
         if self.user.product is not None and proj_start:
             msg_box = show_dialog(text=f'Продолжить работу с {self.user.product.name}?',
                                   m_type='continue_project')
+            msg_box.raise_()
             if msg_box.standardButton(msg_box.clickedButton()) == QMessageBox.Yes:
                 self.showMainTable(product_name=self.user.product.name,
                                    product_denotation=self.user.product.deno)
