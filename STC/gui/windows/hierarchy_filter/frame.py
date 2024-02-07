@@ -45,6 +45,7 @@ class TableViewFilter(QFrame):
         self.filterGeometry()
         self.show()
         self.combobox.setFocus()
+        self.setAutoFillBackground(True)
 
     def getData(self) -> None:
         """ Запрашивает уникальные значения столбца модели"""
