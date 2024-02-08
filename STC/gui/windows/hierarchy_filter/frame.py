@@ -53,6 +53,7 @@ class TableViewFilter(QFrame):
         self.model.filters = self.proxy_filters
         self.model.invalidateFilter()
         self.data = self.model.getData(self.logical_index)
+        self.data_str_uniq = sorted([item for item in set(self.data) if item is not None])
 
         self.model.filters = self.real_filters
         self.model.invalidateFilter()
@@ -96,8 +97,8 @@ class TableViewFilter(QFrame):
         self.cb_all.stateChanged.connect(lambda: self.changeCbsState(_type='check_all'))
 
         self.cbs = {}
-        sub_data = [item for item in self.data if item is not None]
-        for data in sorted(sub_data):
+        # sub_data = [item for item in set(self.data) if item is not None]
+        for data in self.data_str_uniq:
             data = self.model.itemConversion(item=data)
             checkbox = QCheckBox(data)
             if data in self.checked_data:
@@ -133,7 +134,7 @@ class TableViewFilter(QFrame):
         self.combobox = QComboBox()
         self.combobox.setSizeAdjustPolicy(self.combobox.AdjustToMinimumContentsLengthWithIcon)
         self.combobox.setEditable(True)
-        self.combobox.addItems(sorted(set(str(self.data))))
+        self.combobox.addItems(self.data_str_uniq)
         self.combobox.setCurrentText('')
 
     def widgetRelation(self) -> None:
