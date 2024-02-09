@@ -119,7 +119,7 @@ class TableViewFilter(QFrame):
     def setButtons(self) -> None:
         """ Инициализация кнопок """
 
-        self.btn_ok = QPushButton('Ok')
+        self.btn_ok = QPushButton('Применить')
         self.btn_ok.clicked.connect(self.filterApply)
 
         self.btn_cancel = QPushButton('Сбросить')
