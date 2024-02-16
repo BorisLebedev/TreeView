@@ -738,7 +738,7 @@ class NewDocumentSpecProductsWithDeno(NewDocumentSpecProducts):
     def defaultValues(self, default_values: list[dict[str, str | int]]) -> None:
         """ Внесение значений по умолчанию """
 
-        for row_data in default_values:
+        for row_data in sorted(default_values, key=lambda x: x['Тип']):
             row = self.table.rowCount() - 1
             if row_data['Код'] is not None:
                 for setting in self.header_settings:
@@ -801,7 +801,7 @@ class NewDocumentSpecProductsNoDeno(NewDocumentSpecProducts):
     def defaultValues(self, default_values: list[dict[str, str | int]]) -> None:
         """ Внесение значений по умолчанию """
 
-        for row_data in default_values:
+        for row_data in sorted(default_values, key=lambda x: x['Тип']):
             row = self.table.rowCount() - 1
             if row_data['Код'] is None:
                 for setting in self.header_settings:
