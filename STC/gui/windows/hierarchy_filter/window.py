@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QTableView
 from STC.gui.windows.ancestors.window import WindowBasic
 from STC.gui.windows.hierarchy_filter.frame import TableViewFilter
 
+
 if TYPE_CHECKING:
     from PyQt5.Qt import QPoint
     from STC.gui.windows.ancestors.model import SortFilterProxyModel

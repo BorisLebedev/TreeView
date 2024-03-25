@@ -60,6 +60,7 @@ class PlainText(PlainTextResizable):
 
     def __init__(self, operation: Operation) -> None:
         super().__init__()
+        self.setReadOnly(True)
         self.operation = operation
         self.upd()
 
