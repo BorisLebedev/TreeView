@@ -130,10 +130,11 @@ class ConfigXLHierarchy(Config):
             doc_type_col_fin=int(self.data[cfg]['doc_type_col_fin']),
             file_name_prefix=str(self.data[cfg]['file_name_prefix']),
             file_name_postfix=str(self.data[cfg]['file_name_postfix']),
+            organization_codes=str(self.data[cfg]['organization_codes']).replace(" ", "").split(','),
             doc_type_col_start=int(self.data[cfg]['doc_type_col_start']),
             file_name_extension=str(self.data[cfg]['file_name_extension']),
             primary_application_col=int(self.data[cfg]['primary_application_col']),
-            product_type_exceptions=str(self.data[cfg]['product_type_exceptions']).split(', ')
+            product_type_exceptions=str(self.data[cfg]['product_type_exceptions']).replace(" ", "").split(',')
         )
 
     def initExcelHierarchyNorm(self):
@@ -484,6 +485,7 @@ class CfgXLHierarchyForDocuments:
     doc_type_col_fin: int
     file_name_prefix: str
     file_name_postfix: str
+    organization_codes: list[str]
     doc_type_col_start: int
     file_name_extension: str
     primary_application_col: int
@@ -762,6 +764,7 @@ class CfgDbPostgreSQL:
 class CfgPLM:
     """ Параметры конфигурации для работы с
         выгрузками из PLM системы """
+
     folder_kd: str
     folder_td: str
 

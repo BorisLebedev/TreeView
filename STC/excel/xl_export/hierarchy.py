@@ -205,7 +205,8 @@ class Excel(ExcelExport):
             child = item.child(row)
             product = item.child(row).data()
 
-            if product.has_real_deno or self.full:
+            # if product.has_real_deno or self.full:
+            if product.deno[:4] in self.config.organization_codes or self.full:
                 sub_index = index_mk(main_index, counter)
                 index = sub_index[2:]
                 counter += 1
