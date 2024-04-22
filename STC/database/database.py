@@ -5501,6 +5501,24 @@ class DbMkExcelSentences(Base):
         return db_mk_excel_sentence
 
     @classmethod
+    def delMkExcelSentenceMultiple(cls, id_mk_excel: int, commit_later: bool = False) -> None:
+        """ Удаление данных из БД """
+        del_list = []
+        for i in range(1, 25):
+            if (id_mk_excel, i) in cls.data.keys():
+                del_list.append(cls.data[(id_mk_excel, i)])
+        for db_mk_excel_sentence in del_list:
+            DbConnection.session.delete(db_mk_excel_sentence)
+        if not commit_later:
+            try:
+                DbConnection.sessionCommit()
+                cls.updData()
+            except (IntegrityError, OperationalError) as err:
+                show_dialog(f'Не удалось удалить данные {err}. Повторная попытка')
+                DbConnection.session.rollback()
+                cls.delMkExcelSentence(id_mk_excel=id_mk_excel)
+
+    @classmethod
     def addMkExcelSentencesMultiple(cls, data: dict[str, dict[str, int | str]])\
             -> dict[str, dict[str, int | str | DbMkExcelSentences]]:
         """ Внесение нескольких записей за один коммит """

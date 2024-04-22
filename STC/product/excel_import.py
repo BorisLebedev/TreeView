@@ -239,6 +239,8 @@ class ExcelSync:
                                                     'number': number,
                                                     'code': code,
                                                     'text': text}
+                    DbMkExcelSentences.delMkExcelSentenceMultiple(id_mk_excel=id_mk_excel,
+                                                                  commit_later=False)
         DbMkExcelSentences.addMkExcelSentencesMultiple(data=mk_excel_sentences_data)
 
 
