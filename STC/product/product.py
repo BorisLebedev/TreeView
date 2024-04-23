@@ -1405,9 +1405,9 @@ class Product:
             else:
                 status = 'Актуально'
         elif not plm_date:
-            status = 'Нет даты\nспецификации'
+            status = 'Неизвестно'
         elif not upd_date:
-            status = 'Нет даты\nобновления изделия'
+            status = 'Не обновлялось'
         else:
             status = 'ОШИБКА'
         return status
