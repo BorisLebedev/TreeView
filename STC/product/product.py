@@ -1261,11 +1261,12 @@ class Product:
             DbProduct.updData()
         product_data = []
         for item in DbProduct.uniqueData():
-            product_data.append({
-                'id_product': item.id_product,
-                'name': str(item.name),
-                'denotation': str(item.deno),
-                'db_product': item})
+            if item.deno != item.name:
+                product_data.append({
+                    'id_product': item.id_product,
+                    'name': str(item.name),
+                    'denotation': str(item.deno),
+                    'db_product': item})
         project_data = []
         for item in DbExcelProject.uniqueData():
             if item.id_product is not None:
