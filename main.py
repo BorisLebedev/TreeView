@@ -93,7 +93,7 @@ class Controller:
         self.product_selector_window = WindowProductSelector(product_data)
         self.windows.append(self.product_selector_window)
         self.product_selector_window.newDocumentWindow.connect(self.showNewDocumentWindow)
-        self.product_selector_window.showMainTable.connect(self.showMainTable)
+        self.product_selector_window.showMainTable.connect(self.checkProductNameAndDeno)
         self.product_selector_window.syncWithExcel.connect(self.syncWithExcel)
         self.product_selector_window.syncWithExcelTdDb.connect(self.syncWithExcelTdDb)
         self.product_selector_window.syncWithPLM.connect(self.syncWithPLM)
@@ -115,62 +115,64 @@ class Controller:
         self.product_selector_window.product_data = Product.getAllProductsInDict(upd=True)
         self.product_selector_window.initDefaultValues()
 
-    def showMainTable(self, product_name=None, product_denotation=None) -> None:
-        """ Окно отображения таблицы иерархии состава изделия """
-
+    def checkProductNameAndDeno(self, product_name=None, product_denotation=None) -> None:
         reverse = False
         if product_name is None and product_denotation is None:
-            product_name = self.product_selector_window.cb_name.currentText()
-            product_denotation = self.product_selector_window.cb_deno.currentText()
+            product_name = self.product_selector_window.product_name
+            product_denotation = self.product_selector_window.product_deno
             reverse = self.product_selector_window.reverse
         if product_denotation != '' and product_name != '':
-            SplashScreen().newMessage(message=f'Открытие таблицы '
-                                              f'{product_name} {product_denotation}',
-                                      stage=0,
-                                      stages=12,
-                                      log=True,
-                                      logging_level='INFO')
-            self.table = WindowTable(product_denotation=product_denotation, reverse=reverse)
-            self.windows.append(self.table)
-            self.table.showWindowSearch.connect(self.showWindowSearch)
-            self.table.showWindowFilter.connect(self.showWindowFilter)
-            self.table.showWindowProductSelector.connect(Controller)
-            self.table.showWindowNewDocument.connect(self.showNewDocumentWindow)
-            self.table.showWindowCreateMk.connect(self.showSelectMkWindow)
-            self.table.showWindowDocumentSettings.connect(self.showWindowDocumentSettings)
-            self.table.exportToExcel.connect(lambda: Excel(self.table.tree_view))
-            self.table.exportToExcelFull.connect(lambda: Excel(self.table.tree_view, full=True))
-            self.table.exportToExcelNorm.connect(lambda: ExcelNorm(self.table.tree_view))
-            self.table.exportToExcelNTD.connect(lambda: ExcelNTD(self.table.tree_view))
-            self.table.redrawTreeView.connect(self.redrawTreeView)
-            self.table.tree_view.model.updTreeView.connect(self.redrawTreeView)
-            self.table.updTreeView.connect(lambda: self.updTreeView(load_from_db=False))
-            self.table.syncTreeView.connect(lambda: self.updTreeView(load_from_db=True))
-            self.table.copyText.connect(lambda: app.clipboard().setText(
-                self.table.tree_view.model.data(self.table.tree_view.currentIndex())))
-            self.table.importTd.connect(self.syncWithExcelTdDb)
-            self.table.importXl.connect(self.syncWithExcel)
-            self.table.importPLM.connect(self.syncWithPLM)
-            self.table.assignKindSignal.connect(self.assignKind)
-            self.table.closeWindow.connect(self.updUserSettings)
-            self.table.closeWindow.connect(self.closeAllWindows)
-            self.table.showWindowAdminMk.connect(self.showWindowAdminMk)
-            self.table.showWindowAdminProduct.connect(self.showWindowAdminProduct)
-            # self.table.showWindowAdminColorTheme.connect(self.showWindowAdminColorTheme)
-            SplashScreen().newMessage(message=f'Открыта иерархия изделия '
-                                              f'{product_name} {product_denotation}',
-                                      stage=8,
-                                      stages=8,
-                                      log=True,
-                                      logging_level='INFO')
-            SplashScreen().closeWithWindow(window=self.table)
-            self.table.show()
-            self.table.activateWindow()
-            self.table.raise_()
-            if self.product_selector_window is not None:
-                self.product_selector_window.close()
-        else:
-            show_dialog(text='Не указаны децимальный номер и наименование')
+            self.showMainTable(product_name=product_name,
+                               product_denotation=product_denotation,
+                               reverse=reverse)
+
+    def showMainTable(self, product_name=None, product_denotation=None, reverse=False) -> None:
+        """ Окно отображения таблицы иерархии состава изделия """
+        SplashScreen().newMessage(message=f'Открытие таблицы '
+                                          f'{product_name} {product_denotation}',
+                                  stage=0,
+                                  stages=12,
+                                  log=True,
+                                  logging_level='INFO')
+        self.table = WindowTable(product_denotation=product_denotation, reverse=reverse)
+        self.windows.append(self.table)
+        self.table.showWindowSearch.connect(self.showWindowSearch)
+        self.table.showWindowFilter.connect(self.showWindowFilter)
+        self.table.showWindowProductSelector.connect(Controller)
+        self.table.showWindowNewDocument.connect(self.showNewDocumentWindow)
+        self.table.showWindowCreateMk.connect(self.showSelectMkWindow)
+        self.table.showWindowDocumentSettings.connect(self.showWindowDocumentSettings)
+        self.table.exportToExcel.connect(lambda: Excel(self.table.tree_view))
+        self.table.exportToExcelFull.connect(lambda: Excel(self.table.tree_view, full=True))
+        self.table.exportToExcelNorm.connect(lambda: ExcelNorm(self.table.tree_view))
+        self.table.exportToExcelNTD.connect(lambda: ExcelNTD(self.table.tree_view))
+        self.table.redrawTreeView.connect(self.redrawTreeView)
+        self.table.tree_view.model.updTreeView.connect(self.redrawTreeView)
+        self.table.updTreeView.connect(lambda: self.updTreeView(load_from_db=False))
+        self.table.syncTreeView.connect(lambda: self.updTreeView(load_from_db=True))
+        self.table.copyText.connect(lambda: app.clipboard().setText(
+            self.table.tree_view.model.data(self.table.tree_view.currentIndex())))
+        self.table.importTd.connect(self.syncWithExcelTdDb)
+        self.table.importXl.connect(self.syncWithExcel)
+        self.table.importPLM.connect(self.syncWithPLM)
+        self.table.assignKindSignal.connect(self.assignKind)
+        self.table.closeWindow.connect(self.updUserSettings)
+        self.table.closeWindow.connect(self.closeAllWindows)
+        self.table.showWindowAdminMk.connect(self.showWindowAdminMk)
+        self.table.showWindowAdminProduct.connect(self.showWindowAdminProduct)
+        # self.table.showWindowAdminColorTheme.connect(self.showWindowAdminColorTheme)
+        SplashScreen().newMessage(message=f'Открыта иерархия изделия '
+                                          f'{product_name} {product_denotation}',
+                                  stage=8,
+                                  stages=8,
+                                  log=True,
+                                  logging_level='INFO')
+        SplashScreen().closeWithWindow(window=self.table)
+        self.table.show()
+        self.table.activateWindow()
+        self.table.raise_()
+        if self.product_selector_window is not None:
+            self.product_selector_window.close()
 
     def showNewDocumentWindow(self) -> None:
         """ Окно реквизитов документа """

@@ -11,6 +11,8 @@ from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QPushButton
 
+from STC.gui.splash_screen import show_dialog
+
 from STC.gui.windows.ancestors.window import WindowBasic
 
 if TYPE_CHECKING:
@@ -65,12 +67,12 @@ class WindowProductSelector(WindowBasic):
 
         self.cb_deno.blockSignals(True)
         self.cb_deno.clear()
-        completer_list = []
+        self.completer_list_deno = []
         self.cb_deno.clear()
         for product in self.product_data:
             if self.cb_name.currentText().lower() in product['name'].lower():
-                completer_list.append(product['denotation'])
-        self.cb_deno.addItems(completer_list)
+                self.completer_list_deno.append(product['denotation'])
+        self.cb_deno.addItems(self.completer_list_deno)
         if self.cb_name.currentText() == '':
             self.cb_deno.setCurrentText("")
         self.cb_deno.blockSignals(False)
@@ -84,12 +86,12 @@ class WindowProductSelector(WindowBasic):
 
         self.cb_name.blockSignals(True)
         self.cb_name.clear()
-        completer_list = []
+        self.completer_list_name = []
         self.cb_name.clear()
         for product in self.product_data:
             if self.cb_deno.currentText().lower() in product['denotation'].lower():
-                completer_list.append(product['name'])
-        self.cb_name.addItems(sorted(completer_list))
+                self.completer_list_name.append(product['name'])
+        self.cb_name.addItems(sorted(self.completer_list_name))
         if self.cb_deno.currentText() == '':
             self.cb_name.setCurrentText("")
         self.cb_name.blockSignals(False)
@@ -164,3 +166,17 @@ class WindowProductSelector(WindowBasic):
 
         self.reverse = True
         self.showMainTable.emit()
+
+    @property
+    def product_name(self):
+        return self.cb_name.currentText()
+
+    @property
+    def product_deno(self):
+        deno = self.cb_deno.currentText()
+        if deno == '':
+            show_dialog(text='Не указан децимальный номер')
+        elif deno not in self.completer_list_deno:
+            show_dialog(text=f'Не найдено изделие с децимальным номером {deno}')
+            deno = ''
+        return deno
