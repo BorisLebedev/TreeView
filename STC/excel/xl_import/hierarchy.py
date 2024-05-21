@@ -10,6 +10,7 @@ from os import path
 from pandas import DataFrame
 from pandas import isnull
 from pandas import read_excel
+from pandas import read_csv
 
 from STC.config.config import CFG_HR
 from STC.database.database import DbProduct
@@ -17,6 +18,7 @@ from STC.database.database import DbProductKind
 from STC.database.database import DbProductType
 from STC.functions.func import null_cleaner
 from STC.gui.splash_screen import SplashScreen
+from STC.gui.splash_screen import show_dialog
 
 
 class ExcelData:
@@ -43,6 +45,7 @@ class ExcelData:
         self.project = None
         self.documents_td = {}
         self.deno_col = CFG_HR.xl_h_doc.deno_col
+        self.getNormExcelData()
         files = self.getExcelFiles(CFG_HR.xl_h_doc.folder)
         stages = len(self.getExcelFiles(CFG_HR.xl_h_doc.folder))
         for stage, file in enumerate(files):
@@ -51,6 +54,7 @@ class ExcelData:
                 SplashScreen().changeSubProgressBar(stage=stage, stages=stages)
                 self.projectName(name)
                 self.readExcelData(path.join(CFG_HR.xl_h_doc.folder, file))
+        self.correctProductData()
         SplashScreen().changeSubProgressBar(stage=0, stages=0)
 
     def projectName(self, name: str) -> None:
@@ -87,6 +91,34 @@ class ExcelData:
         files = listdir(directory)
         list_of_files = sorted(files, key=lambda x: path.getmtime(path.join(directory, x)))
         return list_of_files
+
+    def getNormExcelData(self):
+        """ Считывает данные из сводной таблицы трудоемкостей и
+            формирует словарь {'Децимальный номер': Трудоемкость} """
+        file = '_Таблица трудоемкостей.csv'
+        deno_col = 'Обозначение КД'
+        norm_col = 'Тр-ть'
+        try:
+            table = read_csv(file, sep=';', usecols=[deno_col, norm_col], index_col=False)
+        except FileNotFoundError:
+            table = None
+            show_dialog('Файл _Таблица трудоемкостей.csv не найден.\n'
+                        'Проверка ПКИ не будет проведена')
+        start_row = 2
+        self.norm_dict = {}
+        if table:
+            table = table.dropna().reset_index()
+            for row in range(start_row, table.shape[0]):
+                deno = table[deno_col][row]
+                norm = float(table[norm_col][row].replace(',', '.'))
+                if deno not in self.norm_dict:
+                    self.norm_dict[deno] = norm
+
+    def correctProductData(self):
+        for deno, product in self.products.items():
+            if self.norm_dict.get(deno, 0) == 0:
+                if DbProductKind.data.get(product.id_kind, None) == DbProductKind.data.get('ПКИ', None):
+                    product.id_kind = ''
 
 
 class ExcelProduct:
