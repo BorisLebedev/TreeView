@@ -106,7 +106,7 @@ class ExcelData:
                         'Проверка ПКИ не будет проведена')
         start_row = 2
         self.norm_dict = {}
-        if table:
+        if table is not None:
             table = table.dropna().reset_index()
             for row in range(start_row, table.shape[0]):
                 deno = table[deno_col][row]
