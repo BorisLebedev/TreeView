@@ -42,7 +42,7 @@ class MessageBox(QMessageBox):
         q_type = self.setType(m_type)
         self.setIcon(q_type)
         self.setText(text)
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
         self.setButtons(m_type=m_type)
 
     @staticmethod
