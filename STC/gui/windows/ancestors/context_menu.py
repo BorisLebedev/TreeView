@@ -79,7 +79,7 @@ class ContextMenuForSpecProductsTable(ContextMenuForBasicTable):
         self.add_action_text = 'Добавить строку'
         self.copy_action_text = 'Скопировать строку'
         self.mark_action_text = 'Выделить цветом'
-        self.del_mark_action_text = 'Убрать выделение'
+        self.del_mark_action_text = 'Убрать цвет'
         self.del_all_action_text = 'Удалить строки'
 
     def actionCopyRow(self) -> QAction:
