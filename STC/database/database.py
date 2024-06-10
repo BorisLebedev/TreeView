@@ -5137,11 +5137,12 @@ class DbOperationDef(Base):
             в словарь, хранящийся в классе, используя определенные
             аттрибуты экземпляра в качестве ключей словаря """
         cls.items[item.id_operation_def] = item
-        if item.kind.name == 'неизвестно':
-            for id_kind in DbProductKind.data:
-                cls.updDataValues(id_kind=id_kind, db_operation_def=item)
-        else:
-            cls.updDataValues(id_kind=item.id_kind, db_operation_def=item)
+        if item.kind:
+            if item.kind.name == 'неизвестно':
+                for id_kind in DbProductKind.data:
+                    cls.updDataValues(id_kind=id_kind, db_operation_def=item)
+            else:
+                cls.updDataValues(id_kind=item.id_kind, db_operation_def=item)
 
     @classmethod
     def uniqueData(cls) -> list[DbOperationDef]:
