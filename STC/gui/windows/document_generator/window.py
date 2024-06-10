@@ -187,7 +187,6 @@ class WindowCreateMK(WindowBasic):
     def updOperation(self) -> None:
         """ Обновляет рамку операции удаляя старую
             и инициализируя новую """
-
         self.newOperation()
         self.delOperation()
 

@@ -535,6 +535,7 @@ class FrameMkOperations(FrameWithTable):
         combobox.addItems(sorted(default_operations))
         combobox.setCurrentText(operation.name)
         combobox.currentTextChanged.connect(self.changeOperation)
+        combobox.wheelEvent = lambda event: None
         return combobox
 
     def operationNumsUpdate(self) -> None:
