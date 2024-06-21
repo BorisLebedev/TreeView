@@ -189,7 +189,7 @@ class FrameMainSettings(FrameCheckboxSettings):
         self.doc_type.addItems(self.cbValues(document_class))
         self.doc_type.setSizeAdjustPolicy(self.doc_type.AdjustToMinimumContentsLengthWithIcon)
         self.doc_type.setEditable(True)
-        self.doc_type.currentTextChanged.connect(self.readSettings)
+        self.doc_type.lineEdit().editingFinished.connect(self.readSettings)
         self.documentType()
 
     def documentType(self) -> None:
