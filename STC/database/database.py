@@ -3505,11 +3505,13 @@ class DbMaterialDef(Base):
         """ Кэширует данные. Добавляет экземпляр класса ORM модели
             в словарь, хранящийся в классе, используя определенные
             аттрибуты экземпляра в качестве ключей словаря """
-        cls.items[item.id_material_def] = item
-        if item.id_sentence in cls.data:
-            cls.data[item.id_sentence].append(item)
-        else:
-            cls.data[item.id_sentence] = [item]
+
+        if item.id_sentence:
+            cls.items[item.id_material_def] = item
+            if item.id_sentence in cls.data:
+                cls.data[item.id_sentence].append(item)
+            else:
+                cls.data[item.id_sentence] = [item]
 
     @classmethod
     def uniqueData(cls) -> list[DbMaterialDef]:
@@ -3870,11 +3872,12 @@ class DbRigDef(Base):
         """ Кэширует данные. Добавляет экземпляр класса ORM модели
             в словарь, хранящийся в классе, используя определенные
             аттрибуты экземпляра в качестве ключей словаря """
-        cls.items[item.id_rig_def] = item
-        if item.id_sentence in cls.data:
-            cls.data[item.id_sentence].append(item)
-        else:
-            cls.data[item.id_sentence] = [item]
+        if item.sentence:
+            cls.items[item.id_rig_def] = item
+            if item.id_sentence in cls.data:
+                cls.data[item.id_sentence].append(item)
+            else:
+                cls.data[item.id_sentence] = [item]
 
     @classmethod
     def uniqueData(cls) -> list[DbRigDef]:
@@ -4210,11 +4213,13 @@ class DbEquipmentDef(Base):
         """ Кэширует данные. Добавляет экземпляр класса ORM модели
             в словарь, хранящийся в классе, используя определенные
             аттрибуты экземпляра в качестве ключей словаря """
-        cls.items[item.id_equipment_def] = item
-        if item.id_sentence in cls.data:
-            cls.data[item.id_sentence].append(item)
-        else:
-            cls.data[item.id_sentence] = [item]
+
+        if item.id_sentence:
+            cls.items[item.id_equipment_def] = item
+            if item.id_sentence in cls.data:
+                cls.data[item.id_sentence].append(item)
+            else:
+                cls.data[item.id_sentence] = [item]
 
     @classmethod
     def uniqueData(cls) -> list[DbEquipmentDef]:
@@ -4577,11 +4582,13 @@ class DbIOTDef(Base):
         """ Кэширует данные. Добавляет экземпляр класса ORM модели
             в словарь, хранящийся в классе, используя определенные
             аттрибуты экземпляра в качестве ключей словаря """
-        cls.items[item.id_iot_def] = item
-        if item.id_sentence in cls.data:
-            cls.data[item.id_sentence].append(item)
-        else:
-            cls.data[item.id_sentence] = [item]
+
+        if item.id_sentence:
+            cls.items[item.id_iot_def] = item
+            if item.id_sentence in cls.data:
+                cls.data[item.id_sentence].append(item)
+            else:
+                cls.data[item.id_sentence] = [item]
 
     @classmethod
     def uniqueData(cls) -> list[DbIOTDef]:
@@ -4805,11 +4812,13 @@ class DbDocDef(Base):
         """ Кэширует данные. Добавляет экземпляр класса ORM модели
             в словарь, хранящийся в классе, используя определенные
             аттрибуты экземпляра в качестве ключей словаря """
-        cls.items[item.id_doc_def] = item
-        if item.id_sentence in cls.data:
-            cls.data[item.id_sentence].append(item)
-        else:
-            cls.data[item.id_sentence] = [item]
+
+        if item.id_sentence:
+            cls.items[item.id_doc_def] = item
+            if item.id_sentence in cls.data:
+                cls.data[item.id_sentence].append(item)
+            else:
+                cls.data[item.id_sentence] = [item]
 
     @classmethod
     def uniqueData(cls) -> list[DbDocDef]:
@@ -5137,8 +5146,8 @@ class DbOperationDef(Base):
         """ Кэширует данные. Добавляет экземпляр класса ORM модели
             в словарь, хранящийся в классе, используя определенные
             аттрибуты экземпляра в качестве ключей словаря """
-        cls.items[item.id_operation_def] = item
         if item.kind:
+            cls.items[item.id_operation_def] = item
             if item.kind.name == 'неизвестно':
                 for id_kind in DbProductKind.data:
                     cls.updDataValues(id_kind=id_kind, db_operation_def=item)
