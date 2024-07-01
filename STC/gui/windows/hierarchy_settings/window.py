@@ -22,7 +22,7 @@ class WindowDocumentSettings(WindowBasic):
 
     def __init__(self, tree_model: HierarchicalView) -> None:
         super().__init__()
-        self.title = 'Свойства документов'
+        self.title = 'Свойства'
         self.tree_model = tree_model
         self.initUI()
         self.setFrame()
