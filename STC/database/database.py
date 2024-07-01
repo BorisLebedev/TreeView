@@ -1997,11 +1997,12 @@ class DbDocumentSignature(Base):
                              commit_later: bool = False) -> None:
         """ Изменение данных в БД """
         key = (id_document_real, signature_position)
-        if key not in cls.uniqueData():
+        if key not in cls.data:
             cls.addNewDocumentSignature(id_document_real=id_document_real,
                                         signature_position=signature_position,
                                         signature_surname=signature_surname,
-                                        signature_signdate=signature_signdate)
+                                        signature_signdate=signature_signdate,
+                                        commit_later=commit_later)
         else:
             changed = False
             db_signature_position = cls.data[key]
@@ -2038,10 +2039,10 @@ class DbDocumentSignature(Base):
                                                     signature_surname=signature_surname,
                                                     signature_signdate=signature_signdate)
         DbConnection.session.add(db_document_signature)
+        cls.addData(db_document_signature)
         if not commit_later:
             try:
                 DbConnection.sessionCommit()
-                cls.addData(db_document_signature)
             except (IntegrityError, OperationalError) as err:
                 show_dialog(f'Не удалось внести данные {err}. Повторная попытка')
                 DbConnection.session.rollback()
