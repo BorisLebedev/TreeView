@@ -249,7 +249,7 @@ class Excel(ExcelExport):
                 self.columns.list_kd_code.append(['.'.join(list(signs)) + '.'])
                 self.treeModelToList(item=child,
                                      level=level + 1,
-                                     main_index=index_mk(main_index, row))
+                                     main_index=index_mk(main_index, counter))
 
     @staticmethod
     def chooseKttp(product: Product) -> str:
