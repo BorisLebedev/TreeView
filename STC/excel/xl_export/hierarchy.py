@@ -215,7 +215,6 @@ class Excel(ExcelExport):
                                                     stages=self._tree_row_count)
                 self._current_row += 1
 
-
                 creator = ''
                 creator_dep = ''
                 kttp = ''
