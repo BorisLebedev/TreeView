@@ -18,8 +18,8 @@ from STC.functions.func import benchmark
 
 def generate_test_data() -> None:
     """ Вызывает функции генерации данных """
-    product_quantity = 1000
-    project_quantity = 1
+    product_quantity = 5000
+    project_quantity = 3
     max_lvl = 5
     stages = 9
     stage = 0
